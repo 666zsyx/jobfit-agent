@@ -1,12 +1,49 @@
-# Test your FastAPI endpoints
+@baseUrl = http://127.0.0.1:8000
+@token = demo-token
 
-GET http://127.0.0.1:8000/
+### 健康检查
+GET {{baseUrl}}/health
 Accept: application/json
 
 ###
 
-### 健康检查
-GET http://127.0.0.1:8000/health
+### 当前用户
+GET {{baseUrl}}/api/users/me
 Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### 非流式聊天
+POST {{baseUrl}}/api/chat
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "用一句话解释 Agent。"
+    }
+  ]
+}
+
+###
+
+### 流式聊天
+POST {{baseUrl}}/api/chat/stream
+Accept: text/event-stream
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "用大约 300 个字解释什么是 Agent。"
+    }
+  ]
+}
 
 ###

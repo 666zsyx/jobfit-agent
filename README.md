@@ -4,19 +4,172 @@
 
 ## 当前阶段
 
-STEP 02：FastAPI 服务骨架。
+STEP 03：调通大模型 API。
+
+当前已经支持：
+
+- `GET /health`：健康检查
+- `GET /api/users/me`：演示鉴权与当前用户
+- `POST /api/chat`：非流式聊天，返回答案、Token Usage 和耗时
+- `POST /api/chat/stream`：SSE 流式聊天，返回内容事件、Usage 事件和结束标记
+
+当前鉴权仍为演示版本：
+
+```http
+Authorization: Bearer demo-token
+```
+
+真实用户系统将在后续阶段实现。
+
+## 环境准备
+
+要求 Python 3.12。
+
+```powershell
+cd "D:\agentstudy\jobfit_agent"
+
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+复制环境变量模板：
+
+```powershell
+Copy-Item .env.example .env
+```
+
+然后在本地 `.env` 中填写真实 DeepSeek API Key：
+
+```dotenv
+APP_ENV=development
+LLM_API_KEY=你的真实Key
+LLM_BASE_URL=https://api.deepseek.com
+LLM_MODEL=deepseek-flash
+```
+
+安全要求：
+
+- `.env` 已被 `.gitignore` 忽略。
+- 不要把真实 Key 写入代码、截图、聊天或 GitHub。
+- 如果 Key 曾经提交到远程仓库，应立即撤销并重新生成。
 
 ## 本地启动
 
-```bash
-python -m uvicorn app.main:app --reload
+```powershell
+cd "D:\agentstudy\jobfit_agent"
+
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
 ```
 
-## 健康检查
+服务地址：
+
+```text
+http://127.0.0.1:8000
+```
+
+Swagger：
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+## 非流式聊天
+
+请求：
 
 ```http
-GET /health
+POST /api/chat
+Authorization: Bearer demo-token
+Content-Type: application/json
 ```
+
+```json
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "用一句话解释 Agent。"
+    }
+  ]
+}
+```
+
+响应：
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "answer": "Agent 是……",
+    "usage": {
+      "prompt_tokens": 20,
+      "completion_tokens": 30,
+      "total_tokens": 50
+    },
+    "latency_ms": 1234
+  }
+}
+```
+
+## 流式聊天
+
+接口使用 SSE：
+
+```http
+POST /api/chat/stream
+Authorization: Bearer demo-token
+Content-Type: application/json
+```
+
+PowerShell 验证：
+
+```powershell
+$headers = @{
+    Authorization = "Bearer demo-token"
+}
+
+$body = @{
+    messages = @(
+        @{
+            role = "user"
+            content = "用大约300个字解释什么是 Agent。"
+        }
+    )
+} | ConvertTo-Json -Depth 5
+
+curl.exe -N -X POST "http://127.0.0.1:8000/api/chat/stream" `
+    -H "Authorization: Bearer demo-token" `
+    -H "Content-Type: application/json" `
+    -d $body
+```
+
+事件格式：
+
+```text
+data: {"type":"content","content":"第一段"}
+
+data: {"type":"content","content":"第二段"}
+
+data: {"type":"usage","usage":{"prompt_tokens":20,"completion_tokens":30,"total_tokens":50},"latency_ms":1234}
+
+data: [DONE]
+```
+
+## 自动化测试
+
+安装测试依赖：
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+```
+
+运行测试：
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
+```
+
+测试使用 mock 替代真实模型调用，因此不会消耗 DeepSeek API 额度。
 
 ## Docker
 
