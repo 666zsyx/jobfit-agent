@@ -1,5 +1,8 @@
 # JobFit Agent
 
+> 项目全景、模块职责、数据流和 STEP 变更记录见 [docs/PROJECT_GUIDE.md](docs/PROJECT_GUIDE.md)。
+
+
 基于 RAG 和工具调用的可解释岗位匹配与差距分析 Agent。
 
 ## 当前阶段
