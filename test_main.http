@@ -47,3 +47,15 @@ Authorization: Bearer {{token}}
 }
 
 ###
+
+### JD 结构化提取
+POST {{baseUrl}}/api/jobs/extract
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "job_description": "负责 FastAPI 后端服务开发，要求熟悉 Python、Pydantic 和异步编程。"
+}
+
+###

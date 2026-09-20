@@ -1,6 +1,6 @@
 # JobFit Agent 项目全景与维护文档
 
-> 最后更新：2026-09-18
+> 最后更新：2026-09-20
 >
 > 适用对象：未来的项目维护者、面试准备者、协作者和几周后重新阅读代码的自己。
 >
@@ -27,7 +27,7 @@ JobFit Agent 是一个基于 RAG 和工具调用的可解释岗位匹配与差�
 → 报告保存
 ```
 
-当前项目处于早期阶段，已经完成模型 API 与聊天接口，尚未实现完整岗位匹配业务。
+当前项目处于早期阶段，已经完成模型 API、聊天接口和岗位 JD 结构化提取，尚未实现完整岗位匹配业务。
 
 ---
 
@@ -36,18 +36,17 @@ JobFit Agent 是一个基于 RAG 和工具调用的可解释岗位匹配与差�
 ```text
 STEP 01：完成
 STEP 02：完成
-STEP 03：功能完成
-STEP 03：测试与文档完成
-STEP 03：Git 与 tag 完成
-STEP 03：公网部署延期到 STEP 06
-STEP 04：未开始
+STEP 03：完成，公网部署延期到 STEP 06
+STEP 04：功能、测试、文档完成，Git 待收尾
 ```
 
 当前代码分支：
 
 ```text
-main
+feature/step-04-structured-output
 ```
+
+STEP 04 的代码、测试和文档已完成，当前等待 Git 提交、合并和 tag。
 
 STEP 03 对应版本：
 
@@ -172,6 +171,46 @@ data: [DONE]
 - 流开始后出错时发送安全错误事件。
 - 避免把第三方异常原样返回客户端。
 
+## 5. 岗位 JD 结构化提取
+
+```http
+POST /api/jobs/extract
+Authorization: Bearer demo-token
+Content-Type: application/json
+```
+
+输入：
+
+```json
+{
+  "job_description": "负责 FastAPI 后端开发，要求熟悉 Python。"
+}
+```
+
+返回：
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "responsibilities": ["负责 FastAPI 后端开发"],
+    "required_skills": ["熟悉 Python"],
+    "nice_to_have": []
+  }
+}
+```
+
+包含能力：
+
+- Prompt 明确角色、JD 数据边界、任务和输出约束。
+- Pydantic 模型生成 JSON Schema 并加入 Prompt。
+- `chat_json()` 使用 `response_format={"type": "json_object"}`。
+- 使用 Pydantic 对模型输出执行硬校验。
+- 输出为空或校验失败时，携带错误反馈最多重试一次。
+- 认证、限流、超时和网络异常不进入结构重试。
+- 请求层限制 JD 长度，纯空白输入直接返回 422。
+
 ---
 
 # 四、当前技术栈与选型原因
@@ -213,14 +252,23 @@ data: [DONE]
 - 响应数据模型。
 - 配置模型。
 - 参数校验。
+- 生成模型输出 JSON Schema。
+- 将模型返回文本校验为可信的 Pydantic 对象。
 
 当前使用位置：
 
 ```text
 app/schemas/auth.py
 app/schemas/chat.py
+app/schemas/extraction.py
 app/core/config.py
 ```
+
+结构化输出边界：
+
+- JSON 模式只保证返回 JSON 对象。
+- 字段名、类型和约束由 Pydantic 强制校验。
+- 校验失败不会返回空业务对象，而是反馈并重试或抛出 `StructuredOutputError`。
 
 ## 4. python-dotenv
 
@@ -245,6 +293,7 @@ app/core/config.py
 ```text
 AsyncOpenAI
 client.chat.completions.create()
+response_format={"type": "json_object"}
 stream=True
 stream_options={"include_usage": True}
 ```
@@ -300,15 +349,21 @@ jobfit_agent/
 │   ├── routers/
 │   │   ├── health.py
 │   │   ├── users.py
-│   │   └── chat.py
+│   │   ├── chat.py
+│   │   └── jobs.py
 │   ├── schemas/
 │   │   ├── auth.py
-│   │   └── chat.py
+│   │   ├── chat.py
+│   │   └── extraction.py
 │   └── services/
-│       └── llm.py
+│       ├── llm.py
+│       └── extraction.py
 ├── tests/
 │   ├── conftest.py
-│   └── test_chat_api.py
+│   ├── test_chat_api.py
+│   ├── test_llm_service.py
+│   ├── test_extraction_service.py
+│   └── test_job_extraction_api.py
 ├── docs/
 │   └── PROJECT_GUIDE.md
 ├── Dockerfile
@@ -330,7 +385,7 @@ jobfit_agent/
 
 - 创建 FastAPI 应用。
 - 注册全局异常处理。
-- 注册 health、users、chat 路由。
+- 注册 health、users、chat、jobs 路由。
 
 ## `app/core/config.py`
 
@@ -342,7 +397,8 @@ jobfit_agent/
 ## `app/core/exceptions.py`
 
 - 定义 `AppError`。
-- 定义 `LLMServiceError`。
+- 定义 `LLMServiceError`，表示模型服务调用失败。
+- 定义 `StructuredOutputError`，表示模型调用成功但最终输出无效。
 - 定义全局异常响应处理函数。
 
 ## `app/core/response.py`
@@ -396,6 +452,33 @@ LLMStreamEvent
 - 路由不直接接触 `AsyncOpenAI`。
 - 服务层不直接返回完整 SDK Response。
 - 第三方异常不原样返回客户端。
+- `chat()` 保持普通文本模式。
+- `chat_json()` 增加 JSON object 模式。
+- 两者复用 `_chat()` 的异常映射、Usage 和耗时统计。
+
+## `app/routers/jobs.py`
+
+- 接收并校验 `JobExtractionRequest`。
+- 使用 Bearer Token 鉴权。
+- 调用 `services.extraction.extract_job()`。
+- 统一返回 `success_response`。
+- 不捕获 `LLMServiceError` 和 `StructuredOutputError`，交给全局处理器。
+
+## `app/schemas/extraction.py`
+
+- `JobExtraction`：模型输出契约。
+- `JobExtractionRequest`：HTTP 请求契约。
+- 拒绝空值、纯空白和超过 20000 字符的 JD。
+- 清理 JD 首尾空白后才进入服务层。
+
+## `app/services/extraction.py`
+
+- 构造包含 JSON Schema 的 Prompt。
+- 调用 `chat_json()`。
+- 使用 `model_validate_json()` 校验模型输出。
+- 校验失败时生成精简反馈并追加到消息历史。
+- 最多调用模型两次；`max_attempts` 由服务端控制。
+- 最终失败抛出 `StructuredOutputError` 并保留异常链。
 
 ---
 
@@ -433,6 +516,25 @@ LLMStreamEvent
 → 最终发送 usage 和 [DONE]
 ```
 
+## 3. 岗位 JD 结构化提取
+
+```text
+客户端
+→ POST /api/jobs/extract
+→ get_current_user 校验 Bearer Token
+→ FastAPI 校验 JobExtractionRequest
+→ 清理 JD 首尾空白
+→ extract_job() 构造带 JSON Schema 的 Prompt
+→ chat_json() 启用 JSON object 模式
+→ AsyncOpenAI 调用 DeepSeek
+→ JobExtraction.model_validate_json()
+→ 成功：返回 JobExtraction
+→ 失败：反馈错误，最多重试一次
+→ 仍失败：抛出 StructuredOutputError
+→ success_response 统一包装
+→ 返回 JSON
+```
+
 ---
 
 # 八、错误处理设计
@@ -443,28 +545,36 @@ LLMStreamEvent
 AppError
 ```
 
-模型服务异常：
+异常边界：
 
 ```text
 LLMServiceError
+→ 模型服务调用失败，例如认证、限流、超时、网络异常。
+→ 请求没有得到正常响应，立即向上传播，不进入 JSON 校验重试。
+
+StructuredOutputError
+→ 模型调用成功，但内容为空或多次校验仍不符合 JobExtraction Schema。
+→ 保留最后一次 ValidationError/RuntimeError 作为异常链。
 ```
 
 状态码映射：
 
 ```text
-AuthenticationError     → 500
-RateLimitError          → 503
-APITimeoutError         → 504
-APIConnectionError      → 502
-BadRequestError         → 500
-其他 APIStatusError     → 502
+AuthenticationError       → 500
+RateLimitError            → 503
+APITimeoutError           → 504
+APIConnectionError        → 502
+BadRequestError           → 500
+其他 APIStatusError       → 502
+StructuredOutputError     → 502
 ```
 
 设计原则：
 
 - 保留服务端异常链：`raise ... from exc`。
 - 客户端只收到安全、可理解的信息。
-- 不把原始 DeepSeek SDK 异常返回给用户。
+- 不把原始 DeepSeek SDK 异常或完整 Pydantic 错误返回给用户。
+- 调用失败和输出失败必须保持不同错误类型，避免把服务故障伪装成空提取结果。
 
 ---
 
@@ -478,6 +588,10 @@ BadRequestError         → 500
 - 第三方异常不直接返回客户端。
 - 流式错误使用安全错误事件。
 - 文档明确提示 Key 泄漏后的处理方式。
+- JD 提取接口需要 Bearer 鉴权。
+- JD 最大长度为 20000 字符，纯空白输入在请求层拒绝。
+- `max_attempts` 不接受客户端输入，避免放大 Token 成本和请求延迟。
+- 不向客户端返回完整 Pydantic 校验错误。
 
 当前仍未完成：
 
@@ -488,7 +602,7 @@ BadRequestError         → 500
 - 没有公网访问保护。
 - 没有生产级日志与审计。
 
-因此当前项目不适合作为公开生产服务。
+因此当前项目不适合作为公开生产服务，公网部署继续延期到 STEP 06。
 
 ---
 
@@ -499,14 +613,17 @@ BadRequestError         → 500
 ```text
 tests/conftest.py
 tests/test_chat_api.py
+tests/test_llm_service.py
+tests/test_extraction_service.py
+tests/test_job_extraction_api.py
 ```
 
 测试方式：
 
 - 使用 `TestClient` 在进程内调用 ASGI 应用。
-- 使用 mock 替换真实 LLM 调用。
+- 使用 mock、假客户端或假服务替代真实模型调用。
 - 不依赖真实网络和 API 额度。
-- 覆盖成功、鉴权、校验、异常、SSE 和结束标记。
+- 覆盖 API 调用参数、结构化输出、有限重试、鉴权和统一错误映射。
 
 当前测试范围：
 
@@ -518,6 +635,18 @@ tests/test_chat_api.py
 模型异常映射
 SSE content/usage/[DONE]
 SSE 错误事件
+普通模式不携带 response_format
+JSON 模式携带 response_format
+JobExtraction 首次成功
+校验失败后携带反馈重试
+空响应后携带反馈重试
+两次无效输出后抛出 StructuredOutputError
+LLMServiceError 原样传播
+JD 提取接口鉴权
+JD 空值、纯空白、超长 422
+JD 提取成功响应
+StructuredOutputError → 502
+LLMServiceError → 503
 ```
 
 测试不能替代真实模型 smoke test。
@@ -528,6 +657,7 @@ SSE 错误事件
 - Base URL 是否正确。
 - 模型名是否正确。
 - 网络是否可达。
+- JSON 模式参数是否被兼容接口支持。
 - SSE 经过网络和代理后是否正常。
 
 ---
@@ -541,14 +671,15 @@ SSE 错误事件
 - 简历管理和版本控制
 - PDF 解析
 - 岗位 JD 管理
-- 结构化岗位要求提取
+- 简历结构化提取
+- 结构化提取结果持久化
 - Function Calling
 - ReAct 循环
 - 会话状态
 - RAG 与证据检索
 - 匹配报告
 - 调用日志
-- 成本统计
+- Token 成本和延迟持续统计
 - 评估
 - 公网部署
 
@@ -563,6 +694,7 @@ SSE 错误事件
 ```text
 STEP 02：建立 Dockerfile、健康检查和环境变量基线
 STEP 03：只做私密 smoke test（可选），公网部署延期
+STEP 04～05：继续维护依赖、镜像和测试，不新增公开环境
 STEP 06：第一次公开测试部署
 STEP 07：加入数据库和 Redis 后更新部署
 STEP 08：部署带 RAG 的作品集版本
@@ -636,6 +768,36 @@ STEP 12：生产化、安全、监控和性能优化
 
 - 公网部署，计划在 STEP 06 完成第一次公开测试。
 
+## STEP 04：Prompt 与结构化输出
+
+完成：
+
+- 学习 Prompt 的角色、数据边界、任务和输出约束。
+- 使用 Pydantic 定义 `JobExtraction` 模型输出契约。
+- 使用 `model_json_schema()` 生成 JSON Schema 并加入 Prompt。
+- 在模型服务层新增 `chat_json()`。
+- 使用 `response_format={"type": "json_object"}` 请求 JSON 对象。
+- 使用 `model_validate_json()` 执行 Pydantic 硬校验。
+- 对空响应和校验失败执行最多两次的结构化输出尝试。
+- 校验失败反馈只包含字段、错误类型和说明。
+- 调用失败保持 `LLMServiceError`，输出失败最终抛出 `StructuredOutputError`。
+- 新增 `POST /api/jobs/extract` 接口。
+- 请求层校验空值、纯空白和 20000 字符上限。
+- `max_attempts` 由服务端控制，不接受客户端输入。
+- 增加服务层、提取层和接口层自动化测试。
+- 更新 README、HTTP 示例和项目指南。
+
+为什么使用 JSON 模式与 Pydantic 双重边界：
+
+- JSON 模式保证响应至少是 JSON 对象，不保证字段名、类型和约束。
+- Pydantic 才能把模型输出变成可信的后端数据结构。
+- 只有两类错误同时分开处理，才能避免把 API 故障当成空提取结果。
+
+暂缓：
+
+- 数据库持久化、简历结构化提取和结构化版本保存按依赖顺序在后续 STEP 实现。
+- 公网部署仍延期到 STEP 06。
+
 ---
 
 # 十四、每个大 STEP 完成后的维护清单
@@ -678,10 +840,13 @@ STEP 12：生产化、安全、监控和性能优化
 1. README.md
 2. docs/PROJECT_GUIDE.md
 3. app/main.py
-4. app/routers/chat.py
-5. app/services/llm.py
-6. app/schemas/chat.py
-7. tests/test_chat_api.py
+4. app/routers/jobs.py
+5. app/services/extraction.py
+6. app/services/llm.py
+7. app/schemas/extraction.py
+8. tests/test_job_extraction_api.py
+9. tests/test_extraction_service.py
+10. tests/test_llm_service.py
 ```
 
 重点关注：
