@@ -37,16 +37,23 @@ JobFit Agent 是一个基于 RAG 和工具调用的可解释岗位匹配与差�
 STEP 01：完成
 STEP 02：完成
 STEP 03：完成，公网部署延期到 STEP 06
-STEP 04：功能、测试、文档完成，Git 待收尾
+STEP 04：功能、测试、文档、Git 和 tag 完成
 ```
 
 当前代码分支：
 
 ```text
-feature/step-04-structured-output
+main
 ```
 
-STEP 04 的代码、测试和文档已完成，当前等待 Git 提交、合并和 tag。
+STEP 04 对应版本：
+
+```text
+tag: step-04-structured-output
+merge commit: 088cf0a17a9b1c563d10c7f0fbad321854ebbc0c
+```
+
+STEP 04 的功能、测试、文档、Git 合并和 tag 均已完成。公网部署仍延期到 STEP 06。
 
 STEP 03 对应版本：
 
