@@ -25,13 +25,23 @@ client = AsyncOpenAI(
 )
 
 
-async def chat(messages: list[dict[str, str]]) -> ChatResult:
+async def _chat(
+    messages: list[dict[str, str]],
+    response_format: dict[str, str] | None = None,
+) -> ChatResult:
     try:
         start = perf_counter()
-        response = await client.chat.completions.create(
-            model=settings.llm_model,
-            messages=messages,
-        )
+        if response_format is None:
+            response = await client.chat.completions.create(
+                model=settings.llm_model,
+                messages=messages,
+            )
+        else:
+            response = await client.chat.completions.create(
+                model=settings.llm_model,
+                messages=messages,
+                response_format=response_format,
+            )
         latency_ms = round((perf_counter() - start) * 1000)
     except AuthenticationError as exc:
         # 认证失败属于服务端配置或上游认证问题
@@ -87,6 +97,19 @@ async def chat(messages: list[dict[str, str]]) -> ChatResult:
             ),
             latency_ms=latency_ms,
         )
+
+
+async def chat(messages: list[dict[str, str]]) -> ChatResult:
+    return await _chat(messages=messages)
+
+
+async def chat_json(
+    messages: list[dict[str, str]],
+) -> ChatResult:
+    return await _chat(
+        messages=messages,
+        response_format={"type": "json_object"},
+    )
 
 
 async def stream_chat(

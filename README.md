@@ -2,12 +2,11 @@
 
 > 项目全景、模块职责、数据流和 STEP 变更记录见 [docs/PROJECT_GUIDE.md](docs/PROJECT_GUIDE.md)。
 
-
 基于 RAG 和工具调用的可解释岗位匹配与差距分析 Agent。
 
 ## 当前阶段
 
-STEP 03：调通大模型 API。
+STEP 04：学习 Prompt 与结构化输出，并接入 JobFit Agent。
 
 当前已经支持：
 
@@ -15,6 +14,9 @@ STEP 03：调通大模型 API。
 - `GET /api/users/me`：演示鉴权与当前用户
 - `POST /api/chat`：非流式聊天，返回答案、Token Usage 和耗时
 - `POST /api/chat/stream`：SSE 流式聊天，返回内容事件、Usage 事件和结束标记
+- `POST /api/jobs/extract`：从岗位 JD 中结构化提取岗位职责、必备技能和加分项
+
+岗位提取接口使用 Prompt、JSON Schema、JSON 模式和 Pydantic 双重校验。模型调用成功但输出为空或不符合 Schema 时，最多尝试两次；认证、限流、超时和网络错误不会进入结构重试。
 
 当前鉴权仍为演示版本：
 
@@ -22,7 +24,7 @@ STEP 03：调通大模型 API。
 Authorization: Bearer demo-token
 ```
 
-真实用户系统将在后续阶段实现。
+真实用户系统将在后续阶段实现。公网部署仍延期到 STEP 06，本阶段不新增公开环境。
 
 ## 环境准备
 
@@ -158,6 +160,58 @@ data: {"type":"usage","usage":{"prompt_tokens":20,"completion_tokens":30,"total_
 data: [DONE]
 ```
 
+## 岗位 JD 结构化提取
+
+请求：
+
+```http
+POST /api/jobs/extract
+Authorization: Bearer demo-token
+Content-Type: application/json
+```
+
+请求体：
+
+```json
+{
+  "job_description": "负责 FastAPI 后端服务开发，要求熟悉 Python、Pydantic 和异步编程。"
+}
+```
+
+说明：
+
+- `job_description` 不能为空或只包含空白。
+- 最大长度为 20000 个字符。
+- 客户端不能传入重试次数，`max_attempts` 由服务端控制。
+- 服务最多调用模型两次。
+- 第一次输出不符合 Pydantic 契约时，会把校验错误作为下一轮反馈。
+
+成功响应：
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "responsibilities": [
+      "负责 FastAPI 后端服务开发"
+    ],
+    "required_skills": [
+      "熟悉 Python、Pydantic 和异步编程"
+    ],
+    "nice_to_have": []
+  }
+}
+```
+
+主要错误：
+
+- `422`：岗位描述为空、纯空白或超过长度限制。
+- `502`：模型调用成功，但输出为空或多次校验仍不符合 Schema。
+- `503`：模型服务限流或暂时不可用。
+- `504`：模型调用超时。
+- 上游认证和网络异常不会伪装成空提取结果。
+
 ## 自动化测试
 
 安装测试依赖：
@@ -172,7 +226,7 @@ data: [DONE]
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-测试使用 mock 替代真实模型调用，因此不会消耗 DeepSeek API 额度。
+测试使用 mock 或假客户端替代真实模型调用，因此不会消耗 DeepSeek API 额度。
 
 ## Docker
 
