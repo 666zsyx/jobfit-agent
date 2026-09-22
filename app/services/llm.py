@@ -13,7 +13,13 @@ from openai import (
 
 from app.core.config import settings
 from app.core.exceptions import LLMServiceError
-from app.schemas.chat import ChatResult, LLMStreamEvent, TokenUsage
+from app.schemas.chat import (
+    ChatResult,
+    LLMStreamEvent,
+    LLMWithToolsResult,
+    TokenUsage,
+    ToolCall,
+)
 
 
 # 创建客户端
@@ -98,6 +104,86 @@ async def _chat(
             latency_ms=latency_ms,
         )
 
+#负责拿到第一次调用模型后模型的决策结果然后交给工具层进行参数解析和校验
+async def chat_with_tools(
+    messages: list[dict],
+    tools: list[dict],
+) -> LLMWithToolsResult:
+    try:
+        start = perf_counter()
+        response = await client.chat.completions.create(
+            model=settings.llm_model,
+            messages=messages,
+            tools=tools,
+            tool_choice="auto",
+        )
+        latency_ms = round((perf_counter() - start) * 1000)
+    except AuthenticationError as exc:
+        raise LLMServiceError(
+            message="LLM 服务认证失败，请检查服务配置。",
+            status_code=500,
+        ) from exc
+    except RateLimitError as exc:
+        raise LLMServiceError(
+            message="LLM 请求频率超限，请稍后重试。",
+            status_code=503,
+        ) from exc
+    except APITimeoutError as exc:
+        raise LLMServiceError(
+            message="LLM 请求超时，请检查网络或稍后重试。",
+            status_code=504,
+        ) from exc
+    except APIConnectionError as exc:
+        raise LLMServiceError(
+            message="无法连接到 LLM 服务，请检查网络。",
+            status_code=502,
+        ) from exc
+    except BadRequestError as exc:
+        raise LLMServiceError(
+            message="LLM 请求参数错误，可能上下文超限或格式不对。",
+            status_code=500,
+        ) from exc
+    except APIStatusError as exc:
+        raise LLMServiceError(
+            message="LLM 服务返回异常状态，请稍后重试。",
+            status_code=502,
+        ) from exc
+    else:
+        message = response.choices[0].message
+        usage = response.usage
+
+        if usage is None:
+            raise LLMServiceError("模型响应中没有 usage。")
+
+        raw_tool_calls = message.tool_calls or []
+
+        tool_calls = [
+            ToolCall(
+                id=call.id,
+                name=call.function.name,
+                arguments=call.function.arguments,
+            )
+            for call in raw_tool_calls
+        ]
+
+        content = message.content
+        has_content = bool(content and content.strip())
+
+        if not has_content and not tool_calls:
+            raise LLMServiceError(
+                "模型没有返回内容或工具调用。"
+            )
+
+        return LLMWithToolsResult(
+            content=message.content,
+            tool_calls=tool_calls,
+            usage=TokenUsage(
+                prompt_tokens=usage.prompt_tokens,
+                completion_tokens=usage.completion_tokens,
+                total_tokens=usage.total_tokens,
+            ),
+            latency_ms=latency_ms,
+        )
 
 async def chat(messages: list[dict[str, str]]) -> ChatResult:
     return await _chat(messages=messages)
