@@ -1,3 +1,5 @@
+# 集中配置测试环境变量和共享 fixture。
+
 import os
 
 import pytest

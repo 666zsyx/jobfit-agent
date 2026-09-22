@@ -1,3 +1,5 @@
+# 验证一次 Function Calling 往返、消息历史和 Usage 汇总。
+
 import asyncio
 import json
 from typing import Any

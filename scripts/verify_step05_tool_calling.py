@@ -1,3 +1,5 @@
+# 手工验收岗位 JD 工具的真实模型调用链路。
+
 import asyncio
 import json
 import sys
@@ -30,10 +32,12 @@ REQUIRED_RESULT_KEYS = (
 )
 
 
+# 统一输出验收失败原因并终止脚本。
 def fail(message: str) -> None:
     raise SystemExit(message)
 
 
+# 真实调用岗位 JD 工具并校验参数、结果和最终回答。
 async def main() -> None:
     current_user = CurrentUser(
         id=1,

@@ -1,3 +1,5 @@
+# 定义简历分段和结构化提取结果。
+
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -14,6 +16,7 @@ ResumeSectionType = Literal[
 ]
 
 
+# 表示从简历原文提取出的结构化分段。
 class ResumeSection(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -42,6 +45,7 @@ class ResumeSection(BaseModel):
         return value
 
 
+# 表示一份简历的完整分段提取结果。
 class ResumeExtraction(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

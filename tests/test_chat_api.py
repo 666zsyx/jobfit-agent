@@ -1,3 +1,5 @@
+# 验证聊天接口的鉴权、请求校验和响应结构。
+
 import json
 from collections.abc import AsyncIterator
 

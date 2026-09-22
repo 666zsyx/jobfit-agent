@@ -1,6 +1,9 @@
+# 定义岗位 JD 结构化提取的模型输出契约。
+
 from pydantic import BaseModel, Field, field_validator
 
 
+# 表示岗位 JD 的结构化提取结果。
 class JobExtraction(BaseModel):
     responsibilities: list[str] = Field(
         min_length=1,
@@ -16,6 +19,7 @@ class JobExtraction(BaseModel):
     )
 
 
+# 表示岗位 JD 提取接口的请求参数。
 class JobExtractionRequest(BaseModel):
     job_description: str = Field(
         min_length=1,

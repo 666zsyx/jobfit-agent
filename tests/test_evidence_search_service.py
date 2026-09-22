@@ -1,3 +1,5 @@
+# 验证关键词证据检索的评分、排序和边界。
+
 import pytest
 
 from app.schemas.resume import ResumeSection

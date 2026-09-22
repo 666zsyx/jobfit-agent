@@ -1,3 +1,5 @@
+# 实现可解释的关键词证据检索基线。
+
 import re
 
 from app.schemas.evidence import (
@@ -25,6 +27,7 @@ CHINESE_RUN_PATTERN = re.compile(
 )
 
 
+# 把中英文文本切成可比较的英文词项、中文整串和双字 n-gram。
 #把任意文本切分成token集合（英文整词 + 中文整串 + 中文2-gram）
 def tokenize(text: str) -> set[str]:
     #统一转小写便于匹配
@@ -50,6 +53,7 @@ def tokenize(text: str) -> set[str]:
     return tokens
 
 
+# 计算一条岗位要求与一个简历分段的命中词项比例。
 #计算一条岗位要求和一段简历的匹配得分
 def calculate_score(
     requirement: str,
@@ -76,6 +80,7 @@ def calculate_score(
     )
 
 
+# 校验岗位要求列表、单项类型、空白和长度约束。
 #校验岗位要求列表是否合法
 def _validate_requirements(
     requirements: list[str],
@@ -104,6 +109,7 @@ def _validate_requirements(
     return normalized_requirements
 
 
+# 校验简历分段列表非空。
 #校验简历分段列表是否合法
 def _validate_sections(
     sections: list[ResumeSection],
@@ -113,6 +119,7 @@ def _validate_sections(
         raise ValueError("sections 不能为空")
 
 
+# 校验单条要求允许返回的证据数量。
 #校验每条要求允许返回的证据数量是否合法
 def _validate_max_evidence(
     max_evidence_per_requirement: int,
@@ -140,6 +147,7 @@ def _validate_max_evidence(
         )
 
 
+# 为每条岗位要求独立检索并排序最相关的简历证据。
 #主入口：对每条岗位要求，从简历分段中检索最相关的证据
 def search_resume_evidence(
     requirements: list[str],

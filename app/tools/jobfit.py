@@ -1,3 +1,5 @@
+# 定义并注册 JobFit Agent 的真实工具。
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.schemas.evidence import (
@@ -18,6 +20,7 @@ from app.tools.base import ToolContext, ToolSpec
 from app.tools.registry import ToolRegistry
 
 
+# 定义岗位 JD 提取工具的输入契约。
 class ExtractJobRequirementsArgs(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -38,6 +41,7 @@ class ExtractJobRequirementsArgs(BaseModel):
         return value
 
 
+# 定义简历分段提取工具的输入契约。
 class ExtractResumeSectionsArgs(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -58,6 +62,7 @@ class ExtractResumeSectionsArgs(BaseModel):
         return value
 
 
+# 把岗位 JD 工具参数适配到现有提取服务。
 async def extract_job_requirements_handler(
     args: ExtractJobRequirementsArgs,
     context: ToolContext,
@@ -66,6 +71,7 @@ async def extract_job_requirements_handler(
     return result.model_dump(mode="json")
 
 
+# 把简历工具参数适配到现有分段提取服务。
 async def extract_resume_sections_handler(
     args: ExtractResumeSectionsArgs,
     context: ToolContext,
@@ -74,6 +80,7 @@ async def extract_resume_sections_handler(
     return result.model_dump(mode="json")
 
 
+# 把检索工具参数适配到关键词证据检索服务。
 async def search_resume_evidence_handler(
     args: EvidenceSearchRequest,
     context: ToolContext,
@@ -85,6 +92,7 @@ async def search_resume_evidence_handler(
     return result.model_dump(mode="json")
 
 
+# 把结构化检索结果适配到三态匹配评估服务。
 async def assess_requirement_match_handler(
     args: EvidenceSearchResult,
     context: ToolContext,
@@ -138,6 +146,7 @@ ASSESS_REQUIREMENT_MATCH_TOOL = ToolSpec(
 )
 
 
+# 创建并装配 JobFit 全部真实工具。
 def build_jobfit_tool_registry() -> ToolRegistry:
     registry = ToolRegistry()
     registry.register(EXTRACT_JOB_REQUIREMENTS_TOOL)

@@ -1,3 +1,5 @@
+# 验证简历分段提取、重试和结构校验。
+
 import asyncio
 
 import pytest

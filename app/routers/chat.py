@@ -1,3 +1,5 @@
+# 提供普通聊天和 SSE 流式聊天接口。
+
 import json
 from collections.abc import AsyncIterator
 
@@ -15,6 +17,7 @@ from app.services.llm import stream_chat as llm_stream_chat
 router = APIRouter(prefix="/api", tags=["chat"])
 
 
+# 处理非流式聊天请求，并返回模型结果和 Usage。
 @router.post("/chat")
 async def chat_endpoint(
     request: ChatRequest,
@@ -28,6 +31,7 @@ async def chat_endpoint(
     return success_response(data=result)
 
 
+# 把 LLM 事件转换成 SSE 流返回客户端。
 @router.post("/chat/stream")
 async def stream_chat_endpoint(
     request: ChatRequest,

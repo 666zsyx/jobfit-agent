@@ -1,3 +1,5 @@
+# 定义简历证据检索的输入、输出和约束。
+
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -14,6 +16,7 @@ MAX_REQUIREMENTS = 20
 MAX_EVIDENCE_PER_REQUIREMENT = 10
 
 
+# 清理单条岗位要求，并校验非空和最大长度。
 def _normalize_requirement(value: str) -> str:
     value = value.strip()
 
@@ -28,6 +31,7 @@ def _normalize_requirement(value: str) -> str:
     return value
 
 
+# 表示证据检索工具需要的岗位要求和简历分段。
 class EvidenceSearchRequest(BaseModel):
     """简历证据检索的输入。"""
 
@@ -56,6 +60,7 @@ class EvidenceSearchRequest(BaseModel):
         ]
 
 
+# 表示一段简历原文及其关键词匹配分数。
 class EvidenceItem(ResumeSection):
     """一条与岗位要求相关的简历证据。"""
 
@@ -68,6 +73,7 @@ class EvidenceItem(ResumeSection):
     )
 
 
+# 表示一条岗位要求与对应证据列表的绑定关系。
 class RequirementEvidence(BaseModel):
     """一条岗位要求及其对应的证据列表。"""
 
@@ -90,6 +96,7 @@ class RequirementEvidence(BaseModel):
         return _normalize_requirement(value)
 
 
+# 表示按岗位要求顺序组织的完整证据检索结果。
 class EvidenceSearchResult(BaseModel):
     """完整的简历证据检索结果。"""
 

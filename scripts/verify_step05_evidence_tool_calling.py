@@ -1,3 +1,5 @@
+# 手工验收证据检索工具的真实模型调用链路。
+
 import asyncio
 import json
 import sys
@@ -40,10 +42,12 @@ TEST_SECTIONS = [
 EXPECTED_SKILLS_CONTENT = TEST_SECTIONS[0]["content"]
 
 
+# 统一输出验收失败原因并终止脚本。
 def fail(message: str) -> None:
     raise SystemExit(message)
 
 
+# 真实调用证据检索工具并校验要求、证据和最终回答。
 async def main() -> None:
     current_user = CurrentUser(
         id=1,

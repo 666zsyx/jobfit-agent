@@ -1,3 +1,5 @@
+# 封装 LLM 普通、JSON、流式和工具调用 API。
+
 from collections.abc import AsyncIterator
 from time import perf_counter
 
@@ -31,6 +33,7 @@ client = AsyncOpenAI(
 )
 
 
+# 封装普通或 JSON 模式模型调用，并统一翻译上游异常。
 async def _chat(
     messages: list[dict[str, str]],
     response_format: dict[str, str] | None = None,
@@ -104,6 +107,7 @@ async def _chat(
             latency_ms=latency_ms,
         )
 
+# 调用一次带工具模型请求，并把 SDK 响应转换成项目结构。
 #负责拿到第一次调用模型后模型的决策结果然后交给工具层进行参数解析和校验
 async def chat_with_tools(
     messages: list[dict],
@@ -185,10 +189,12 @@ async def chat_with_tools(
             latency_ms=latency_ms,
         )
 
+# 提供普通非流式聊天入口。
 async def chat(messages: list[dict[str, str]]) -> ChatResult:
     return await _chat(messages=messages)
 
 
+# 请求模型返回 JSON 对象，但仍由上层执行 Pydantic 校验。
 async def chat_json(
     messages: list[dict[str, str]],
 ) -> ChatResult:
@@ -198,6 +204,7 @@ async def chat_json(
     )
 
 
+# 请求流式模型输出并转换成项目内 SSE 事件。
 async def stream_chat(
     messages: list[dict[str, str]],
 ) -> AsyncIterator[LLMStreamEvent]:

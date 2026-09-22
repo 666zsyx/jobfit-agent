@@ -1,3 +1,5 @@
+# 通过 LLM 将简历原文提取为结构化分段。
+
 import json
 
 from pydantic import ValidationError
@@ -15,6 +17,7 @@ RESUME_SCHEMA_TEXT = json.dumps(
 )
 
 
+# 构造只提取原文、不做总结改写的简历分段 Prompt。
 def build_resume_extraction_messages(
     resume_text: str,
 ) -> list[dict[str, str]]:
@@ -51,6 +54,7 @@ def build_resume_extraction_messages(
     ]
 
 
+# 把简历结构校验错误转换成安全的重试反馈。
 def _build_validation_feedback(
     exc: ValidationError,
 ) -> str:
@@ -73,6 +77,7 @@ def _build_validation_feedback(
     )
 
 
+# 调用模型提取简历分段，并执行有限结构重试。
 async def extract_resume_sections(
     resume_text: str,
     max_attempts: int = 2,

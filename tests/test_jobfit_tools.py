@@ -1,3 +1,5 @@
+# 验证四个 JobFit 工具的注册、参数校验和执行结果。
+
 import asyncio
 
 import pytest

@@ -1,3 +1,5 @@
+# 验证带工具模型调用的响应映射和异常边界。
+
 import asyncio
 from types import SimpleNamespace
 
