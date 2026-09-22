@@ -29,3 +29,15 @@ class LLMStreamEvent(BaseModel):
     content: str | None = None
     usage: TokenUsage | None = None
     latency_ms: int | None = None
+
+class ToolCall(BaseModel):
+    id: str
+    name: str
+    arguments: str
+
+
+class LLMWithToolsResult(BaseModel):
+    content: str | None = None
+    tool_calls: list[ToolCall] = Field(default_factory=list)
+    usage: TokenUsage
+    latency_ms: int
