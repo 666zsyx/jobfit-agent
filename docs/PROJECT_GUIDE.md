@@ -38,7 +38,7 @@ STEP 01：完成
 STEP 02：完成
 STEP 03：完成，公网部署延期到 STEP 06
 STEP 04：功能、测试、文档、Git 和 tag 完成
-STEP 05：功能、测试、真实验收和文档完成；Git 待收尾
+STEP 05：功能、测试、真实验收、文档、Git、远程 push 和 tag 全部完成
 ```
 
 当前代码分支：
@@ -54,7 +54,7 @@ tag: step-04-structured-output
 merge commit: 088cf0a17a9b1c563d10c7f0fbad321854ebbc0c
 ```
 
-STEP 04 的功能、测试、文档、Git 合并和 tag 均已完成。STEP 05 已完成四个真实工具、统一工具执行边界、超时与安全日志，并通过真实 DeepSeek 手工验收；尚未 commit、merge、push 或 tag。公网部署仍延期到 STEP 06。
+STEP 04 的功能、测试、文档、Git 合并和 tag 均已完成。STEP 05 已完成四个真实工具、统一工具执行边界、超时与安全日志，并通过真实 DeepSeek 手工验收；本地 merge、远程 push 和 tag 均已完成。公网部署仍延期到 STEP 06。
 
 STEP 03 对应版本：
 
