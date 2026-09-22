@@ -6,7 +6,7 @@
 
 ## 当前阶段
 
-STEP 04：学习 Prompt 与结构化输出，并接入 JobFit Agent。
+STEP 05：学习 Function Calling 与工具注册，并接入 JobFit Agent。
 
 当前已经支持：
 
@@ -17,6 +17,15 @@ STEP 04：学习 Prompt 与结构化输出，并接入 JobFit Agent。
 - `POST /api/jobs/extract`：从岗位 JD 中结构化提取岗位职责、必备技能和加分项
 
 岗位提取接口使用 Prompt、JSON Schema、JSON 模式和 Pydantic 双重校验。模型调用成功但输出为空或不符合 Schema 时，最多尝试两次；认证、限流、超时和网络错误不会进入结构重试。
+
+STEP 05 已增加工具注册与单次 Function Calling 编排基础。当前注册四个真实工具：
+
+- `extract_job_requirements`：从岗位 JD 提取职责、必备技能和加分项。
+- `extract_resume_sections`：从简历原文提取教育、项目、技能等结构化分段。
+- `search_resume_evidence`：按岗位要求检索简历分段中的原文证据。
+- `assess_requirement_match`：根据证据评估 `strong_match`、`partial_match` 或 `insufficient_evidence`。
+
+外层编排的一次工具往返最多调用模型两次；工具 handler 内部可能再次调用模型，例如岗位或简历结构化提取，当前内层模型 Usage 尚未合并到外层统计。工具参数统一使用 Pydantic 校验，用户身份由后端 `ToolContext` 注入，工具 handler 最多执行 30 秒；调用日志只记录工具名、用户 ID、参数键、状态和耗时，不记录 JD、简历或报告正文。当前工具尚未通过 HTTP 路由暴露，也没有数据库持久化工具。
 
 当前鉴权仍为演示版本：
 

@@ -1,6 +1,6 @@
 # JobFit Agent 项目全景与维护文档
 
-> 最后更新：2026-09-20
+> 最后更新：2026-09-22
 >
 > 适用对象：未来的项目维护者、面试准备者、协作者和几周后重新阅读代码的自己。
 >
@@ -27,7 +27,7 @@ JobFit Agent 是一个基于 RAG 和工具调用的可解释岗位匹配与差�
 → 报告保存
 ```
 
-当前项目处于早期阶段，已经完成模型 API、聊天接口和岗位 JD 结构化提取，尚未实现完整岗位匹配业务。
+当前项目已完成模型 API、聊天接口、结构化提取、工具注册、简历分段、关键词证据检索、三态匹配评估以及单次 Function Calling 编排，尚未实现持久化、最小 ReAct 循环和完整岗位匹配报告。
 
 ---
 
@@ -38,12 +38,13 @@ STEP 01：完成
 STEP 02：完成
 STEP 03：完成，公网部署延期到 STEP 06
 STEP 04：功能、测试、文档、Git 和 tag 完成
+STEP 05：功能、测试、真实验收和文档完成；Git 待收尾
 ```
 
 当前代码分支：
 
 ```text
-main
+feature/step-05-tool-calling
 ```
 
 STEP 04 对应版本：
@@ -53,7 +54,7 @@ tag: step-04-structured-output
 merge commit: 088cf0a17a9b1c563d10c7f0fbad321854ebbc0c
 ```
 
-STEP 04 的功能、测试、文档、Git 合并和 tag 均已完成。公网部署仍延期到 STEP 06。
+STEP 04 的功能、测试、文档、Git 合并和 tag 均已完成。STEP 05 已完成四个真实工具、统一工具执行边界、超时与安全日志，并通过真实 DeepSeek 手工验收；尚未 commit、merge、push 或 tag。公网部署仍延期到 STEP 06。
 
 STEP 03 对应版本：
 
@@ -218,6 +219,126 @@ Content-Type: application/json
 - 认证、限流、超时和网络异常不进入结构重试。
 - 请求层限制 JD 长度，纯空白输入直接返回 422。
 
+## 6. 工具注册与统一执行边界
+
+当前工具基础层位于：
+
+```text
+app/tools/base.py
+app/tools/registry.py
+app/tools/executor.py
+app/tools/jobfit.py
+```
+
+包含能力：
+
+- `ToolContext` 注入后端确认的 `CurrentUser`。
+- `ToolSpec` 将工具名、描述、Pydantic 参数模型和异步 handler 绑定。
+- `ToolRegistry` 作为白名单，拒绝重复或未注册工具。
+- `execute_tool()` 统一执行 JSON 对象检查、Pydantic 校验、用户上下文注入、超时和异常脱敏。
+- 工具结果必须是 JSON 兼容字典。
+- 工具 handler 默认最多执行 30 秒。
+- 工具调用日志记录工具名、用户 ID、参数键、状态和耗时，不记录参数值和结果正文。
+
+当前未通过 HTTP 路由暴露工具调用，也未实现工具调用记录的数据库持久化。
+
+## 7. 简历分段提取
+
+业务服务：
+
+```text
+app/services/resume_extraction.py
+```
+
+输入简历原文，通过 Prompt、JSON Schema、JSON 模式和 Pydantic 校验提取：
+
+```text
+summary
+education
+work_experience
+project_experience
+skills
+certificates
+other
+```
+
+空响应和 Schema 校验失败最多尝试两次，API 异常不进入结构重试。当前要求保留原文，不允许总结、润色、推断或补全。
+
+## 8. 简历证据检索
+
+业务服务：
+
+```text
+app/services/evidence_search.py
+```
+
+当前是 RAG 之前的关键词检索基线：
+
+- 英文、数字和技术词按 token 匹配。
+- 中文生成整串和双字 n-gram。
+- 使用最低分数阈值过滤明显的弱双字误匹配。
+- 每条要求只返回命中证据。
+- 没有足够证据时返回空列表，不编造原文。
+- 证据内容保留简历分段原文。
+- 按分数降序、原始 section 顺序稳定排序。
+
+该实现后续会在 STEP 08 升级为混合检索、向量检索和重排。
+
+## 9. 要求匹配评估
+
+业务服务：
+
+```text
+app/services/matching.py
+```
+
+根据证据检索结果输出三种状态：
+
+```text
+strong_match
+partial_match
+insufficient_evidence
+```
+
+当前规则使用最高证据分与强匹配阈值判断，并汇总各状态数量。没有输出 `not_match`，因为关键词证据不足不能证明候选人明确不满足要求。
+
+## 10. 单次 Function Calling 编排
+
+编排服务：
+
+```text
+app/services/tool_calling.py
+```
+
+一次调用最多执行一轮工具：
+
+```text
+第一次模型调用
+→ 有 tool_calls 时执行工具
+→ assistant tool_calls 与 role=tool 结果加入消息
+→ 第二次模型调用生成最终回答
+```
+
+模型直接回答时不执行工具，也只调用一次模型。当前尚未实现 ReAct 循环和多轮工具调用。
+
+## 11. 四个真实 JobFit 工具
+
+```text
+extract_job_requirements
+→ JD 提取职责、必备技能和加分项
+
+extract_resume_sections
+→ 简历原文提取结构化分段
+
+search_resume_evidence
+→ 岗位要求 + 简历分段返回原文证据
+
+assess_requirement_match
+→ 证据结果返回三态评估和 summary
+```
+
+四个工具均通过 `ToolRegistry` 注册，使用 Pydantic 参数模型，并通过 `execute_tool()` 执行。
+
 ---
 
 # 四、当前技术栈与选型原因
@@ -268,6 +389,10 @@ Content-Type: application/json
 app/schemas/auth.py
 app/schemas/chat.py
 app/schemas/extraction.py
+app/schemas/resume.py
+app/schemas/evidence.py
+app/schemas/matching.py
+app/schemas/tool_calling.py
 app/core/config.py
 ```
 
@@ -303,6 +428,8 @@ client.chat.completions.create()
 response_format={"type": "json_object"}
 stream=True
 stream_options={"include_usage": True}
+tools=[...]
+tool_choice="auto"
 ```
 
 选型原因：
@@ -339,6 +466,47 @@ LLM_MODEL=deepseek-flash
 requirements-dev.txt
 ```
 
+## 8. Tool Registry 与 ToolSpec
+
+用途：
+
+- 将工具名、说明、参数模型和异步 handler 集中注册。
+- 防止未注册工具执行。
+- 拒绝重复工具名。
+- 从 Pydantic `model_json_schema()` 生成模型工具定义。
+- 统一参数校验、用户注入、超时、异常脱敏和调用日志。
+
+选型原因：
+
+- 先手写注册机制，避免被 Agent 框架 API 绑定。
+- 白名单比动态导入安全。
+- 参数模型和 OpenAI 工具定义来自同一份契约，避免漂移。
+
+## 9. asyncio.wait_for
+
+用途：
+
+- 为异步工具 handler 设置 30 秒执行上限。
+- 超时后取消协程并返回安全错误。
+
+选型原因：
+
+- Python 标准库，无新增依赖。
+- 能避免外部服务或数据库长期挂起占满请求资源。
+- 超时与普通业务异常可分别记录和返回。
+
+## 10. 三态证据评估
+
+用途：
+
+- 区分强证据、部分证据和证据不足。
+- 防止把“未检索到证据”误判为“明确不匹配”。
+
+选型原因：
+
+- 当前只有关键词检索基线，语义判断能力有限。
+- 三态结果能保留不确定性，后续再接入更可靠的 RAG 与语义分析。
+
 ---
 
 # 五、当前目录结构
@@ -361,16 +529,41 @@ jobfit_agent/
 │   ├── schemas/
 │   │   ├── auth.py
 │   │   ├── chat.py
-│   │   └── extraction.py
-│   └── services/
-│       ├── llm.py
-│       └── extraction.py
+│   │   ├── extraction.py
+│   │   ├── resume.py
+│   │   ├── evidence.py
+│   │   ├── matching.py
+│   │   └── tool_calling.py
+│   ├── services/
+│   │   ├── llm.py
+│   │   ├── extraction.py
+│   │   ├── resume_extraction.py
+│   │   ├── evidence_search.py
+│   │   ├── matching.py
+│   │   └── tool_calling.py
+│   └── tools/
+│       ├── base.py
+│       ├── registry.py
+│       ├── executor.py
+│       └── jobfit.py
+├── scripts/
+│   ├── verify_step05_tool_calling.py
+│   ├── verify_step05_resume_tool_calling.py
+│   ├── verify_step05_evidence_tool_calling.py
+│   └── verify_step05_assess_tool_calling.py
 ├── tests/
 │   ├── conftest.py
 │   ├── test_chat_api.py
 │   ├── test_llm_service.py
+│   ├── test_llm_tools_service.py
 │   ├── test_extraction_service.py
-│   └── test_job_extraction_api.py
+│   ├── test_job_extraction_api.py
+│   ├── test_resume_extraction_service.py
+│   ├── test_evidence_search_service.py
+│   ├── test_matching_service.py
+│   ├── test_tool_registry.py
+│   ├── test_jobfit_tools.py
+│   └── test_tool_calling_service.py
 ├── docs/
 │   └── PROJECT_GUIDE.md
 ├── Dockerfile
@@ -442,6 +635,8 @@ ChatRequest
 TokenUsage
 ChatResult
 LLMStreamEvent
+ToolCall
+LLMWithToolsResult
 ```
 
 ## `app/services/llm.py`
@@ -451,6 +646,8 @@ LLMStreamEvent
 - 创建异步 DeepSeek 客户端。
 - 封装非流式聊天。
 - 封装流式聊天。
+- 封装 `chat_with_tools()`，验证普通文本或工具调用响应。
+- 将 OpenAI SDK 工具调用对象转换为项目自己的 `ToolCall`。
 - 统计 Token 和耗时。
 - 将 SDK 异常转换为 `LLMServiceError`。
 
@@ -462,6 +659,7 @@ LLMStreamEvent
 - `chat()` 保持普通文本模式。
 - `chat_json()` 增加 JSON object 模式。
 - 两者复用 `_chat()` 的异常映射、Usage 和耗时统计。
+- `chat_with_tools()` 不解析 `arguments`，也不执行工具，只负责拿取和稳定化模型响应。
 
 ## `app/routers/jobs.py`
 
@@ -486,6 +684,100 @@ LLMStreamEvent
 - 校验失败时生成精简反馈并追加到消息历史。
 - 最多调用模型两次；`max_attempts` 由服务端控制。
 - 最终失败抛出 `StructuredOutputError` 并保留异常链。
+
+## `app/schemas/resume.py`
+
+- `ResumeSection`：分段类型、标题和原文内容契约。
+- `ResumeExtraction`：简历分段列表契约。
+- 限制分段类型、长度和额外字段。
+
+## `app/services/resume_extraction.py`
+
+- 构造简历分段 Prompt 和 JSON Schema。
+- 使用 `chat_json()` 调用模型。
+- 使用 Pydantic 校验 `ResumeExtraction`。
+- 空响应或校验失败最多重试两次，API 异常不进入结构重试。
+- 不允许总结、润色、推断或补全简历原文。
+
+## `app/schemas/evidence.py`
+
+- `EvidenceSearchRequest`：检索工具参数契约。
+- `EvidenceItem`：保留 section 类型、标题、原文和匹配分。
+- `RequirementEvidence`：岗位要求与证据列表。
+- `EvidenceSearchResult`：要求和结果的顺序对应契约。
+
+## `app/services/evidence_search.py`
+
+- 当前使用英文 token、中文整串和双字 n-gram 做关键词匹配。
+- 过滤低于最低阈值的弱证据。
+- 按分数降序和原始 section 顺序稳定排序。
+- 没有足够证据时返回空列表。
+- 不调用 LLM，不访问数据库。
+
+## `app/schemas/matching.py`
+
+- `MatchStatus`：`strong_match`、`partial_match`、`insufficient_evidence`。
+- `RequirementAssessment`：单条要求的状态、理由和证据。
+- `MatchSummary`：三种状态的统计。
+- `MatchAssessmentResult`：评估列表与汇总一致性契约。
+
+## `app/services/matching.py`
+
+- 没有 evidence 时标记 `insufficient_evidence`。
+- 最高证据分达到阈值时标记 `strong_match`。
+- 有证据但未达到阈值时标记 `partial_match`。
+- 不输出 `not_match`，不把证据不足解释成明确不满足。
+- 汇总数量必须与 assessment 状态一致。
+
+## `app/schemas/tool_calling.py`
+
+- `ToolExecutionRecord`：记录一次工具调用和结果。
+- `ToolCallingResult`：返回最终回答、工具调用、执行记录、Usage 和总耗时。
+
+## `app/services/tool_calling.py`
+
+- 完成一次工具往返。
+- 第一次调用 `chat_with_tools()`。
+- 无工具调用时直接返回模型文本。
+- 有工具调用时解析 `arguments`，调用 `execute_tool()`，构造 assistant 和 tool 消息，再调用 `chat()`。
+- 最多调用模型两次，不实现 ReAct 循环。
+- 汇总外层两次调用的 Usage；内层工具模型 Usage 尚未汇总。
+
+## `app/tools/base.py`
+
+- `ToolContext`：由后端注入 `CurrentUser`。
+- `ToolSpec`：绑定工具名、描述、参数模型和异步 handler。
+- `openai_definition()`：从 Pydantic 参数模型生成 OpenAI 工具定义。
+
+## `app/tools/registry.py`
+
+- `ToolRegistry` 工具白名单。
+- 注册工具并拒绝重复工具名。
+- 按名称查找工具。
+- 输出模型可使用的工具定义列表。
+
+## `app/tools/executor.py`
+
+- 拒绝未注册工具。
+- 要求参数是 JSON 对象。
+- 使用对应 Pydantic 模型校验参数。
+- 注入 `ToolContext`。
+- 使用 `asyncio.wait_for()` 限制 handler 最多执行 30 秒。
+- 统一返回参数错误、超时、内部异常和非序列化结果的安全错误。
+- 记录不含参数值的工具调用日志。
+
+## `app/tools/jobfit.py`
+
+- 注册四个 JobFit 工具。
+- 将工具参数模型绑定到既有业务服务。
+- 所有 handler 返回 `model_dump(mode="json")` 的 JSON 字典。
+- 当前不读取数据库，也不持久化调用记录。
+
+## `scripts/` 下的 STEP 05 验收脚本
+
+- 使用真实 DeepSeek 验证岗位提取、简历分段、证据检索和匹配评估工具。
+- 检查工具名、参数、`tool_call_id`、结果结构和最终回答。
+- 手工验收脚本不进入 pytest，不自动消耗 API。
 
 ---
 
@@ -560,8 +852,13 @@ LLMServiceError
 → 请求没有得到正常响应，立即向上传播，不进入 JSON 校验重试。
 
 StructuredOutputError
-→ 模型调用成功，但内容为空或多次校验仍不符合 JobExtraction Schema。
+→ 模型调用成功，但内容为空或多次校验仍不符合结构化 Schema。
 → 保留最后一次 ValidationError/RuntimeError 作为异常链。
+
+工具执行错误
+→ 未注册工具、参数不是 JSON 对象、Pydantic 校验失败、超时、handler 异常或结果不可序列化。
+→ execute_tool() 转换为稳定字典结果，不把内部异常原文交给模型。
+→ 当前没有 HTTP 路由，因此不直接映射为 HTTP 状态码。
 ```
 
 状态码映射：
@@ -597,17 +894,24 @@ StructuredOutputError     → 502
 - 文档明确提示 Key 泄漏后的处理方式。
 - JD 提取接口需要 Bearer 鉴权。
 - JD 最大长度为 20000 字符，纯空白输入在请求层拒绝。
+- 简历原文最大长度为 50000 字符，岗位要求数量、长度和证据数量受 Pydantic 限制。
 - `max_attempts` 不接受客户端输入，避免放大 Token 成本和请求延迟。
-- 不向客户端返回完整 Pydantic 校验错误。
+- 工具调用必须经过白名单注册表。
+- 工具参数必须通过对应 Pydantic 模型校验。
+- 用户身份由 `ToolContext` 注入，模型不能决定 `user_id`。
+- 工具 handler 默认最多执行 30 秒。
+- 工具日志不记录 JD、简历、报告正文和完整参数值。
+- 内部工具异常不会以原始异常文本返回给模型。
 
 当前仍未完成：
 
 - 固定 `demo-token` 未改成环境变量。
-- 没有真实用户数据库。
-- 没有用户级数据隔离。
+- 没有真实用户数据库和简历版本表。
+- 当前四个工具处理请求直接传入的数据，因此尚未发生数据库归属查询。
+- 后续 `get_resume_profile` 和 `save_match_report` 必须按 `current_user.id` 过滤数据。
 - 没有请求频率限制。
 - 没有公网访问保护。
-- 没有生产级日志与审计。
+- 没有工具调用日志的数据库持久化和生产级审计。
 
 因此当前项目不适合作为公开生产服务，公网部署继续延期到 STEP 06。
 
@@ -621,8 +925,15 @@ StructuredOutputError     → 502
 tests/conftest.py
 tests/test_chat_api.py
 tests/test_llm_service.py
+tests/test_llm_tools_service.py
 tests/test_extraction_service.py
 tests/test_job_extraction_api.py
+tests/test_resume_extraction_service.py
+tests/test_evidence_search_service.py
+tests/test_matching_service.py
+tests/test_tool_registry.py
+tests/test_jobfit_tools.py
+tests/test_tool_calling_service.py
 ```
 
 测试方式：
@@ -630,7 +941,8 @@ tests/test_job_extraction_api.py
 - 使用 `TestClient` 在进程内调用 ASGI 应用。
 - 使用 mock、假客户端或假服务替代真实模型调用。
 - 不依赖真实网络和 API 额度。
-- 覆盖 API 调用参数、结构化输出、有限重试、鉴权和统一错误映射。
+- 覆盖 API 调用参数、结构化输出、有限重试、鉴权、统一错误映射、工具注册、工具参数校验、超时、日志脱敏和单次工具编排。
+- 使用 fake client、fake service 和 fake handler 替代真实模型、数据库或外部服务。
 
 当前测试范围：
 
@@ -654,6 +966,17 @@ JD 空值、纯空白、超长 422
 JD 提取成功响应
 StructuredOutputError → 502
 LLMServiceError → 503
+chat_with_tools 文本与工具调用映射
+一个和多个工具调用的稳定数据结构
+空白模型响应拒绝
+简历首次成功与校验失败重试
+简历空响应重试和 StructuredOutputError
+证据中英文匹配、阈值过滤、排序和空证据
+匹配三态评估与 summary 一致性
+工具注册表重复名和未知工具拒绝
+四个 JobFit 工具参数、结果和描述
+工具超时、异常脱敏和日志不记录参数值
+单次 Function Calling 消息顺序、tool_call_id 和 Usage 汇总
 ```
 
 测试不能替代真实模型 smoke test。
@@ -666,35 +989,164 @@ LLMServiceError → 503
 - 网络是否可达。
 - JSON 模式参数是否被兼容接口支持。
 - SSE 经过网络和代理后是否正常。
+- 模型是否会正确选择四个 JobFit 工具。
+- 模型工具参数是否保持原始输入。
+- 工具结果返回后，模型是否保留“证据不足”的不确定性。
 
 ---
 
 # 十一、当前限制与后续依赖
 
+当前已经具备：
+
+- 四个真实工具和工具注册机制
+- 单次 Function Calling 往返
+- 关键词证据检索基线
+- 三态证据充分性评估
+
 还没有实现：
 
-- 真实用户登录
-- 数据库
+- 真实用户登录和数据库身份体系
 - 简历管理和版本控制
 - PDF 解析
-- 岗位 JD 管理
-- 简历结构化提取
-- 结构化提取结果持久化
-- Function Calling
-- ReAct 循环
-- 会话状态
-- RAG 与证据检索
-- 匹配报告
-- 调用日志
-- Token 成本和延迟持续统计
-- 评估
-- 公网部署
+- 岗位 JD 与结构化结果持久化
+- ReAct 多轮循环
+- 会话状态和任务恢复
+- Embedding、向量检索和重排
+- `get_resume_profile` 和 `save_match_report` 的数据库实现
+- 匹配报告和差距分析完整闭环
+- 工具调用记录的数据库持久化
+- 包含内层工具模型调用的统一 Token 成本统计
+- 评估数据集和公网部署
 
 这些功能将在后续 STEP 按依赖顺序实现，不删除已有能力。
 
 ---
 
-# 十二、部署节奏
+# 十二、各功能完整链路
+
+本节按层记录每个功能的完整链路，避免只描述“实现了什么”，而忽略数据如何经过各层。
+
+## 1. 一次 Function Calling 往返
+
+```text
+用户消息
+→ run_tool_calling_once()
+→ registry.openai_definitions()
+→ chat_with_tools()
+→ 外层模型返回 content 或 tool_calls
+→ 无 tool_calls：直接返回文本
+→ 有 tool_calls：解析 arguments
+→ execute_tool()
+→ ToolRegistry 按名称白名单查找
+→ Pydantic 校验参数
+→ 注入 ToolContext.current_user
+→ asyncio.wait_for() 执行 handler
+→ 工具结果转成 role=tool 消息
+→ assistant tool_calls 与 tool 消息加入历史
+→ chat() 第二次调用模型
+→ 合并外层 Usage
+→ 返回 ToolCallingResult
+```
+
+## 2. 岗位 JD 提取
+
+HTTP：
+
+```text
+客户端
+→ POST /api/jobs/extract
+→ Bearer 鉴权
+→ JobExtractionRequest 校验
+→ extract_job()
+→ Prompt + JobExtraction JSON Schema
+→ chat_json()
+→ DeepSeek JSON object 模式
+→ Pydantic 校验
+→ 空响应/校验失败最多反馈重试一次
+→ StructuredOutputError 或 JobExtraction
+→ success_response
+→ 客户端
+```
+
+工具：
+
+```text
+外层模型
+→ extract_job_requirements
+→ 工具参数校验 job_description
+→ handler 调用 extract_job()
+→ JobExtraction.model_dump(mode="json")
+→ 工具结果返回外层模型
+```
+
+## 3. 简历分段提取
+
+```text
+简历原文
+→ extract_resume_sections()
+→ 空值和 50000 字符边界校验
+→ Prompt + ResumeExtraction JSON Schema
+→ chat_json()
+→ DeepSeek 返回 JSON
+→ Pydantic 校验 ResumeExtraction
+→ 空响应/校验失败最多反馈重试一次
+→ 保留原文的 ResumeSection 列表
+→ 工具层转为 JSON 字典
+```
+
+## 4. 简历证据检索
+
+```text
+岗位要求列表 + 简历分段列表
+→ EvidenceSearchRequest 校验
+→ 每条 requirement 单独检索
+→ 英文 token、中文整串和双字 n-gram
+→ title + content 匹配评分
+→ 过滤低于最低阈值的弱证据
+→ 按 score 降序、原始顺序稳定排序
+→ 截取每条要求最多 3 条证据
+→ RequirementEvidence 列表
+→ EvidenceSearchResult
+```
+
+没有命中时保留空 evidence，不借用其他要求的证据，也不生成原文。
+
+## 5. 要求匹配评估
+
+```text
+EvidenceSearchResult
+→ 逐条读取 RequirementEvidence
+→ evidence 为空：insufficient_evidence
+→ 最高分 >= 0.6：strong_match
+→ 有证据但低于 0.6：partial_match
+→ 保留全部 EvidenceItem
+→ 汇总三种状态数量
+→ MatchAssessmentResult
+```
+
+该结果只表达当前证据充分性，不表达候选人真实能力结论。
+
+## 6. 工具执行边界
+
+```text
+模型 tool_calls
+→ tool_name 白名单查询
+→ arguments JSON 对象检查
+→ ToolSpec.args_model Pydantic 校验
+→ ToolContext 注入当前用户
+→ asyncio.wait_for(handler, 30 秒)
+→ handler 返回 JSON 字典
+→ json.dumps 可序列化检查
+→ 统一 ok/result 或 ok/error
+→ 安全日志
+```
+
+日志只包含工具名、用户 ID、参数键、状态和耗时。
+
+---
+
+# 十三、部署节奏
 
 采用“持续保持可部署、分阶段公网验证”的策略。
 
@@ -708,6 +1160,14 @@ STEP 08：部署带 RAG 的作品集版本
 STEP 11：LangGraph 工作流完成后更新线上版本
 STEP 12：生产化、安全、监控和性能优化
 ```
+
+本阶段 Docker 状态：
+
+- 没有新增第三方依赖。
+- 没有新增端口。
+- 没有新增数据库、Redis、向量库或其他容器。
+- `Dockerfile` 和 `docker-compose.yml` 无需修改。
+- 公网部署仍延期到 STEP 06。
 
 为什么 STEP 06 首次公开部署：
 
@@ -730,7 +1190,7 @@ STEP 12：生产化、安全、监控和性能优化
 
 ---
 
-# 十三、STEP 变更记录
+# 十四、STEP 变更记录
 
 ## STEP 01：Python 基础
 
@@ -805,9 +1265,46 @@ STEP 12：生产化、安全、监控和性能优化
 - 数据库持久化、简历结构化提取和结构化版本保存按依赖顺序在后续 STEP 实现。
 - 公网部署仍延期到 STEP 06。
 
+## STEP 05：Function Calling 与工具注册
+
+完成：
+
+- 学习 OpenAI 兼容 Function Calling 的消息闭环。
+- 新增 `chat_with_tools()`，稳定转换模型文本或 `ToolCall`。
+- 新增 `ToolContext`、`ToolSpec` 和 `ToolRegistry`。
+- 新增统一 `execute_tool()`，负责参数校验、用户注入、超时和异常脱敏。
+- 注册四个真实工具：
+  - `extract_job_requirements`
+  - `extract_resume_sections`
+  - `search_resume_evidence`
+  - `assess_requirement_match`
+- 新增简历分段提取服务。
+- 新增关键词证据检索基线。
+- 新增三态要求匹配评估。
+- 新增单次 Function Calling 编排，最多调用模型两次。
+- 工具调用日志不记录参数值和结果正文。
+- 增加真实 DeepSeek 手工验收脚本。
+- 四个工具均完成真实模型调用验收。
+
+为什么这样设计：
+
+- 模型只负责提出工具调用，后端负责校验、权限上下文和执行。
+- 工具 Schema 和 Pydantic 参数模型来自同一契约，避免漂移。
+- 工具结果必须先变成 JSON 兼容字典，才能安全进入模型消息。
+- 没有证据时返回 `insufficient_evidence`，不伪造“明确不匹配”。
+- 当前关键词检索是可测试基线，STEP 08 再升级为混合检索和 RAG。
+
+暂缓：
+
+- `get_resume_profile` 和 `save_match_report` 依赖数据库、用户归属和事务，延期到 STEP 07。
+- 工具尚未通过 HTTP 路由暴露，业务完整接口在 STEP 06 实现。
+- 内层模型调用的 Usage 尚未合并到外层统计。
+- 工具调用日志尚未持久化。
+- 公网部署仍延期到 STEP 06。
+
 ---
 
-# 十四、每个大 STEP 完成后的维护清单
+# 十五、每个大 STEP 完成后的维护清单
 
 每完成一个大 STEP，必须更新本文档：
 
@@ -825,6 +1322,7 @@ STEP 12：生产化、安全、监控和性能优化
 12. 更新部署状态。
 13. 在“STEP 变更记录”中增加本次完成了什么、为什么这样做。
 14. 更新 README 和 HANDOFF 中的当前状态。
+15. 新增功能时必须补充该功能的完整数据链路。
 
 文档原则：
 
@@ -839,7 +1337,7 @@ STEP 12：生产化、安全、监控和性能优化
 
 ---
 
-# 十五、快速恢复上下文
+# 十六、快速恢复上下文
 
 如果几周后重新进入项目，按以下顺序阅读：
 
@@ -847,13 +1345,17 @@ STEP 12：生产化、安全、监控和性能优化
 1. README.md
 2. docs/PROJECT_GUIDE.md
 3. app/main.py
-4. app/routers/jobs.py
-5. app/services/extraction.py
-6. app/services/llm.py
-7. app/schemas/extraction.py
-8. tests/test_job_extraction_api.py
-9. tests/test_extraction_service.py
-10. tests/test_llm_service.py
+4. app/tools/base.py
+5. app/tools/registry.py
+6. app/tools/executor.py
+7. app/tools/jobfit.py
+8. app/services/tool_calling.py
+9. app/services/llm.py
+10. app/services/resume_extraction.py
+11. app/services/evidence_search.py
+12. app/services/matching.py
+13. tests/test_jobfit_tools.py
+14. tests/test_tool_calling_service.py
 ```
 
 重点关注：
@@ -867,7 +1369,7 @@ STEP 12：生产化、安全、监控和性能优化
 
 ---
 
-# 十六、常用命令
+# 十七、常用命令
 
 安装运行依赖：
 
