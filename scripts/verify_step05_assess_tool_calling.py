@@ -1,3 +1,5 @@
+# 手工验收匹配评估工具的真实模型调用链路。
+
 import asyncio
 import json
 import sys
@@ -51,10 +53,12 @@ FORBIDDEN_ANSWER_PHRASES = [
 ]
 
 
+# 统一输出验收失败原因并终止脚本。
 def fail(message: str) -> None:
     raise SystemExit(message)
 
 
+# 真实调用匹配评估工具并校验三态结果、summary 和最终回答。
 async def main() -> None:
     current_user = CurrentUser(
         id=1,

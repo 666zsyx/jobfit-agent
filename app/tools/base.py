@@ -1,3 +1,5 @@
+# 定义工具上下文、工具描述和参数契约。
+
 import re
 from collections.abc import Awaitable, Callable
 from typing import Any
@@ -10,6 +12,7 @@ from app.schemas.auth import CurrentUser
 TOOL_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 
 
+# 保存工具执行所需的后端可信上下文。
 class ToolContext(BaseModel):
     current_user: CurrentUser
 
@@ -20,6 +23,7 @@ ToolHandler = Callable[
 ]
 
 
+# 把工具名、说明、参数模型和异步处理函数绑定为一个契约。
 class ToolSpec:
     def __init__(
         self,

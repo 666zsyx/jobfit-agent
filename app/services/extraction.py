@@ -1,3 +1,5 @@
+# 通过 Prompt、JSON Schema 和 Pydantic 提取岗位 JD。
+
 import json
 
 from pydantic import ValidationError
@@ -13,6 +15,7 @@ JOB_SCHEMA_TEXT = json.dumps(
 )
 
 
+# 构造岗位 JD 提取的系统消息和用户消息。
 def build_job_extraction_messages(
     job_description: str,
 ) -> list[dict[str, str]]:
@@ -45,6 +48,7 @@ def build_job_extraction_messages(
     ]
 
 
+# 把 Pydantic 校验错误压缩成下一轮可用的反馈。
 def _build_validation_feedback(
     exc: ValidationError,
 ) -> str:
@@ -66,6 +70,7 @@ def _build_validation_feedback(
     )
 
 
+# 调用模型提取岗位 JD，并对空响应和结构错误执行有限重试。
 async def extract_job(
     job_description: str,
     max_attempts: int = 2,

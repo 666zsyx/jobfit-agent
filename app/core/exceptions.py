@@ -1,3 +1,5 @@
+# 定义项目异常体系，并把异常转换为统一 HTTP 响应。
+
 from fastapi import Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
@@ -5,6 +7,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
+# 项目业务异常基类，统一携带消息和 HTTP 状态码。
 class AppError(Exception):
     def __init__(
         self,
@@ -16,6 +19,7 @@ class AppError(Exception):
         super().__init__(message)
 
 
+# 表示上游 LLM 认证、限流、超时或连接失败。
 class LLMServiceError(AppError):
     def __init__(
         self,
@@ -25,6 +29,7 @@ class LLMServiceError(AppError):
         super().__init__(message=message, status_code=status_code)
 
 
+# 表示模型调用成功，但结构化输出最终校验失败。
 class StructuredOutputError(AppError):
     def __init__(
         self,
@@ -34,6 +39,7 @@ class StructuredOutputError(AppError):
         super().__init__(message=message, status_code=status_code)
 
 
+# 把项目业务异常转换为统一错误响应。
 async def app_error_handler(request: Request, exc: AppError):
     return JSONResponse(
         status_code=exc.status_code,
@@ -45,6 +51,7 @@ async def app_error_handler(request: Request, exc: AppError):
     )
 
 
+# 把 FastAPI/Starlette HTTP 异常转换为统一错误响应。
 async def http_exception_handler(
     request: Request,
     exc: StarletteHTTPException,
@@ -59,6 +66,7 @@ async def http_exception_handler(
     )
 
 
+# 把请求参数校验错误转换为统一的 422 响应。
 async def validation_exception_handler(
     request: Request,
     exc: RequestValidationError,

@@ -1,3 +1,5 @@
+# 验证普通聊天和 JSON 模式的 LLM 服务行为。
+
 import asyncio
 from types import SimpleNamespace
 

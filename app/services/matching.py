@@ -1,3 +1,5 @@
+# 根据检索证据评估要求的证据充分性。
+
 from app.schemas.evidence import (
     EvidenceSearchResult,
     RequirementEvidence,
@@ -12,6 +14,7 @@ from app.schemas.matching import (
 STRONG_MATCH_SCORE = 0.6
 
 
+# 根据单条要求是否存在证据及其最高分决定三态结果。
 def _assess_one_requirement(
     match: RequirementEvidence,
 ) -> RequirementAssessment:
@@ -47,6 +50,7 @@ def _assess_one_requirement(
     )
 
 
+# 评估全部岗位要求，并生成状态汇总。
 def assess_requirement_match(
     search_result: EvidenceSearchResult,
 ) -> MatchAssessmentResult:

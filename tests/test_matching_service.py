@@ -1,3 +1,5 @@
+# 验证三态证据评估、汇总和 Schema 约束。
+
 import pytest
 from pydantic import ValidationError
 

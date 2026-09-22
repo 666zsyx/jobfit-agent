@@ -1,3 +1,5 @@
+# 提供当前演示环境下的 Bearer 鉴权依赖。
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
@@ -6,6 +8,7 @@ from app.schemas.auth import CurrentUser
 security = HTTPBearer(auto_error=False)
 
 
+# 校验演示 Bearer Token，并返回后端可信的当前用户。
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
 ) -> CurrentUser:

@@ -1,3 +1,5 @@
+# 统一校验、限时、执行和记录工具调用。
+
 import asyncio
 import json
 import logging
@@ -14,6 +16,7 @@ logger = logging.getLogger(__name__)
 TOOL_TIMEOUT_SECONDS = 30.0
 
 
+# 只提取参数字段名，用于安全日志而不暴露参数值。
 def _argument_keys(arguments: object) -> str:
     if not isinstance(arguments, dict):
         return "[]"
@@ -21,10 +24,12 @@ def _argument_keys(arguments: object) -> str:
     return str(sorted(str(key) for key in arguments.keys()))
 
 
+# 计算当前操作已经消耗的毫秒数。
 def _duration_ms(started_at: float) -> int:
     return round((perf_counter() - started_at) * 1000)
 
 
+# 按统一字段记录工具调用状态，避免输出敏感正文。
 def _log_tool_call(
     level: int,
     *,
@@ -50,6 +55,7 @@ def _log_tool_call(
     logger.log(level, " ".join(fields))
 
 
+# 校验工具名和参数，注入用户上下文，限时执行并返回安全结果。
 async def execute_tool(
     registry: ToolRegistry,
     tool_name: str,

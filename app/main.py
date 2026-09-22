@@ -1,3 +1,5 @@
+# 创建 FastAPI 应用并注册路由与全局异常处理。
+
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException

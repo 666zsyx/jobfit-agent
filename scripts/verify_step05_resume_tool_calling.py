@@ -1,3 +1,5 @@
+# 手工验收简历分段工具的真实模型调用链路。
+
 import asyncio
 import json
 import sys
@@ -34,10 +36,12 @@ REQUIRED_SECTION_KEYS = (
 )
 
 
+# 统一输出验收失败原因并终止脚本。
 def fail(message: str) -> None:
     raise SystemExit(message)
 
 
+# 真实调用简历分段工具并校验结构、原文和最终回答。
 async def main() -> None:
     current_user = CurrentUser(
         id=1,

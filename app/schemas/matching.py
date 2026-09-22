@@ -1,3 +1,5 @@
+# 定义岗位要求证据充分性评估的数据结构。
+
 from typing import Literal
 
 from pydantic import (
@@ -23,6 +25,7 @@ MatchStatus = Literal[
 ]
 
 
+# 表示单条岗位要求的证据充分性状态。
 class RequirementAssessment(BaseModel):
     """单条岗位要求的证据充分性评估。"""
 
@@ -56,6 +59,7 @@ class RequirementAssessment(BaseModel):
         return value
 
 
+# 汇总强匹配、部分匹配和证据不足数量。
 class MatchSummary(BaseModel):
     """匹配评估结果的汇总统计。"""
 
@@ -75,6 +79,7 @@ class MatchSummary(BaseModel):
     )
 
 
+# 表示完整的三态匹配评估结果。
 class MatchAssessmentResult(BaseModel):
     """完整的岗位要求匹配评估结果。"""
 

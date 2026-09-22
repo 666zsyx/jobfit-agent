@@ -1,3 +1,5 @@
+# 验证岗位 JD 提取 Prompt、重试和异常边界。
+
 import asyncio
 
 import pytest

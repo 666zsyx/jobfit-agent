@@ -1,3 +1,5 @@
+# 验证工具注册、执行、超时、日志和结果边界。
+
 import asyncio
 
 import pytest

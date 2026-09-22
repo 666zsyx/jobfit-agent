@@ -1,15 +1,19 @@
+# 读取并校验应用和 LLM 连接配置。
+
 import os
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
 load_dotenv()
 
+# 应用运行所需的配置字段。
 class Settings(BaseModel):
     app_env: str
     llm_api_key: str
     llm_base_url: str
     llm_model: str
 
+# 从环境变量读取配置，缺少 LLM 关键配置时立即失败。
 def get_settings() -> Settings:
     app_env = os.getenv("APP_ENV","development")
     api_key = os.getenv("LLM_API_KEY")

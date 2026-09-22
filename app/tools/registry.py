@@ -1,6 +1,9 @@
+# 提供工具白名单注册和 OpenAI 工具定义导出。
+
 from app.tools.base import ToolSpec
 
 
+# 维护工具白名单，并导出模型可识别的工具定义。
 class ToolRegistry:
     def __init__(self) -> None:
         self._tools: dict[str, ToolSpec] = {}

@@ -1,3 +1,5 @@
+# 编排一次完整但不循环的 Function Calling 往返。
+
 import json
 from time import perf_counter
 from typing import Any
@@ -11,6 +13,7 @@ from app.services.llm import chat, chat_with_tools
 from app.tools import ToolContext, ToolRegistry, execute_tool
 
 
+# 把模型工具提议还原成下一次调用所需的 assistant 消息。
 # 把模型返回的工具调用转换成 assistant 消息
 def _build_assistant_tool_message(
     result: LLMWithToolsResult,
@@ -32,6 +35,7 @@ def _build_assistant_tool_message(
     }
 
 
+# 把后端执行结果转换成携带 tool_call_id 的 tool 消息。
 # 把工具执行结果转换成 tool 消息
 def _build_tool_message(
     tool_call_id: str,
@@ -45,6 +49,7 @@ def _build_tool_message(
     }
 
 
+# 汇总外层两次模型调用的 Token Usage。
 # 汇总第一次和第二次模型调用的 Token Usage
 def _merge_usage(
     first: TokenUsage,
@@ -59,6 +64,7 @@ def _merge_usage(
     )
 
 
+# 执行一次完整 Function Calling 往返，不实现 ReAct 循环。
 # 只执行一次 Function Calling 往返，不实现 ReAct 循环
 async def run_tool_calling_once(
     messages: list[dict[str, Any]],

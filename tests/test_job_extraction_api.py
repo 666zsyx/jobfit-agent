@@ -1,3 +1,5 @@
+# 验证岗位 JD 提取 HTTP 接口和统一异常响应。
+
 import pytest
 
 from app.core.exceptions import LLMServiceError, StructuredOutputError
