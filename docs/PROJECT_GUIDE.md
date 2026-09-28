@@ -39,13 +39,24 @@ STEP 02：完成
 STEP 03：完成，部署按下述新节奏延期
 STEP 04：功能、测试、文档、Git 和 tag 完成
 STEP 05：功能、测试、真实验收、文档、Git、远程 push 和 tag 全部完成
-STEP 06：功能、测试、文档、本地 HTTP 部署就绪和真实模型验收已完成，待 Git 闭环
+STEP 06：完成；功能、测试、真实模型、HTTP、部署就绪、文档和本地 Git 闭环均已完成
 ```
 
 当前代码分支：
 
 ```text
-feature/step-06-react-loop
+main
+```
+
+STEP 06 对应版本：
+
+```text
+feature commits:
+  da124b7 feat: add react agent loop and match api
+  4c2033b test: cover react agent loop and api
+  713834b docs: document STEP 06 react agent
+merge commit: a989091e3756a15ec5c800a6e253a07e9d8b69ca
+tag: step-06-react-loop
 ```
 
 STEP 04 对应版本：
