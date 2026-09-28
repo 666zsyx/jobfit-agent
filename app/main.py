@@ -14,6 +14,7 @@ from app.routers.health import router as health_router
 from app.routers.users import router as users_router
 from app.routers.chat import router as chat_router
 from app.routers.jobs import router as jobs_router
+from app.routers.agent import router as agent_router
 
 app = FastAPI(title="JobFit Agent")
 
@@ -25,3 +26,4 @@ app.include_router(health_router)
 app.include_router(users_router)
 app.include_router(chat_router)
 app.include_router(jobs_router)
+app.include_router(agent_router)
