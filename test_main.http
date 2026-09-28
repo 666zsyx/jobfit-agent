@@ -59,3 +59,16 @@ Authorization: Bearer {{token}}
 }
 
 ###
+
+### JobFit ReAct 岗位匹配
+POST {{baseUrl}}/api/agent/match
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "job_description": "岗位：Python 后端实习生。职责：使用 FastAPI 开发后端接口，参与 Agent 应用开发。要求：熟悉 Python；了解 Pydantic 和异步编程；有 LLM 应用开发经验者优先。",
+  "resume_text": "姓名：张三。技能：Python、FastAPI、Pydantic、异步编程基础。项目：使用 FastAPI 完成课程项目，并调用大模型 API 实现多轮问答。"
+}
+
+###

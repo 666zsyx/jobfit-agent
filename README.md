@@ -6,7 +6,7 @@
 
 ## 当前阶段
 
-STEP 05：学习 Function Calling 与工具注册，并接入 JobFit Agent。
+STEP 06：手写最小 ReAct 循环并接入 JobFit Agent。
 
 当前已经支持：
 
@@ -15,6 +15,7 @@ STEP 05：学习 Function Calling 与工具注册，并接入 JobFit Agent。
 - `POST /api/chat`：非流式聊天，返回答案、Token Usage 和耗时
 - `POST /api/chat/stream`：SSE 流式聊天，返回内容事件、Usage 事件和结束标记
 - `POST /api/jobs/extract`：从岗位 JD 中结构化提取岗位职责、必备技能和加分项
+- `POST /api/agent/match`：运行受控的 JobFit ReAct 岗位匹配分析。
 
 岗位提取接口使用 Prompt、JSON Schema、JSON 模式和 Pydantic 双重校验。模型调用成功但输出为空或不符合 Schema 时，最多尝试两次；认证、限流、超时和网络错误不会进入结构重试。
 
@@ -25,7 +26,9 @@ STEP 05 已增加工具注册与单次 Function Calling 编排基础。当前注
 - `search_resume_evidence`：按岗位要求检索简历分段中的原文证据。
 - `assess_requirement_match`：根据证据评估 `strong_match`、`partial_match` 或 `insufficient_evidence`。
 
-外层编排的一次工具往返最多调用模型两次；工具 handler 内部可能再次调用模型，例如岗位或简历结构化提取，当前内层模型 Usage 尚未合并到外层统计。工具参数统一使用 Pydantic 校验，用户身份由后端 `ToolContext` 注入，工具 handler 最多执行 30 秒；调用日志只记录工具名、用户 ID、参数键、状态和耗时，不记录 JD、简历或报告正文。当前工具尚未通过 HTTP 路由暴露，也没有数据库持久化工具。
+STEP 06 新增 `app/services/react_agent.py` 和 `POST /api/agent/match`。ReAct 服务最多执行 8 轮模型决策；模型每轮可以选择调用工具或给出最终回答。每次工具调用都会写入 `trace`，所有外层模型调用的 Token Usage 会累计，达到最大步数时返回 `max_steps_reached`。
+
+外层编排的一次工具往返最多调用模型两次；工具 handler 内部可能再次调用模型，例如岗位或简历结构化提取，当前内层模型 Usage 尚未合并到外层统计。工具参数统一使用 Pydantic 校验，用户身份由后端 `ToolContext` 注入，工具 handler 最多执行 30 秒；调用日志只记录工具名、用户 ID、参数键、状态和耗时，不记录 JD、简历或报告正文。当前有数据库持久化工具等待 STEP 07 实现。
 
 当前鉴权仍为演示版本：
 
@@ -33,7 +36,7 @@ STEP 05 已增加工具注册与单次 Function Calling 编排基础。当前注
 Authorization: Bearer demo-token
 ```
 
-真实用户系统将在后续阶段实现。公网部署仍延期到 STEP 06，本阶段不新增公开环境。
+真实用户系统将在后续阶段实现。STEP 06 只做部署就绪检查，不新增公开环境；STEP 07 后建立私有 staging，STEP 12 后正式公网部署。
 
 ## 环境准备
 
@@ -221,6 +224,51 @@ Content-Type: application/json
 - `504`：模型调用超时。
 - 上游认证和网络异常不会伪装成空提取结果。
 
+## JobFit ReAct 岗位匹配
+
+请求：
+
+```http
+POST /api/agent/match
+Authorization: Bearer demo-token
+Content-Type: application/json
+```
+
+请求体：
+
+```json
+{
+  "job_description": "负责 FastAPI 后端开发，要求熟悉 Python。",
+  "resume_text": "熟悉 Python 和 FastAPI，完成过课程项目。"
+}
+```
+
+说明：
+
+- `job_description` 最大长度为 20000 个字符。
+- `resume_text` 最大长度为 50000 个字符。
+- 两个字段都会去掉首尾空白，空值和纯空白返回 `422`。
+- 客户端不能传入 `max_steps`，轮数上限由后端控制，默认是 8。
+- 模型需要依次调用岗位提取、简历分段、证据检索和匹配评估工具。
+
+成功响应包含：
+
+```text
+answer        最终匹配回答
+status        completed 或 max_steps_reached
+steps         实际执行的模型决策轮数
+max_steps     后端允许的最大轮数
+trace         每次工具调用的参数和结果
+usage         外层模型调用累计 Token Usage
+latency_ms    整个 ReAct 循环耗时
+```
+
+主要错误：
+
+- `401`：没有 Bearer Token 或 Token 无效。
+- `422`：JD/简历为空、超长，或客户端传入额外字段。
+- `5xx`：外层模型服务异常由统一异常处理器映射。
+
 ## 自动化测试
 
 安装测试依赖：
@@ -235,7 +283,16 @@ Content-Type: application/json
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-测试使用 mock 或假客户端替代真实模型调用，因此不会消耗 DeepSeek API 额度。
+测试使用 mock 或假客户端替代真实模型调用，因此不会消耗 DeepSeek API 额度。ReAct 服务测试位于 `tests/test_react_agent_service.py`，接口测试位于 `tests/test_react_agent_api.py`。
+
+真实模型手工验收：
+
+```powershell
+cd D:\agentstudy\jobfit_agent
+.\.venv\Scripts\python.exe .\scripts\verify_step06_react_agent.py
+```
+
+该脚本会真实调用 DeepSeek，验收岗位提取、简历分段、证据检索、匹配评估、trace 和最终回答。
 
 ## Docker
 
@@ -268,3 +325,5 @@ docker compose down
 ```text
 http://127.0.0.1:8000
 ```
+
+STEP 06 只验证部署就绪，不公开部署。当前机器没有安装 Docker，实际镜像构建和私有 staging 放到 STEP 07；正式公网部署放到 STEP 12。

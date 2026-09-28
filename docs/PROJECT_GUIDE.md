@@ -1,6 +1,6 @@
 # JobFit Agent 项目全景与维护文档
 
-> 最后更新：2026-09-22
+> 最后更新：2026-09-28
 >
 > 适用对象：未来的项目维护者、面试准备者、协作者和几周后重新阅读代码的自己。
 >
@@ -27,7 +27,7 @@ JobFit Agent 是一个基于 RAG 和工具调用的可解释岗位匹配与差�
 → 报告保存
 ```
 
-当前项目已完成模型 API、聊天接口、结构化提取、工具注册、简历分段、关键词证据检索、三态匹配评估以及单次 Function Calling 编排，尚未实现持久化、最小 ReAct 循环和完整岗位匹配报告。
+当前项目已完成模型 API、聊天接口、结构化提取、工具注册、简历分段、关键词证据检索、三态匹配评估、单次 Function Calling 编排、最小 ReAct 循环、HTTP 接入、自动化测试、真实模型验收、文档和部署就绪检查，待 Git 收尾；持久化和完整岗位匹配报告将在后续 STEP 实现。
 
 ---
 
@@ -36,15 +36,16 @@ JobFit Agent 是一个基于 RAG 和工具调用的可解释岗位匹配与差�
 ```text
 STEP 01：完成
 STEP 02：完成
-STEP 03：完成，公网部署延期到 STEP 06
+STEP 03：完成，部署按下述新节奏延期
 STEP 04：功能、测试、文档、Git 和 tag 完成
 STEP 05：功能、测试、真实验收、文档、Git、远程 push 和 tag 全部完成
+STEP 06：功能、测试、文档、本地 HTTP 部署就绪和真实模型验收已完成，待 Git 闭环
 ```
 
 当前代码分支：
 
 ```text
-feature/step-05-tool-calling
+feature/step-06-react-loop
 ```
 
 STEP 04 对应版本：
@@ -54,7 +55,7 @@ tag: step-04-structured-output
 merge commit: 088cf0a17a9b1c563d10c7f0fbad321854ebbc0c
 ```
 
-STEP 04 的功能、测试、文档、Git 合并和 tag 均已完成。STEP 05 已完成四个真实工具、统一工具执行边界、超时与安全日志，并通过真实 DeepSeek 手工验收；本地 merge、远程 push 和 tag 均已完成。公网部署仍延期到 STEP 06。
+STEP 04 的功能、测试、文档、Git 合并和 tag 均已完成。STEP 05 已完成四个真实工具、统一工具执行边界、超时与安全日志，并通过真实 DeepSeek 手工验收；本地 merge、远程 push 和 tag 均已完成。部署计划已调整：STEP 06 只做部署就绪检查，不公开部署；STEP 07 后建立私有 staging；STEP 12 后正式公网部署。
 
 STEP 03 对应版本：
 
@@ -65,9 +66,10 @@ commit: 6d32d56
 
 公网部署延期原因：
 
-- 当前仍使用固定 `demo-token`。
-- 该 Token 出现在源码和文档中，直接公网部署有 API 余额被滥用风险。
-- STEP 06 完成后项目才具备结构化输出、工具调用和最小 ReAct 循环，更适合作为第一版公开测试环境。
+- 当前仍使用固定 `demo-token`，并且没有真实登录、限流、配额和并发保护。
+- 一次 ReAct 请求可能触发多轮模型和嵌套工具调用，直接公开有 API 余额被滥用风险。
+- STEP 06 只验证项目能够部署和启动，不向公网开放。
+- STEP 07 后建立私有 staging，STEP 12 后完成正式公网部署。
 
 ---
 
@@ -302,7 +304,7 @@ insufficient_evidence
 
 当前规则使用最高证据分与强匹配阈值判断，并汇总各状态数量。没有输出 `not_match`，因为关键词证据不足不能证明候选人明确不满足要求。
 
-## 10. 单次 Function Calling 编排
+## 10. 单次 Function Calling 编排（STEP 05 基线）
 
 编排服务：
 
@@ -319,9 +321,53 @@ app/services/tool_calling.py
 → 第二次模型调用生成最终回答
 ```
 
-模型直接回答时不执行工具，也只调用一次模型。当前尚未实现 ReAct 循环和多轮工具调用。
+模型直接回答时不执行工具，也只调用一次模型。该服务保留为 STEP 05 的单次编排基线；多轮 ReAct 循环已在 STEP 06 的服务层中实现。
 
-## 11. 四个真实 JobFit 工具
+## 11. 最小 ReAct 循环（STEP 06）
+
+服务入口：
+
+```text
+app/services/react_agent.py
+```
+
+HTTP 接口：
+
+```http
+POST /api/agent/match
+```
+
+输入：
+
+```text
+job_description
+resume_text
+```
+
+处理流程：
+
+```text
+system/user 消息
+→ chat_with_tools()
+→ 模型返回 tool_calls 或最终回答
+→ 有 tool_calls 时执行 execute_tool()
+→ assistant 消息写入历史
+→ tool 结果写入历史
+→ 继续下一轮模型决策
+→ 无 tool_calls 时返回最终回答
+→ 达到 max_steps 时返回 max_steps_reached
+```
+
+核心边界：
+
+- `max_steps` 默认 8，不接受客户端传入。
+- 每轮模型调用都携带完整 tools 定义。
+- `arguments` 先经过 JSON 解析，再由 `execute_tool()` 做 Pydantic 校验。
+- 每个工具结果都写入 `trace`，并转换成 role=tool 消息。
+- Usage 累计所有外层模型调用，但不包含工具内部嵌套模型调用。
+- 参数解析失败、未知工具和工具异常都会返回安全 Observation，不直接暴露内部异常。
+
+## 12. 四个真实 JobFit 工具
 
 ```text
 extract_job_requirements
@@ -525,7 +571,8 @@ jobfit_agent/
 │   │   ├── health.py
 │   │   ├── users.py
 │   │   ├── chat.py
-│   │   └── jobs.py
+│   │   ├── jobs.py
+│   │   └── agent.py
 │   ├── schemas/
 │   │   ├── auth.py
 │   │   ├── chat.py
@@ -533,14 +580,16 @@ jobfit_agent/
 │   │   ├── resume.py
 │   │   ├── evidence.py
 │   │   ├── matching.py
-│   │   └── tool_calling.py
+│   │   ├── tool_calling.py
+│   │   └── react_agent.py
 │   ├── services/
 │   │   ├── llm.py
 │   │   ├── extraction.py
 │   │   ├── resume_extraction.py
 │   │   ├── evidence_search.py
 │   │   ├── matching.py
-│   │   └── tool_calling.py
+│   │   ├── tool_calling.py
+│   │   └── react_agent.py
 │   └── tools/
 │       ├── base.py
 │       ├── registry.py
@@ -550,7 +599,8 @@ jobfit_agent/
 │   ├── verify_step05_tool_calling.py
 │   ├── verify_step05_resume_tool_calling.py
 │   ├── verify_step05_evidence_tool_calling.py
-│   └── verify_step05_assess_tool_calling.py
+│   ├── verify_step05_assess_tool_calling.py
+│   └── verify_step06_react_agent.py
 ├── tests/
 │   ├── conftest.py
 │   ├── test_chat_api.py
@@ -563,7 +613,9 @@ jobfit_agent/
 │   ├── test_matching_service.py
 │   ├── test_tool_registry.py
 │   ├── test_jobfit_tools.py
-│   └── test_tool_calling_service.py
+│   ├── test_tool_calling_service.py
+│   ├── test_react_agent_service.py
+│   └── test_react_agent_api.py
 ├── docs/
 │   └── PROJECT_GUIDE.md
 ├── Dockerfile
@@ -585,7 +637,8 @@ jobfit_agent/
 
 - 创建 FastAPI 应用。
 - 注册全局异常处理。
-- 注册 health、users、chat、jobs 路由。
+- 注册 health、users、chat、jobs、agent 路由。
+- 将 JobFit ReAct 匹配请求转发到服务层。
 
 ## `app/core/config.py`
 
@@ -779,6 +832,44 @@ LLMWithToolsResult
 - 检查工具名、参数、`tool_call_id`、结果结构和最终回答。
 - 手工验收脚本不进入 pytest，不自动消耗 API。
 
+## `app/routers/agent.py`
+
+- 暴露 `POST /api/agent/match`。
+- 依赖 `get_current_user` 完成 Bearer 鉴权。
+- 从可信 `CurrentUser` 构造 `ToolContext`。
+- 调用 `run_jobfit_agent()` 并返回统一成功响应。
+- 不接受客户端传入 `max_steps` 或用户身份字段。
+
+## `app/schemas/react_agent.py`
+
+- 定义 `JobFitAgentRequest`。
+- 定义 `ReactToolExecution` 和 `ReactAgentResult`。
+- 限制 JD 和简历长度，拒绝空值和额外字段。
+
+## `app/services/react_agent.py`
+
+- 定义 `run_react_loop()` 通用循环。
+- 构造 assistant/tool 消息。
+- 累计 Token Usage 和耗时。
+- 执行工具并记录 trace。
+- 提供 JobFit 消息构造和 `run_jobfit_agent()` 入口。
+
+## `scripts/verify_step06_react_agent.py`
+
+- 使用真实 DeepSeek 运行完整 JobFit ReAct 链路。
+- 校验四个工具调用、顺序、结果结构、最终三态回答、Usage 和 trace。
+- 只输出安全摘要，不打印完整简历参数和工具正文。
+
+## `tests/test_react_agent_service.py`
+
+- 验证直接回答、多轮工具调用、max_steps、非法 JSON 和未知工具。
+- 使用假 `chat_with_tools`，不访问真实模型。
+
+## `tests/test_react_agent_api.py`
+
+- 验证鉴权、请求清洗、长度限制、额外字段、成功响应和异常映射。
+- 替换路由中的 `run_jobfit_agent()`，不访问真实模型。
+
 ---
 
 # 七、请求数据流
@@ -834,6 +925,26 @@ LLMWithToolsResult
 → 返回 JSON
 ```
 
+## 4. ReAct 岗位匹配
+
+```text
+客户端
+→ POST /api/agent/match
+→ get_current_user 校验 Bearer Token
+→ FastAPI 校验 JobFitAgentRequest
+→ ToolContext(current_user=current_user)
+→ run_jobfit_agent()
+→ build_jobfit_react_messages()
+→ 循环调用 chat_with_tools()
+→ 模型返回 tool_calls 或最终回答
+→ execute_tool() 校验并执行注册工具
+→ assistant/tool 消息加入 messages
+→ ReactToolExecution 写入 trace
+→ 累计外层 Token Usage 和 latency_ms
+→ completed 或 max_steps_reached
+→ success_response()
+```
+
 ---
 
 # 八、错误处理设计
@@ -880,6 +991,16 @@ StructuredOutputError     → 502
 - 不把原始 DeepSeek SDK 异常或完整 Pydantic 错误返回给用户。
 - 调用失败和输出失败必须保持不同错误类型，避免把服务故障伪装成空提取结果。
 
+ReAct 循环错误边界：
+
+- 外层模型认证、限流、超时、连接和状态错误继续映射为 `LLMServiceError`。
+- 工具参数不是合法 JSON 时返回 `工具参数解析失败`。
+- 工具名不在白名单时返回 `工具未注册`。
+- 工具参数不符合 Pydantic 模型时返回 `工具参数校验失败`。
+- 工具 handler 抛出内部异常时只返回 `工具执行失败`，不暴露原始异常。
+- 业务不存在、证据不足等预期失败作为 Observation 返回模型。
+- 达到 `max_steps` 时停止调用模型并返回 `max_steps_reached`。
+
 ---
 
 # 九、安全设计
@@ -913,7 +1034,17 @@ StructuredOutputError     → 502
 - 没有公网访问保护。
 - 没有工具调用日志的数据库持久化和生产级审计。
 
-因此当前项目不适合作为公开生产服务，公网部署继续延期到 STEP 06。
+因此当前项目不适合作为公开生产服务。STEP 06 只做部署就绪检查，STEP 07 后建立私有 staging，STEP 12 后正式公网部署。
+
+ReAct 服务安全边界：
+
+- 用户身份只来自 Bearer 鉴权后的 `CurrentUser`，请求体不能传入 `user_id`。
+- 工具名必须存在于 `ToolRegistry` 白名单。
+- 工具参数必须经过 Pydantic 校验。
+- `max_steps` 由后端控制，客户端不能提高循环上限。
+- JD 和简历以数据边界标签传给模型，并明确不作为指令执行。
+- `trace` 只包含工具调用和 Observation，不记录模型隐藏思维链。
+- trace 中可能包含用户提交的 JD、简历和工具结果，不能未经脱敏直接写生产日志或发送给其他用户。
 
 ---
 
@@ -934,6 +1065,8 @@ tests/test_matching_service.py
 tests/test_tool_registry.py
 tests/test_jobfit_tools.py
 tests/test_tool_calling_service.py
+tests/test_react_agent_service.py
+tests/test_react_agent_api.py
 ```
 
 测试方式：
@@ -943,6 +1076,7 @@ tests/test_tool_calling_service.py
 - 不依赖真实网络和 API 额度。
 - 覆盖 API 调用参数、结构化输出、有限重试、鉴权、统一错误映射、工具注册、工具参数校验、超时、日志脱敏和单次工具编排。
 - 使用 fake client、fake service 和 fake handler 替代真实模型、数据库或外部服务。
+- ReAct 服务测试替换 `chat_with_tools()`，接口测试替换路由中的 `run_jobfit_agent()`。
 
 当前测试范围：
 
@@ -977,6 +1111,10 @@ chat_with_tools 文本与工具调用映射
 四个 JobFit 工具参数、结果和描述
 工具超时、异常脱敏和日志不记录参数值
 单次 Function Calling 消息顺序、tool_call_id 和 Usage 汇总
+ReAct 直接回答、多轮工具调用和消息历史
+ReAct max_steps 终止和非法参数拒绝
+ReAct 非法 JSON、未知工具和 Usage 累计
+ReAct HTTP 鉴权、请求清洗、长度限制和异常映射
 ```
 
 测试不能替代真实模型 smoke test。
@@ -992,6 +1130,8 @@ chat_with_tools 文本与工具调用映射
 - 模型是否会正确选择四个 JobFit 工具。
 - 模型工具参数是否保持原始输入。
 - 工具结果返回后，模型是否保留“证据不足”的不确定性。
+- 模型是否按依赖顺序调用四个 JobFit 工具。
+- ReAct 最终回答是否包含三态标记并可追溯到 trace。
 
 ---
 
@@ -1001,6 +1141,8 @@ chat_with_tools 文本与工具调用映射
 
 - 四个真实工具和工具注册机制
 - 单次 Function Calling 往返
+- 最小 ReAct 循环、执行轨迹和最大步数保护
+- `POST /api/agent/match` 与参数/接口测试
 - 关键词证据检索基线
 - 三态证据充分性评估
 
@@ -1010,14 +1152,14 @@ chat_with_tools 文本与工具调用映射
 - 简历管理和版本控制
 - PDF 解析
 - 岗位 JD 与结构化结果持久化
-- ReAct 多轮循环
 - 会话状态和任务恢复
 - Embedding、向量检索和重排
 - `get_resume_profile` 和 `save_match_report` 的数据库实现
 - 匹配报告和差距分析完整闭环
 - 工具调用记录的数据库持久化
 - 包含内层工具模型调用的统一 Token 成本统计
-- 评估数据集和公网部署
+- Agent 执行过程的 SSE 流式输出
+- 正式评估数据集和正式公网部署
 
 这些功能将在后续 STEP 按依赖顺序实现，不删除已有能力。
 
@@ -1144,6 +1286,43 @@ EvidenceSearchResult
 
 日志只包含工具名、用户 ID、参数键、状态和耗时。
 
+## 7. ReAct 岗位匹配
+
+```text
+JobFitAgentRequest
+→ get_current_user
+→ ToolContext
+→ build_jobfit_react_messages()
+→ run_react_loop()
+→ chat_with_tools()
+→ 模型决策 tool_calls 或最终内容
+→ execute_tool()
+→ ReactToolExecution 写入 trace
+→ tool 消息回传模型
+→ 重复直至 completed
+→ 达到 max_steps 时 max_steps_reached
+→ ReactAgentResult
+→ success_response()
+```
+
+失败的完整链路：
+
+```text
+模型参数不是 JSON
+→ 不执行工具
+→ 构造“工具参数解析失败” Observation
+→ 写入 tool 消息和 trace
+→ 模型基于失败结果继续决策
+
+工具名未注册
+→ execute_tool 返回“工具未注册”
+→ 写入 tool 消息和 trace
+
+工具 handler 异常
+→ execute_tool 捕获并返回“工具执行失败”
+→ 不暴露内部异常文本
+```
+
 ---
 
 # 十三、部署节奏
@@ -1154,11 +1333,11 @@ EvidenceSearchResult
 STEP 02：建立 Dockerfile、健康检查和环境变量基线
 STEP 03：只做私密 smoke test（可选），公网部署延期
 STEP 04～05：继续维护依赖、镜像和测试，不新增公开环境
-STEP 06：第一次公开测试部署
-STEP 07：加入数据库和 Redis 后更新部署
-STEP 08：部署带 RAG 的作品集版本
-STEP 11：LangGraph 工作流完成后更新线上版本
-STEP 12：生产化、安全、监控和性能优化
+STEP 06：只做部署就绪检查和本地 HTTP 验收，不公开部署
+STEP 07：加入数据库和 Redis 后建立第一次私有 staging
+STEP 08：在私有 staging 更新带 RAG 的作品集版本
+STEP 11：LangGraph 工作流完成后更新私有 staging
+STEP 12：安全、评估、监控和性能优化完成后正式公网部署
 ```
 
 本阶段 Docker 状态：
@@ -1167,18 +1346,26 @@ STEP 12：生产化、安全、监控和性能优化
 - 没有新增端口。
 - 没有新增数据库、Redis、向量库或其他容器。
 - `Dockerfile` 和 `docker-compose.yml` 无需修改。
-- 公网部署仍延期到 STEP 06。
+- 部署延期；STEP 06 只做部署就绪检查，STEP 07 后建立私有 staging，STEP 12 后正式公网部署。
 
-为什么 STEP 06 首次公开部署：
+为什么 STEP 06 不公开部署：
 
-- STEP 03 只是通用聊天能力。
-- STEP 06 已经具备结构化输出、工具调用和最小 ReAct 循环。
-- 此时项目第一次具备明确 Agent 特征。
+- 当前仍使用公开的 `demo-token`。
+- 没有真实登录、限流、配额和并发保护。
+- 一次 ReAct 请求可能触发多轮模型和嵌套工具调用，成本较高。
+- 没有持久化、用户归属、监控和告警。
 
-为什么 STEP 08 作为作品集版本：
+为什么 STEP 07 后先做私有 staging：
 
-- RAG、证据检索和岗位匹配开始形成项目差异化。
-- 更适合简历、演示和面试讲解。
+- 数据库、Redis、持久化和恢复能力已经具备。
+- 只部署到私有环境或白名单访问。
+- 用于验证真实部署架构，不开放任意用户。
+
+为什么 STEP 12 后正式公网部署：
+
+- 强随机 Token、限流和配额已经完成。
+- 权限隔离、Prompt Injection 防护和成本统计已经完成。
+- 可观测性、健康检查和告警已经完成。
 
 部署前必须完成：
 
@@ -1233,7 +1420,7 @@ STEP 12：生产化、安全、监控和性能优化
 
 暂缓：
 
-- 公网部署，计划在 STEP 06 完成第一次公开测试。
+- 部署延期；STEP 06 只做部署就绪检查，STEP 07 后建立私有 staging，STEP 12 后正式公网部署。
 
 ## STEP 04：Prompt 与结构化输出
 
@@ -1263,7 +1450,7 @@ STEP 12：生产化、安全、监控和性能优化
 暂缓：
 
 - 数据库持久化、简历结构化提取和结构化版本保存按依赖顺序在后续 STEP 实现。
-- 公网部署仍延期到 STEP 06。
+- 部署延期；STEP 06 只做部署就绪检查，STEP 07 后建立私有 staging，STEP 12 后正式公网部署。
 
 ## STEP 05：Function Calling 与工具注册
 
@@ -1297,10 +1484,39 @@ STEP 12：生产化、安全、监控和性能优化
 暂缓：
 
 - `get_resume_profile` 和 `save_match_report` 依赖数据库、用户归属和事务，延期到 STEP 07。
-- 工具尚未通过 HTTP 路由暴露，业务完整接口在 STEP 06 实现。
+- STEP 06 已通过 `/api/agent/match` 暴露 ReAct 业务流程，原单次 Function Calling 服务继续保留为基线。
 - 内层模型调用的 Usage 尚未合并到外层统计。
 - 工具调用日志尚未持久化。
-- 公网部署仍延期到 STEP 06。
+- 部署延期；STEP 06 只做部署就绪检查，STEP 07 后建立私有 staging，STEP 12 后正式公网部署。
+
+## STEP 06：最小 ReAct 循环与 HTTP 接入
+
+完成：
+
+- 在 study-roads 手写独立订单物流 ReAct Agent，完成真实模型多轮工具调用。
+- 新增 `ReactToolExecution` 和 `ReactAgentResult`。
+- 新增 `run_react_loop()`，实现 assistant/tool 消息闭环、trace、Usage 累计和最大步数终止。
+- 新增 JobFit system prompt、消息构造和 `run_jobfit_agent()` 入口。
+- 新增 `POST /api/agent/match`，使用 Bearer 鉴权和 `ToolContext`。
+- 拒绝客户端传入 `max_steps`，后端默认最多 8 轮模型决策。
+- 增加服务层测试和接口测试。
+- 新增真实 DeepSeek 手工验收脚本，四个工具均成功调用并生成三态最终回答。
+- 更新 README、PROJECT_GUIDE、HANDOFF 和部署节奏。
+
+为什么这样设计：
+
+- 模型只提出工具调用，真正执行仍由后端白名单和 Pydantic 校验控制。
+- 每轮都保留 assistant/tool 消息，模型才能基于前序 Observation 继续决策。
+- trace 提供可审计执行过程，但明确不记录隐藏思维链。
+- max_steps 同时控制延迟、成本和无限循环风险。
+- 嵌套工具调用的 Usage 尚不能统一统计，因此明确记录为当前限制。
+
+暂缓：
+
+- 数据库、Redis、任务恢复和报告持久化在 STEP 07 实现。
+- RAG 混合检索和重排在 STEP 08 实现。
+- 内层工具模型 Usage 合并、SSE Agent 过程和正式评估在后续 STEP 实现。
+- STEP 06 只做部署就绪检查；STEP 07 后私有 staging，STEP 12 后正式公网部署。
 
 ---
 
