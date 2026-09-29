@@ -1,5 +1,7 @@
 # 创建 FastAPI 应用并注册路由与全局异常处理。
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -10,13 +12,25 @@ from app.core.exceptions import (
     http_exception_handler,
     validation_exception_handler,
 )
+from app.cache.client import dispose_redis
+from app.db.session import dispose_engine
 from app.routers.health import router as health_router
 from app.routers.users import router as users_router
 from app.routers.chat import router as chat_router
 from app.routers.jobs import router as jobs_router
 from app.routers.agent import router as agent_router
 
-app = FastAPI(title="JobFit Agent")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        yield
+    finally:
+        await dispose_redis()
+        await dispose_engine()
+
+
+app = FastAPI(title="JobFit Agent", lifespan=lifespan)
 
 app.add_exception_handler(AppError, app_error_handler)
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
