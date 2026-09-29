@@ -72,3 +72,38 @@ Authorization: Bearer {{token}}
 }
 
 ###
+
+### 创建持久化分析任务
+POST {{baseUrl}}/api/agent/tasks
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "job_id": 1,
+  "resume_version_id": 1,
+  "conversation_id": null
+}
+
+###
+
+### 执行持久化分析任务
+POST {{baseUrl}}/api/agent/tasks/1/run
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### 查询任务状态（Redis Cache-Aside）
+GET {{baseUrl}}/api/agent/tasks/1
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### 流式执行任务（SSE）
+GET {{baseUrl}}/api/agent/tasks/1/stream
+Accept: text/event-stream
+Authorization: Bearer {{token}}
+
+###
