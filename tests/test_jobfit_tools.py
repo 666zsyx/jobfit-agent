@@ -1,8 +1,9 @@
-# 验证四个 JobFit 工具的注册、参数校验和执行结果。
+# 验证六个 JobFit 工具的注册、参数校验和执行结果。
 
 import asyncio
 
 import pytest
+from pydantic import ValidationError
 
 from app.schemas.auth import CurrentUser
 from app.schemas.evidence import (
@@ -64,7 +65,7 @@ def test_jobfit_registry_contains_extract_job_requirements():
     assert tool is jobfit.EXTRACT_JOB_REQUIREMENTS_TOOL
 
 
-def test_jobfit_registry_contains_four_tools():
+def test_jobfit_registry_contains_six_tools():
     registry = jobfit.build_jobfit_tool_registry()
 
     assert registry.get("extract_job_requirements") is (
@@ -79,7 +80,141 @@ def test_jobfit_registry_contains_four_tools():
     assert registry.get("assess_requirement_match") is (
         jobfit.ASSESS_REQUIREMENT_MATCH_TOOL
     )
-    assert len(registry.openai_definitions()) == 4
+    assert registry.get("get_resume_profile") is (
+        jobfit.GET_RESUME_PROFILE_TOOL
+    )
+    assert registry.get("save_match_report") is (
+        jobfit.SAVE_MATCH_REPORT_TOOL
+    )
+    assert len(registry.openai_definitions()) == 6
+
+
+def test_get_resume_profile_definition_has_empty_schema():
+    registry = jobfit.build_jobfit_tool_registry()
+
+    definition = next(
+        item
+        for item in registry.openai_definitions()
+        if item["function"]["name"] == "get_resume_profile"
+    )
+    parameters = definition["function"]["parameters"]
+
+    assert parameters["type"] == "object"
+    assert parameters["properties"] == {}
+    assert "required" not in parameters
+    assert parameters["additionalProperties"] is False
+
+
+def test_save_match_report_definition_has_expected_schema():
+    registry = jobfit.build_jobfit_tool_registry()
+
+    definition = next(
+        item
+        for item in registry.openai_definitions()
+        if item["function"]["name"] == "save_match_report"
+    )
+    parameters = definition["function"]["parameters"]
+
+    assert set(parameters["properties"]) == {
+        "summary",
+        "result_json",
+    }
+    assert parameters["required"] == [
+        "summary",
+        "result_json",
+    ]
+    assert parameters["additionalProperties"] is False
+
+
+def test_save_match_report_rejects_blank_summary():
+    with pytest.raises(ValidationError):
+        jobfit.SaveMatchReportArgs(
+            summary="   ",
+            result_json={},
+        )
+
+
+def test_tool_context_session_is_excluded_from_model_dump():
+    context = make_context()
+
+    assert context.session is None
+    assert context.task_id is None
+    assert context.step_no is None
+    assert "session" not in context.model_dump()
+    assert "resume_profile_snapshot" not in context.model_dump()
+    assert "pending_report" not in context.model_dump()
+    assert "defer_report_save" not in context.model_dump()
+    assert "collect_tool_audit" not in context.model_dump()
+    assert "tool_audit_events" not in context.model_dump()
+
+
+def test_get_resume_profile_prefers_snapshot():
+    snapshot = {
+        "found": True,
+        "task_id": 7,
+        "resume_id": 8,
+        "resume_version_id": 9,
+        "version_no": 2,
+        "resume_title": "Snapshot Resume",
+        "raw_text": "snapshot text",
+        "extracted_sections": {"sections": []},
+    }
+    context = ToolContext(
+        current_user=CurrentUser(
+            id=1,
+            username="demo_user",
+            role="admin",
+        ),
+        task_id=7,
+        resume_profile_snapshot=snapshot,
+    )
+
+    result = asyncio.run(
+        execute_tool(
+            registry=jobfit.build_jobfit_tool_registry(),
+            tool_name="get_resume_profile",
+            arguments={},
+            context=context,
+        )
+    )
+
+    assert result == {"ok": True, "result": snapshot}
+
+
+def test_save_match_report_can_defer_persistence():
+    context = ToolContext(
+        current_user=CurrentUser(
+            id=1,
+            username="demo_user",
+            role="admin",
+        ),
+        task_id=7,
+        defer_report_save=True,
+    )
+
+    result = asyncio.run(
+        execute_tool(
+            registry=jobfit.build_jobfit_tool_registry(),
+            tool_name="save_match_report",
+            arguments={
+                "summary": "Deferred report",
+                "result_json": {"matches": []},
+            },
+            context=context,
+        )
+    )
+
+    assert result == {
+        "ok": True,
+        "result": {
+            "saved": True,
+            "queued": True,
+        },
+    }
+    assert context.pending_report == {
+        "summary": "Deferred report",
+        "result_json": {"matches": []},
+    }
 
 
 def test_extract_job_requirements_definition_has_expected_schema():
