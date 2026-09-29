@@ -6,7 +6,7 @@
 
 ## 当前阶段
 
-STEP 06：手写最小 ReAct 循环并接入 JobFit Agent。
+STEP 07：状态、记忆、PostgreSQL/Redis 持久化与 Agent SSE 流式服务。
 
 当前已经支持：
 
@@ -15,16 +15,22 @@ STEP 06：手写最小 ReAct 循环并接入 JobFit Agent。
 - `POST /api/chat`：非流式聊天，返回答案、Token Usage 和耗时
 - `POST /api/chat/stream`：SSE 流式聊天，返回内容事件、Usage 事件和结束标记
 - `POST /api/jobs/extract`：从岗位 JD 中结构化提取岗位职责、必备技能和加分项
-- `POST /api/agent/match`：运行受控的 JobFit ReAct 岗位匹配分析。
+- `POST /api/agent/match`：运行兼容版受控 ReAct 岗位匹配分析。
+- `POST /api/agent/tasks`：创建可持久化的岗位分析任务。
+- `POST /api/agent/tasks/{task_id}/run`：执行持久化任务。
+- `GET /api/agent/tasks/{task_id}`：从 Redis/PostgreSQL 查询任务状态。
+- `GET /api/agent/tasks/{task_id}/stream`：通过 SSE 返回 Agent 执行事件。
 
 岗位提取接口使用 Prompt、JSON Schema、JSON 模式和 Pydantic 双重校验。模型调用成功但输出为空或不符合 Schema 时，最多尝试两次；认证、限流、超时和网络错误不会进入结构重试。
 
-STEP 05 已增加工具注册与单次 Function Calling 编排基础。当前注册四个真实工具：
+STEP 05 已增加工具注册与单次 Function Calling 编排基础。当前注册六个真实工具：
 
 - `extract_job_requirements`：从岗位 JD 提取职责、必备技能和加分项。
 - `extract_resume_sections`：从简历原文提取教育、项目、技能等结构化分段。
 - `search_resume_evidence`：按岗位要求检索简历分段中的原文证据。
 - `assess_requirement_match`：根据证据评估 `strong_match`、`partial_match` 或 `insufficient_evidence`。
+- `get_resume_profile`：读取当前任务绑定的持久化简历。
+- `save_match_report`：暂存并持久化结构化匹配报告。
 
 STEP 06 新增 `app/services/react_agent.py` 和 `POST /api/agent/match`。ReAct 服务最多执行 8 轮模型决策；模型每轮可以选择调用工具或给出最终回答。每次工具调用都会写入 `trace`，所有外层模型调用的 Token Usage 会累计，达到最大步数时返回 `max_steps_reached`。
 
@@ -61,6 +67,8 @@ APP_ENV=development
 LLM_API_KEY=你的真实Key
 LLM_BASE_URL=https://api.deepseek.com
 LLM_MODEL=deepseek-flash
+DATABASE_URL=postgresql+asyncpg://jobfit_app:你的密码@127.0.0.1:5432/jobfit_dev
+REDIS_URL=redis://127.0.0.1:6379/0
 ```
 
 安全要求：
@@ -68,6 +76,26 @@ LLM_MODEL=deepseek-flash
 - `.env` 已被 `.gitignore` 忽略。
 - 不要把真实 Key 写入代码、截图、聊天或 GitHub。
 - 如果 Key 曾经提交到远程仓库，应立即撤销并重新生成。
+
+## 本地依赖服务
+
+确保 PostgreSQL 17 正在运行，并启动本地 Redis：
+
+```powershell
+& "D:\agentstudy\runtime\start-redis.ps1"
+```
+
+初始化演示用户：
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\seed_dev_user.py
+```
+
+数据库结构由 Alembic 管理：
+
+```powershell
+.\.venv\Scripts\python.exe -m alembic upgrade head
+```
 
 ## 本地启动
 
@@ -268,6 +296,59 @@ latency_ms    整个 ReAct 循环耗时
 - `401`：没有 Bearer Token 或 Token 无效。
 - `422`：JD/简历为空、超长，或客户端传入额外字段。
 - `5xx`：外层模型服务异常由统一异常处理器映射。
+
+## 持久化任务、Redis 与 SSE
+
+STEP 07 增加：
+
+- PostgreSQL 九表模型与 Alembic 迁移。
+- Repository、事务边界和用户所有权检查。
+- 分析任务、报告版本、消息和工具调用审计。
+- Redis 任务状态缓存、TTL、分布式运行锁和用户隔离。
+- 短事务 prepare/execute/finalize 执行流程。
+- 可恢复 interrupted 状态与失败分类。
+- Agent SSE 事件、heartbeat、客户端断开处理和上下文压缩。
+
+持久化任务示例：
+
+```http
+POST /api/agent/tasks
+Authorization: Bearer demo-token
+Content-Type: application/json
+```
+
+```json
+{
+  "job_id": 1,
+  "resume_version_id": 1,
+  "conversation_id": null
+}
+```
+
+执行和流式观察：
+
+```text
+POST /api/agent/tasks/{task_id}/run
+GET  /api/agent/tasks/{task_id}/stream
+```
+
+SSE 事件包括：
+
+```text
+task_started
+step_started
+tool_started
+tool_finished
+content
+task_completed
+task_interrupted
+task_failed
+heartbeat
+```
+
+AI 不输出隐藏思维链，SSE 只包含可审计状态、工具元信息和最终回答。
+
+Docker Compose 已配置 PostgreSQL、Redis 和应用服务。当前本机真实 Redis 已完成本地验收；Docker staging 等 Docker 环境可用后执行。
 
 ## 自动化测试
 

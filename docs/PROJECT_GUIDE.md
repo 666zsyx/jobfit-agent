@@ -1,6 +1,6 @@
 # JobFit Agent 项目全景与维护文档
 
-> 最后更新：2026-09-28
+> 最后更新：2026-09-29
 >
 > 适用对象：未来的项目维护者、面试准备者、协作者和几周后重新阅读代码的自己。
 >
@@ -27,7 +27,7 @@ JobFit Agent 是一个基于 RAG 和工具调用的可解释岗位匹配与差�
 → 报告保存
 ```
 
-当前项目已完成模型 API、聊天接口、结构化提取、工具注册、简历分段、关键词证据检索、三态匹配评估、单次 Function Calling 编排、最小 ReAct 循环、HTTP 接入、自动化测试、真实模型验收、文档和部署就绪检查，待 Git 收尾；持久化和完整岗位匹配报告将在后续 STEP 实现。
+当前项目已完成模型 API、聊天接口、结构化提取、工具注册、简历分段、关键词证据检索、三态匹配评估、ReAct 循环、PostgreSQL/Alembic 持久化、Redis 缓存与运行锁、工具审计、失败恢复、SSE 流式任务和真实模型持久化验收。
 
 ---
 
@@ -40,6 +40,7 @@ STEP 03：完成，部署按下述新节奏延期
 STEP 04：功能、测试、文档、Git 和 tag 完成
 STEP 05：功能、测试、真实验收、文档、Git、远程 push 和 tag 全部完成
 STEP 06：完成；功能、测试、真实模型、HTTP、部署就绪、文档和本地 Git 闭环均已完成
+STEP 07：代码、数据库/Redis、SSE、真实模型持久化、自动化测试和本地验收完成；私有 staging 待 Docker 环境。
 ```
 
 当前代码分支：
@@ -1530,6 +1531,31 @@ STEP 12：安全、评估、监控和性能优化完成后正式公网部署
 - STEP 06 只做部署就绪检查；STEP 07 后私有 staging，STEP 12 后正式公网部署。
 
 ---
+
+# 十四点五、STEP 07：状态、记忆、持久化与 SSE
+
+完成：
+
+- 设计并创建 PostgreSQL `jobfit` Schema 九张表。
+- 增加 SQLAlchemy 2.x 异步模型、AsyncSession 和 Repository。
+- 使用 Alembic 建立 baseline migration 并验证空库升级与现有库 stamp。
+- 持久化用户、简历版本、岗位、会话消息、分析任务、报告和工具调用记录。
+- 使用用户所有权过滤、软删除过滤、行锁和短事务保护数据安全。
+- Redis 任务状态缓存、TTL、Cache-Aside、`SET NX EX` 运行锁和 Lua owner-token 释放。
+- 工具调用 started/success/validation_error/timeout/error/unknown_tool 审计。
+- 可恢复 interrupted 状态、attempt 重试和失败终态。
+- ReAct 过程事件和 SSE 接口。
+- 客户端断开时保存 interrupted 状态。
+- 会话上下文压缩和 assistant 回答落库。
+- Docker Compose 配置 PostgreSQL、Redis 和应用迁移启动命令。
+
+关键边界：
+
+- PostgreSQL 是权威事实来源，Redis 只做缓存、短期状态和锁。
+- 模型不能提交 user_id、task_id、报告版本或任务终态。
+- SSE 不包含隐藏思维链，只包含可审计状态、工具事件和最终回答。
+- 同一任务报告版本追加保存，不覆盖历史。
+- 真实 Redis 已本地验收；Docker staging 和公网开放留待后续阶段。
 
 # 十五、每个大 STEP 完成后的维护清单
 

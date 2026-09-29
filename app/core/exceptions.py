@@ -39,6 +39,16 @@ class StructuredOutputError(AppError):
         super().__init__(message=message, status_code=status_code)
 
 
+# 表示任务当前状态不允许执行请求的操作。
+class TaskStateConflictError(AppError):
+    def __init__(
+        self,
+        message: str = "任务状态不允许执行该操作",
+        status_code: int = 409,
+    ):
+        super().__init__(message=message, status_code=status_code)
+
+
 # 把项目业务异常转换为统一错误响应。
 async def app_error_handler(request: Request, exc: AppError):
     return JSONResponse(

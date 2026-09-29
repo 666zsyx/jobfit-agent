@@ -1,0 +1,82 @@
+# 映射 PostgreSQL 中的 jobfit.resumes 表。
+
+from __future__ import annotations
+
+from datetime import datetime
+
+from sqlalchemy import (
+    BigInteger,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Identity,
+    Index,
+    Text,
+    func,
+)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.db.base import Base
+
+
+class Resume(Base):
+    """一份简历的逻辑主体。"""
+
+    __tablename__ = "resumes"
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('active', 'archived')",
+            name="resumes_status_check",
+        ),
+        Index(
+            "idx_resumes_user_created_at",
+            "user_id",
+            "created_at",
+        ),
+        {"schema": "jobfit"},
+    )
+
+    resume_id: Mapped[int] = mapped_column(
+        BigInteger,
+        Identity(),
+        primary_key=True,
+    )
+    user_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey(
+            "jobfit.users.user_id",
+            name="resumes_user_id_fkey",
+            ondelete="RESTRICT",
+        ),
+        nullable=False,
+    )
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        server_default="active",
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    user: Mapped["User"] = relationship(back_populates="resumes")
+    versions: Mapped[list["ResumeVersion"]] = relationship(
+        back_populates="resume",
+        order_by="ResumeVersion.version_no",
+    )
+
+
+

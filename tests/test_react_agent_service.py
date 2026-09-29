@@ -45,6 +45,17 @@ def make_context() -> ToolContext:
     )
 
 
+def make_audit_context() -> ToolContext:
+    return ToolContext(
+        current_user=CurrentUser(
+            id=7,
+            username="test_user",
+            role="admin",
+        ),
+        collect_tool_audit=True,
+    )
+
+
 def make_tool_call(
     call_id: str,
     value: str,
@@ -301,11 +312,12 @@ def test_invalid_json_becomes_safe_tool_observation(monkeypatch):
         fake_chat_with_tools,
     )
 
+    audit_context = make_audit_context()
     result = asyncio.run(
         react_agent.run_react_loop(
             messages=[{"role": "user", "content": "测试坏参数"}],
             registry=make_registry(executed),
-            context=make_context(),
+            context=audit_context,
         )
     )
 
@@ -321,6 +333,66 @@ def test_invalid_json_becomes_safe_tool_observation(monkeypatch):
         "ok": False,
         "error": "工具参数解析失败",
     }
+    assert len(audit_context.tool_audit_events) == 1
+    event = audit_context.tool_audit_events[0]
+    assert event.status == "validation_error"
+    assert event.step_no == 1
+    assert event.tool_call_id == "call_bad"
+    assert event.error_code == "invalid_tool_arguments"
+
+
+def test_react_passes_step_and_tool_call_id_to_executor(monkeypatch):
+    calls: list[dict[str, Any]] = []
+    call_count = 0
+
+    async def fake_execute_tool(**kwargs):
+        calls.append(kwargs)
+        return {"ok": True, "result": {"value": "hello"}}
+
+    async def fake_chat_with_tools(
+        messages: list[dict[str, Any]],
+        tools: list[dict],
+    ) -> LLMWithToolsResult:
+        nonlocal call_count
+        call_count += 1
+
+        if call_count == 1:
+            return LLMWithToolsResult(
+                content=None,
+                tool_calls=[make_tool_call("call_audit", "hello")],
+                usage=make_usage(10, 1),
+                latency_ms=5,
+            )
+
+        return LLMWithToolsResult(
+            content="完成",
+            tool_calls=[],
+            usage=make_usage(20, 2),
+            latency_ms=5,
+        )
+
+    monkeypatch.setattr(
+        react_agent,
+        "execute_tool",
+        fake_execute_tool,
+    )
+    monkeypatch.setattr(
+        react_agent,
+        "chat_with_tools",
+        fake_chat_with_tools,
+    )
+
+    asyncio.run(
+        react_agent.run_react_loop(
+            messages=[{"role": "user", "content": "测试调用 ID"}],
+            registry=make_registry(),
+            context=make_audit_context(),
+        )
+    )
+
+    assert len(calls) == 1
+    assert calls[0]["step_no"] == 1
+    assert calls[0]["tool_call_id"] == "call_audit"
 
 
 def test_unknown_tool_is_recorded_and_loop_can_finish(monkeypatch):

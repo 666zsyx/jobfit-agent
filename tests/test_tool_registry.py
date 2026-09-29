@@ -471,3 +471,223 @@ def test_execute_tool_internal_error_logs_and_returns_safe_result(caplog):
         for record in caplog.records
     )
     assert "内部错误" not in str(result)
+
+
+def make_audit_context() -> ToolContext:
+    return ToolContext(
+        current_user=CurrentUser(
+            id=7,
+            username="test_user",
+            role="admin",
+        ),
+        collect_tool_audit=True,
+    )
+
+
+def run_audited_tool(
+    registry: ToolRegistry,
+    *,
+    tool_name: str,
+    arguments: object,
+    context: ToolContext,
+) -> dict:
+    return asyncio.run(
+        execute_tool(
+            registry=registry,
+            tool_name=tool_name,
+            arguments=arguments,
+            context=context,
+            step_no=3,
+            tool_call_id=f"call-{tool_name}",
+        )
+    )
+
+
+def test_execute_tool_records_success_audit_without_values():
+    context = make_audit_context()
+    registry = ToolRegistry()
+    registry.register(make_tool())
+
+    result = run_audited_tool(
+        registry,
+        tool_name="echo_message",
+        arguments={"message": "secret-value"},
+        context=context,
+    )
+
+    assert result["ok"] is True
+    assert len(context.tool_audit_events) == 1
+    event = context.tool_audit_events[0]
+    assert event.status == "success"
+    assert event.step_no == 3
+    assert event.tool_call_id == "call-echo_message"
+    assert event.argument_keys == ["message"]
+    assert event.duration_ms is not None
+    assert "secret-value" not in event.model_dump_json()
+
+
+def test_execute_tool_records_unknown_tool_audit():
+    context = make_audit_context()
+
+    run_audited_tool(
+        ToolRegistry(),
+        tool_name="missing_tool",
+        arguments={},
+        context=context,
+    )
+
+    event = context.tool_audit_events[0]
+    assert event.status == "unknown_tool"
+    assert event.error_code == "unknown_tool"
+
+
+def test_execute_tool_records_non_object_argument_audit():
+    context = make_audit_context()
+    registry = ToolRegistry()
+    registry.register(make_tool())
+
+    run_audited_tool(
+        registry,
+        tool_name="echo_message",
+        arguments=["hello"],
+        context=context,
+    )
+
+    event = context.tool_audit_events[0]
+    assert event.status == "validation_error"
+    assert event.error_code == "invalid_arguments"
+    assert event.argument_keys == []
+
+
+def test_execute_tool_records_validation_audit():
+    context = make_audit_context()
+    registry = ToolRegistry()
+    registry.register(make_tool())
+
+    run_audited_tool(
+        registry,
+        tool_name="echo_message",
+        arguments={"message": 123},
+        context=context,
+    )
+
+    event = context.tool_audit_events[0]
+    assert event.status == "validation_error"
+    assert event.error_code == "validation_error"
+    assert event.argument_keys == ["message"]
+    assert "123" not in event.model_dump_json()
+
+
+def test_execute_tool_records_timeout_audit(monkeypatch):
+    import app.tools.executor as executor_module
+
+    monkeypatch.setattr(executor_module, "TOOL_TIMEOUT_SECONDS", 0.01)
+    context = make_audit_context()
+    registry = ToolRegistry()
+    registry.register(
+        ToolSpec(
+            name="slow_tool",
+            description="用于验证超时审计。",
+            args_model=EchoArgs,
+            handler=slow_handler,
+        )
+    )
+
+    run_audited_tool(
+        registry,
+        tool_name="slow_tool",
+        arguments={"message": "hello"},
+        context=context,
+    )
+
+    event = context.tool_audit_events[0]
+    assert event.status == "timeout"
+    assert event.error_code == "timeout"
+
+
+def test_execute_tool_records_internal_error_audit():
+    context = make_audit_context()
+    registry = ToolRegistry()
+    registry.register(
+        ToolSpec(
+            name="broken_tool",
+            description="用于验证异常审计。",
+            args_model=EchoArgs,
+            handler=broken_handler,
+        )
+    )
+
+    run_audited_tool(
+        registry,
+        tool_name="broken_tool",
+        arguments={"message": "hello"},
+        context=context,
+    )
+
+    event = context.tool_audit_events[0]
+    assert event.status == "error"
+    assert event.error_code == "handler_error"
+    assert "内部错误" not in event.model_dump_json()
+
+
+def test_execute_tool_records_invalid_result_audit():
+    context = make_audit_context()
+    registry = ToolRegistry()
+    registry.register(
+        ToolSpec(
+            name="model_result",
+            description="用于验证返回值类型审计。",
+            args_model=EchoArgs,
+            handler=model_result_handler,
+        )
+    )
+
+    run_audited_tool(
+        registry,
+        tool_name="model_result",
+        arguments={"message": "hello"},
+        context=context,
+    )
+
+    event = context.tool_audit_events[0]
+    assert event.status == "error"
+    assert event.error_code == "invalid_result"
+
+
+def test_execute_tool_records_non_serializable_audit():
+    context = make_audit_context()
+    registry = ToolRegistry()
+    registry.register(
+        ToolSpec(
+            name="non_serializable",
+            description="用于验证序列化审计。",
+            args_model=EchoArgs,
+            handler=non_serializable_handler,
+        )
+    )
+
+    run_audited_tool(
+        registry,
+        tool_name="non_serializable",
+        arguments={"message": "hello"},
+        context=context,
+    )
+
+    event = context.tool_audit_events[0]
+    assert event.status == "error"
+    assert event.error_code == "non_serializable_result"
+
+
+def test_execute_tool_does_not_collect_audit_when_disabled():
+    context = make_context()
+    registry = ToolRegistry()
+    registry.register(make_tool())
+
+    run_audited_tool(
+        registry,
+        tool_name="echo_message",
+        arguments={"message": "hello"},
+        context=context,
+    )
+
+    assert context.tool_audit_events == []
