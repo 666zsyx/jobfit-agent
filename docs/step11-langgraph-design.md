@@ -502,7 +502,7 @@ Checkpoint 保存什么，不保存什么
 ```text
 [x] 设计冻结
 [x] LangGraph 最小闭环
-[ ] JobFit Graph 骨架
+[x] JobFit Graph 骨架
 [ ] 核心业务节点迁移
 [ ] PostgreSQL Checkpoint
 [ ] 人工确认与 Resume
@@ -546,4 +546,47 @@ pytest==9.1.1
 ```text
 python -m pytest D:\agentstudy\study-roads\step11_langgraph\tests -q
 6 passed
+```
+
+---
+
+## 17. PART 2 验证记录
+
+新增 JobFit Graph 骨架：
+
+```text
+app/graphs/jobfit/state.py
+app/graphs/jobfit/nodes.py
+app/graphs/jobfit/graph.py
+tests/test_jobfit_graph_skeleton.py
+```
+
+已验证拓扑：
+
+```text
+prepare_run
+→ load_context
+→ agent_decide
+→ execute_tools
+→ agent_decide
+→ assess_evidence
+→ human_confirmation
+→ save_report
+→ finalize
+```
+
+同时验证拒绝分支：
+
+```text
+human_confirmation
+→ cancel
+```
+
+本部分使用假数据和确定性节点，不修改旧 ReAct 路径，不接入 HTTP 或数据库。
+
+测试结果：
+
+```text
+python -m pytest -q
+264 passed
 ```
