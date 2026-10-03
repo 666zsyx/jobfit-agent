@@ -204,6 +204,7 @@ async def _persist_waiting_confirmation(
         current_step=current_step,
         interrupted=True,
         pending_confirmation=pending_confirmation,
+        usage=graph_result.get("usage"),
     )
 
 
@@ -337,6 +338,7 @@ async def _persist_graph_completion(
         current_node=task.current_node,
         current_step=current_step,
         final_answer=graph_result.get("final_answer"),
+        usage=graph_result.get("usage"),
         report_id=report.report_id,
         report_version=report.version_no,
         new_resume_version_id=new_resume_version_id,
@@ -530,6 +532,7 @@ async def _execute_graph_task(
                         "status": result.status,
                         "report_id": result.report_id,
                         "current_node": result.current_node,
+                        "usage": result.usage or {},
                     },
                 ),
             )

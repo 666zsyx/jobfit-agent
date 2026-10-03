@@ -3,7 +3,7 @@
 import os
 
 from dotenv import load_dotenv
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 load_dotenv()
@@ -23,6 +23,28 @@ class Settings(BaseModel):
     vector_index_path: str
     vector_collection_name: str
     reranker_model_name: str
+    rate_limit_enabled: bool
+    rate_limit_requests_per_minute: int
+    daily_request_quota: int
+    daily_token_quota: int
+
+
+def _env_bool(name: str, default: bool) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_int(name: str, default: int) -> int:
+    raw = os.getenv(name, str(default)).strip()
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise RuntimeError(f"{name} 必须是整数") from exc
+    if value <= 0:
+        raise RuntimeError(f"{name} 必须大于 0")
+    return value
 
 
 def get_settings() -> Settings:
@@ -54,6 +76,13 @@ def get_settings() -> Settings:
         "RERANKER_MODEL_NAME",
         "BAAI/bge-reranker-base",
     )
+    rate_limit_enabled = _env_bool("RATE_LIMIT_ENABLED", True)
+    rate_limit_requests_per_minute = _env_int(
+        "RATE_LIMIT_REQUESTS_PER_MINUTE",
+        60,
+    )
+    daily_request_quota = _env_int("DAILY_REQUEST_QUOTA", 200)
+    daily_token_quota = _env_int("DAILY_TOKEN_QUOTA", 200_000)
 
     if not api_key or not base_url or not model:
         raise RuntimeError("LLM 配置不完整，请检查 .env")
@@ -76,6 +105,10 @@ def get_settings() -> Settings:
         vector_index_path=vector_index_path,
         vector_collection_name=vector_collection_name,
         reranker_model_name=reranker_model_name,
+        rate_limit_enabled=rate_limit_enabled,
+        rate_limit_requests_per_minute=rate_limit_requests_per_minute,
+        daily_request_quota=daily_request_quota,
+        daily_token_quota=daily_token_quota,
     )
 
 

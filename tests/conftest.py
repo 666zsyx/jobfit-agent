@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 
 
 os.environ.setdefault("APP_ENV", "test")
+os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
 os.environ.setdefault("LLM_API_KEY", "test-api-key")
 os.environ.setdefault("LLM_BASE_URL", "https://example.invalid")
 os.environ.setdefault("LLM_MODEL", "test-model")
