@@ -22,7 +22,6 @@ def test_persisted_prompt_mentions_all_tools_and_context_rules():
     for tool_name in (
         "get_resume_profile",
         "extract_job_requirements",
-        "extract_resume_sections",
         "search_resume_evidence",
         "assess_requirement_match",
         "save_match_report",
@@ -31,7 +30,8 @@ def test_persisted_prompt_mentions_all_tools_and_context_rules():
 
     assert "user_id" in prompt
     assert "task_id" in prompt
-    assert "后端上下文" in prompt
+    assert "后端提供" in prompt
+    assert "chunk_id" in prompt
 
 
 def test_build_messages_uses_persisted_prompt():

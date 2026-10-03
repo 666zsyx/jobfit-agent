@@ -42,11 +42,18 @@ class EvidenceSearchRequest(BaseModel):
         max_length=MAX_REQUIREMENTS,
         description="需要检索证据的岗位要求列表。",
     )
-    sections: list[ResumeSection] = Field(
-        min_length=1,
+    sections: list[ResumeSection] | None = Field(
+        default=None,
         max_length=100,
-        description="已经结构化提取的简历分段列表。",
+        description="旧关键词路径使用的简历分段；RAG 路径可为空。",
     )
+
+    @model_validator(mode="after")
+    def validate_optional_sections(self):
+        if self.sections is not None and not self.sections:
+            raise ValueError("sections 不能为空")
+
+        return self
 
     @field_validator("requirements")
     @classmethod
@@ -69,7 +76,26 @@ class EvidenceItem(ResumeSection):
     score: float = Field(
         ge=0,
         le=1,
-        description="关键词匹配分数，范围 0～1。",
+        description="归一化相关性分数，范围 0～1。",
+    )
+    chunk_id: int | None = Field(
+        default=None,
+        ge=1,
+        description="持久化 Chunk 身份；旧关键词路径可为空。",
+    )
+    source_version_id: int | None = Field(
+        default=None,
+        ge=1,
+        description="证据来源的简历版本 ID。",
+    )
+    position: int | None = Field(
+        default=None,
+        ge=1,
+        description="证据在来源版本中的顺序。",
+    )
+    rerank_score: float | None = Field(
+        default=None,
+        description="Reranker 原始分数；未重排时为空。",
     )
 
 
@@ -112,6 +138,7 @@ class EvidenceSearchResult(BaseModel):
         max_length=MAX_REQUIREMENTS,
         description="每条岗位要求对应的证据结果。",
     )
+
 
     @field_validator("requirements")
     @classmethod

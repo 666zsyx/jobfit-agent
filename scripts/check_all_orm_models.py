@@ -1,4 +1,4 @@
-# 验证九个 ORM 模型、真实表、显式索引和外键名称。
+# 验证十个 ORM 模型、真实表、显式索引和外键名称。
 
 import asyncio
 import sys
@@ -15,6 +15,7 @@ from app.db.models import (
     AnalysisTask,
     Conversation,
     Job,
+    KnowledgeChunk,
     Message,
     Report,
     Resume,
@@ -30,6 +31,7 @@ MODELS = (
     Resume,
     ResumeVersion,
     Job,
+    KnowledgeChunk,
     Conversation,
     Message,
     AnalysisTask,
