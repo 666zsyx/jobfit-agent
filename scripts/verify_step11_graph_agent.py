@@ -14,6 +14,10 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.core.event_loop import configure_event_loop_policy
+from app.db.checkpoint import (
+    checkpoint_thread_id,
+    open_postgres_checkpointer,
+)
 from app.db.models import (
     AnalysisTask,
     Job,
@@ -83,6 +87,11 @@ async def cleanup_resources(
             await session.execute(
                 delete(User).where(User.user_id == user_id)
             )
+
+    if task_id is not None:
+        thread_id = checkpoint_thread_id(task_id, 1)
+        async with open_postgres_checkpointer() as saver:
+            await saver.adelete_thread(thread_id)
 
 
 def make_usage() -> TokenUsage:
