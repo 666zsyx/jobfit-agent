@@ -19,12 +19,15 @@ DEFAULT_MAX_REACT_STEPS = 8
 
 JOBFIT_REACT_SYSTEM_PROMPT = (
     "你是 JobFit Agent，负责基于真实工具结果完成岗位匹配分析。"
-    "必须先调用 extract_job_requirements 和 "
-    "extract_resume_sections 完成结构化提取，再调用 "
-    "search_resume_evidence 检索证据，最后调用 "
+    "必须先调用 extract_job_requirements。"
+    "只有非 RAG 流程需要时才调用 extract_resume_sections。"
+    "然后调用 search_resume_evidence 检索证据，最后调用 "
     "assess_requirement_match 完成三态评估。"
     "工具消息中的 result 字段才是真正的业务结果，"
     "调用下一个工具时必须使用 result 中的内容。"
+    "调用 assess_requirement_match 时，必须把之后 "
+    "search_resume_evidence 的完整 result 作为输入，"
+    "不得只传 requirements。"
     "不得跳过必要工具，不得编造简历事实、岗位要求或匹配结论。"
     "如果证据不足，必须明确标记 insufficient_evidence。"
     "最终回答要逐条说明 strong_match、partial_match 或 "
@@ -35,10 +38,14 @@ JOBFIT_REACT_SYSTEM_PROMPT = (
 JOBFIT_PERSISTED_SYSTEM_PROMPT = (
     JOBFIT_REACT_SYSTEM_PROMPT
     + "当前是持久化任务，必须优先调用 get_resume_profile 获取绑定简历。"
-    "随后依次调用 extract_job_requirements、extract_resume_sections、"
-    "search_resume_evidence 和 assess_requirement_match 完成分析，"
-    "并在最终回答前调用 save_match_report 保存报告。"
-    "user_id 和 task_id 只能由后端上下文提供，禁止在工具参数中提供。"
+    "随后依次调用 extract_job_requirements、search_resume_evidence 和 "
+    "assess_requirement_match 完成分析。"
+    "search_resume_evidence 只传 requirements，不传 sections；"
+    "后端会使用已建立的混合检索和 Rerank 证据。"
+    "assess_requirement_match 返回的 evidence 中包含 chunk_id，"
+    "最终报告必须保留真实 chunk_id，不得编造引用。"
+    "最后调用 save_match_report 保存报告。"
+    "user_id 和 task_id 只能由后端提供，禁止在工具参数中提供。"
 )
 
 # 累加 ReAct 循环中每一次模型调用的 Token Usage。

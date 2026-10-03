@@ -8,36 +8,44 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.auth import CurrentUser
+from app.schemas.knowledge import EvidencePack
 from app.schemas.tool_audit import ToolAuditEvent
 
 
 TOOL_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 
 
-# 保存工具执行所需的后端可信上下文。
 class ToolContext(BaseModel):
+    """保存工具执行所需的后端可信上下文。"""
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     current_user: CurrentUser
     session: AsyncSession | None = Field(default=None, exclude=True)
+    session_factory: Any | None = Field(default=None, exclude=True)
     task_id: int | None = None
     step_no: int | None = None
     resume_profile_snapshot: dict | None = Field(
         default=None,
         exclude=True,
     )
+    resume_version_id: int | None = Field(
+        default=None,
+        ge=1,
+        exclude=True,
+    )
+    rag_enabled: bool = Field(default=False, exclude=True)
+    retrieved_evidence_packs: list[EvidencePack] = Field(
+        default_factory=list,
+        exclude=True,
+    )
+    event_sink: Any | None = Field(default=None, exclude=True)
     pending_report: dict | None = Field(
         default=None,
         exclude=True,
     )
-    defer_report_save: bool = Field(
-        default=False,
-        exclude=True,
-    )
-    collect_tool_audit: bool = Field(
-        default=False,
-        exclude=True,
-    )
+    defer_report_save: bool = Field(default=False, exclude=True)
+    collect_tool_audit: bool = Field(default=False, exclude=True)
     tool_audit_events: list[ToolAuditEvent] = Field(
         default_factory=list,
         exclude=True,
@@ -50,8 +58,9 @@ ToolHandler = Callable[
 ]
 
 
-# 把工具名、说明、参数模型和异步处理函数绑定为一个契约。
 class ToolSpec:
+    """把工具名、说明、参数模型和异步处理函数绑定为一个契约。"""
+
     def __init__(
         self,
         name: str,

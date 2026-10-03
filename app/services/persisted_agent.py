@@ -43,6 +43,7 @@ from app.services.analysis_tasks import create_analysis_task
 from app.services.conversation_context import (
     build_compressed_conversation_context,
 )
+from app.services.rag_evidence import prepare_resume_rag
 from app.services.react_agent import (
     JOBFIT_PERSISTED_SYSTEM_PROMPT,
     build_jobfit_react_messages,
@@ -293,6 +294,59 @@ async def _persist_failure_state(
         )
         return None
 
+async def _prepare_rag_safely(
+    session_factory: async_sessionmaker[AsyncSession],
+    *,
+    user_id: int,
+    task_id: int,
+    resume_version_id: int,
+    event_sink: AgentEventSink | None,
+) -> bool:
+    """准备 RAG 索引，失败时允许 Agent 回退旧关键词路径。"""
+
+    await _emit_event(
+        event_sink,
+        AgentEvent(
+            type="index_started",
+            task_id=task_id,
+            data={"resume_version_id": resume_version_id},
+        ),
+    )
+
+    try:
+        async with session_factory() as session:
+            async with session.begin():
+                await prepare_resume_rag(
+                    session,
+                    user_id=user_id,
+                    resume_version_id=resume_version_id,
+                )
+    except Exception:
+        logger.warning(
+            "准备 RAG 索引失败，回退旧检索 task_id=%s",
+            task_id,
+            exc_info=True,
+        )
+        await _emit_event(
+            event_sink,
+            AgentEvent(
+                type="index_failed",
+                task_id=task_id,
+                data={"error_code": "rag_index_failed"},
+            ),
+        )
+        return False
+
+    await _emit_event(
+        event_sink,
+        AgentEvent(
+            type="index_finished",
+            task_id=task_id,
+            data={"resume_version_id": resume_version_id},
+        ),
+    )
+    return True
+
 async def _run_persisted_task_core(
     session_factory: async_sessionmaker[AsyncSession],
     *,
@@ -331,15 +385,31 @@ async def _run_persisted_task_core(
         ),
     )
 
+    rag_enabled = await _prepare_rag_safely(
+        session_factory,
+        user_id=snapshot.user_id,
+        task_id=snapshot.task_id,
+        resume_version_id=snapshot.resume_profile[
+            "resume_version_id"
+        ],
+        event_sink=event_sink,
+    )
+
     context = ToolContext(
         current_user=CurrentUser(
             id=snapshot.user_id,
             username=snapshot.username,
             role=snapshot.role,
         ),
+        session_factory=session_factory,
         task_id=snapshot.task_id,
         step_no=snapshot.previous_current_step,
         resume_profile_snapshot=snapshot.resume_profile,
+        resume_version_id=snapshot.resume_profile[
+            "resume_version_id"
+        ],
+        rag_enabled=rag_enabled,
+        event_sink=event_sink,
         defer_report_save=True,
         collect_tool_audit=True,
     )
@@ -702,7 +772,3 @@ __all__ = [
     "create_persisted_task",
     "run_persisted_task",
 ]
-
-
-
-

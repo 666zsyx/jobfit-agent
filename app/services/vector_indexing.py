@@ -51,6 +51,11 @@ async def index_resume_version_chunks(
         resume_version_id=resume_version_id,
         chunker_version=RESUME_CHUNKER_VERSION,
     )
+    chunks = [
+        chunk
+        for chunk in chunks
+        if chunk.index_status != "stale"
+    ]
 
     if not chunks:
         raise ValueError("简历版本没有可索引的 Chunk")

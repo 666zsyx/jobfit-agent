@@ -1,7 +1,10 @@
 # 定义并注册 JobFit Agent 的真实工具。
 
+import logging
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.schemas.agent_events import AgentEvent
 from app.schemas.evidence import (
     EvidenceSearchRequest,
     EvidenceSearchResult,
@@ -18,6 +21,7 @@ from app.repositories import (
 from app.services.evidence_search import search_resume_evidence
 from app.services.extraction import extract_job
 from app.services.matching import assess_requirement_match
+from app.services.rag_evidence import search_requirements_with_rag
 from app.services.resume_extraction import (
     MAX_RESUME_TEXT_LENGTH,
     extract_resume_sections,
@@ -26,6 +30,7 @@ from app.tools.base import ToolContext, ToolSpec
 from app.tools.registry import ToolRegistry
 
 
+logger = logging.getLogger(__name__)
 # 定义岗位 JD 提取工具的输入契约。
 class ExtractJobRequirementsArgs(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -114,17 +119,139 @@ async def extract_resume_sections_handler(
     return result.model_dump(mode="json")
 
 
-# 把检索工具参数适配到关键词证据检索服务。
+# 从任务快照恢复旧关键词路径需要的 sections。
+def _sections_from_context(
+    context: ToolContext,
+) -> list:
+    snapshot = context.resume_profile_snapshot
+
+    if not isinstance(snapshot, dict):
+        return []
+
+    extracted_sections = snapshot.get("extracted_sections")
+    if not isinstance(extracted_sections, dict):
+        return []
+
+    try:
+        return ResumeExtraction.model_validate(
+            extracted_sections
+        ).sections
+    except Exception:
+        return []
+
+
+async def _emit_context_event(
+    context: ToolContext,
+    *,
+    event_type: str,
+    data: dict,
+) -> None:
+    if context.event_sink is None:
+        return
+
+    await context.event_sink(
+        AgentEvent(
+            type=event_type,
+            task_id=context.task_id,
+            data=data,
+        )
+    )
+
+
+# 优先使用 RAG 检索，失败时回退旧关键词检索。
 async def search_resume_evidence_handler(
     args: EvidenceSearchRequest,
     context: ToolContext,
 ) -> dict:
-    result: EvidenceSearchResult = search_resume_evidence(
+    fallback_sections = args.sections or _sections_from_context(
+        context
+    )
+
+    if (
+        context.rag_enabled
+        and context.session_factory is not None
+        and context.resume_version_id is not None
+    ):
+        await _emit_context_event(
+            context,
+            event_type="retrieval_started",
+            data={
+                "mode": "hybrid_rerank",
+                "requirement_count": len(args.requirements),
+            },
+        )
+
+        try:
+            async with context.session_factory() as session:
+                result, evidence_packs = (
+                    await search_requirements_with_rag(
+                        session,
+                        user_id=context.current_user.id,
+                        resume_version_id=(
+                            context.resume_version_id
+                        ),
+                        requirements=args.requirements,
+                    )
+                )
+        except Exception:
+            logger.warning(
+                "RAG 检索失败，尝试旧关键词回退 task_id=%s",
+                context.task_id,
+                exc_info=True,
+            )
+            await _emit_context_event(
+                context,
+                event_type="retrieval_finished",
+                data={
+                    "mode": "legacy_keyword",
+                    "degraded": True,
+                    "error_code": "rag_retrieval_failed",
+                },
+            )
+        else:
+            context.retrieved_evidence_packs.extend(
+                evidence_packs
+            )
+            await _emit_context_event(
+                context,
+                event_type="retrieval_finished",
+                data={
+                    "mode": "hybrid_rerank",
+                    "degraded": any(
+                        pack.degraded
+                        for pack in evidence_packs
+                    ),
+                    "evidence_counts": [
+                        len(pack.items)
+                        for pack in evidence_packs
+                    ],
+                },
+            )
+            return result.model_dump(mode="json")
+
+    if not fallback_sections:
+        raise ValueError(
+            "非 RAG 检索必须提供 sections，"
+            "或提供可用的持久化 RAG 上下文"
+        )
+
+    result = search_resume_evidence(
         requirements=args.requirements,
-        sections=args.sections,
+        sections=fallback_sections,
+    )
+    await _emit_context_event(
+        context,
+        event_type="retrieval_finished",
+        data={
+            "mode": "legacy_keyword",
+            "degraded": True,
+            "evidence_counts": [
+                len(match.evidence)
+                for match in result.matches
+            ],
+        },
     )
     return result.model_dump(mode="json")
-
 
 # 把结构化检索结果适配到三态匹配评估服务。
 async def assess_requirement_match_handler(
@@ -184,11 +311,75 @@ async def get_resume_profile_handler(
     }
 
 
+def _collect_chunk_ids(
+    value,
+    output: set[int],
+) -> None:
+    if isinstance(value, dict):
+        for key, child in value.items():
+            if key in {
+                "chunk_id",
+                "chunk_ids",
+                "evidence_ids",
+                "cited_chunk_ids",
+            }:
+                candidates = (
+                    child if isinstance(child, list) else [child]
+                )
+                for candidate in candidates:
+                    if isinstance(candidate, int):
+                        output.add(candidate)
+                    elif isinstance(candidate, str) and candidate.isdigit():
+                        output.add(int(candidate))
+
+            _collect_chunk_ids(child, output)
+    elif isinstance(value, list):
+        for child in value:
+            _collect_chunk_ids(child, output)
+
+
+def _validate_report_citations(
+    result_json: dict,
+    context: ToolContext,
+) -> str | None:
+    allowed_chunk_ids = {
+        item.chunk_id
+        for pack in context.retrieved_evidence_packs
+        for item in pack.items
+    }
+
+    if not allowed_chunk_ids:
+        return None
+
+    cited_chunk_ids: set[int] = set()
+    _collect_chunk_ids(result_json, cited_chunk_ids)
+
+    if not cited_chunk_ids:
+        return "报告缺少证据引用"
+
+    unknown_chunk_ids = sorted(
+        cited_chunk_ids - allowed_chunk_ids
+    )
+    if unknown_chunk_ids:
+        return f"报告引用了未知证据: {unknown_chunk_ids}"
+
+    return None
+
 # 把模型生成的分析结果保存为当前任务的新报告版本。
 async def save_match_report_handler(
     args: SaveMatchReportArgs,
     context: ToolContext,
 ) -> dict:
+    citation_error = _validate_report_citations(
+        args.result_json,
+        context,
+    )
+    if citation_error is not None:
+        return {
+            "saved": False,
+            "error": citation_error,
+        }
+
     if context.defer_report_save:
         context.pending_report = {
             "summary": args.summary,
@@ -255,8 +446,9 @@ EXTRACT_RESUME_SECTIONS_TOOL = ToolSpec(
 SEARCH_RESUME_EVIDENCE_TOOL = ToolSpec(
     name="search_resume_evidence",
     description=(
-        "根据岗位要求和已结构化的简历分段，"
-        "检索对应的简历原文证据。"
+        "根据岗位要求检索简历证据。持久化 RAG 任务只需传 "
+        "requirements，后端会执行混合检索和 Rerank；"
+        "旧非 RAG 流程仍需传 sections。"
     ),
     args_model=EvidenceSearchRequest,
     handler=search_resume_evidence_handler,
@@ -305,4 +497,3 @@ def build_jobfit_tool_registry() -> ToolRegistry:
     registry.register(GET_RESUME_PROFILE_TOOL)
     registry.register(SAVE_MATCH_REPORT_TOOL)
     return registry
-

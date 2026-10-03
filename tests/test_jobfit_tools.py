@@ -534,12 +534,12 @@ def test_search_resume_evidence_definition_has_expected_schema():
     parameters = function["parameters"]
 
     assert "岗位要求" in function["description"]
-    assert "简历分段" in function["description"]
-    assert "原文证据" in function["description"]
+    assert "Rerank" in function["description"]
+    assert "requirements" in function["description"]
     assert parameters["type"] == "object"
     assert "requirements" in parameters["properties"]
     assert "sections" in parameters["properties"]
-    assert parameters["required"] == ["requirements", "sections"]
+    assert parameters["required"] == ["requirements"]
     assert parameters["additionalProperties"] is False
     assert "max_evidence_per_requirement" not in parameters["properties"]
 

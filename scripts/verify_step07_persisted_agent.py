@@ -13,7 +13,15 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.core.exceptions import LLMServiceError
-from app.db.models import AnalysisTask, Job, Report, Resume, ResumeVersion, User
+from app.db.models import (
+    AnalysisTask,
+    Job,
+    KnowledgeChunk,
+    Report,
+    Resume,
+    ResumeVersion,
+    User,
+)
 from app.db.session import async_session_factory, dispose_engine
 from app.repositories import (
     AnalysisTaskRepository,
@@ -23,6 +31,7 @@ from app.repositories import (
     ResumeVersionRepository,
     ToolCallRecordRepository,
 )
+from app.services.rag_runtime import get_vector_index
 from app.services.persisted_agent import (
     create_persisted_task,
     run_persisted_task,
@@ -30,6 +39,8 @@ from app.services.persisted_agent import (
 
 
 async def cleanup_test_data(usernames: list[str]) -> None:
+    version_rows: list[tuple[int, int]] = []
+
     async with async_session_factory() as session:
         async with session.begin():
             user_ids = select(User.user_id).where(
@@ -41,6 +52,26 @@ async def cleanup_test_data(usernames: list[str]) -> None:
             resume_ids = select(Resume.resume_id).where(
                 Resume.user_id.in_(user_ids)
             )
+            version_rows = list(
+                (
+                    await session.execute(
+                        select(
+                            Resume.user_id,
+                            ResumeVersion.resume_version_id,
+                        )
+                        .join(
+                            ResumeVersion,
+                            ResumeVersion.resume_id == Resume.resume_id,
+                        )
+                        .where(Resume.user_id.in_(user_ids))
+                    )
+                ).all()
+            )
+            resume_version_ids = [
+                resume_version_id
+                for _, resume_version_id in version_rows
+            ]
+
             await session.execute(
                 delete(Report).where(Report.task_id.in_(task_ids))
             )
@@ -49,6 +80,14 @@ async def cleanup_test_data(usernames: list[str]) -> None:
                     AnalysisTask.user_id.in_(user_ids)
                 )
             )
+            if resume_version_ids:
+                await session.execute(
+                    delete(KnowledgeChunk).where(
+                        KnowledgeChunk.resume_version_id.in_(
+                            resume_version_ids
+                        )
+                    )
+                )
             await session.execute(
                 delete(ResumeVersion).where(
                     ResumeVersion.resume_id.in_(resume_ids)
@@ -62,6 +101,15 @@ async def cleanup_test_data(usernames: list[str]) -> None:
             )
             await session.execute(
                 delete(User).where(User.user_id.in_(user_ids))
+            )
+
+    if version_rows:
+        vector_index = get_vector_index()
+        for user_id, resume_version_id in version_rows:
+            await asyncio.to_thread(
+                vector_index.delete_resume_version,
+                user_id=user_id,
+                resume_version_id=resume_version_id,
             )
 
 async def verify_step07_persisted_agent() -> None:
