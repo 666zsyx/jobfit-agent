@@ -411,7 +411,7 @@ DOCX ZIP Bomb 被拒绝
 ```text
 [x] PART 0：设计与基线
 [x] PART 1：解析服务和文件校验
-[ ] PART 2：简历版本持久化
+[x] PART 2：简历版本持久化
 [ ] PART 3：上传 API 和查询 API
 [ ] PART 4：结构提取衔接
 [ ] PART 5：测试、文档和 Git 闭环
@@ -475,5 +475,45 @@ reportlab==5.0.1（开发测试）
 
 ```text
 解析测试：12 passed
-完整测试：327 passed
+完整测试：330 passed
+```
+
+---
+
+## 15. PART 2 验证记录
+
+新增：
+
+```text
+app/services/resume_ingestion.py
+tests/test_resume_ingestion.py
+alembic/versions/4864bd55d0dd_expand_resume_source_formats.py
+```
+
+source_type 扩展为：
+
+```text
+text
+pdf
+docx
+txt
+```
+
+保存规则：
+
+```text
+未传 resume_id：创建 Resume + version 1
+传入 resume_id：校验用户归属并追加下一个版本
+解析文本保存到 resume_version.raw_text
+source_type 保存为 pdf / docx / txt
+不做文件长期保存
+```
+
+验证结果：
+
+```text
+简历持久化测试：3 passed
+ORM 测试：通过
+完整测试：330 passed
+Alembic upgrade：4864bd55d0dd
 ```
