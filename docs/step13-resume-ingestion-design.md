@@ -410,9 +410,70 @@ DOCX ZIP Bomb 被拒绝
 
 ```text
 [x] PART 0：设计与基线
-[ ] PART 1：解析服务和文件校验
+[x] PART 1：解析服务和文件校验
 [ ] PART 2：简历版本持久化
 [ ] PART 3：上传 API 和查询 API
 [ ] PART 4：结构提取衔接
 [ ] PART 5：测试、文档和 Git 闭环
+```
+
+---
+
+## 14. PART 1 验证记录
+
+新增：
+
+```text
+app/services/resume_file_parser.py
+tests/test_resume_file_parser.py
+app/core/exceptions.py 的 ResumeFileError
+```
+
+已支持：
+
+```text
+文本型 PDF 解析
+DOCX 段落和表格解析
+TXT 多种编码解析
+PDF 加密检测
+扫描 PDF 检测
+文件大小限制
+PDF 页数限制
+文本长度限制
+DOCX ZIP Bomb 限制
+文件扩展名和魔数校验
+```
+
+解析错误码：
+
+```text
+unsupported_file_type
+file_too_large
+empty_file
+corrupted_pdf
+encrypted_pdf
+scanned_pdf_requires_ocr
+invalid_docx
+docx_zip_bomb
+empty_resume_text
+resume_text_too_long
+pdf_too_many_pages
+invalid_text_encoding
+```
+
+依赖：
+
+```text
+python-multipart==0.0.32
+pdfplumber==0.11.10
+pypdf==6.19.0
+python-docx==1.2.0
+reportlab==5.0.1（开发测试）
+```
+
+验证结果：
+
+```text
+解析测试：12 passed
+完整测试：327 passed
 ```
