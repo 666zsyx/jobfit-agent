@@ -429,7 +429,7 @@ Graph run / resume
 [x] PART 2：可观测性
 [x] PART 3：Token 成本
 [x] PART 4：安全加固
-[ ] PART 5：限流与配额
+[x] PART 5：限流与配额
 [ ] PART 6：部署资产
 [ ] PART 7：演示与面试材料
 [ ] PART 8：质量门禁与 Git 闭环
@@ -683,4 +683,76 @@ Prompt Injection 验证脚本：通过
 高风险 JD / 简历被拒绝
 安全响应头存在
 完整测试：309 passed
+```
+
+---
+
+## 19. PART 5 验证记录
+
+新增：
+
+```text
+app/services/rate_limit.py
+app/dependencies/rate_limit.py
+tests/test_rate_limit.py
+scripts/verify_step12_rate_limit.py
+docs/RATE_LIMIT.md
+```
+
+配置：
+
+```text
+RATE_LIMIT_ENABLED
+RATE_LIMIT_REQUESTS_PER_MINUTE
+DAILY_REQUEST_QUOTA
+DAILY_TOKEN_QUOTA
+```
+
+限制维度：
+
+```text
+每用户每分钟请求数
+每用户每天请求数
+每用户每天 Token 数
+任务运行锁
+```
+
+Redis 降级：
+
+```text
+Redis 正常时使用 Redis 计数
+Redis 故障时使用进程内保守计数器
+```
+
+429 响应：
+
+```text
+统一错误体
+Retry-After
+limit_type
+```
+
+已接入：
+
+```text
+chat
+chat_stream
+jobs_extract
+agent_match
+agent_run
+agent_stream
+graph_run
+graph_resume
+graph_stream
+```
+
+验证结果：
+
+```text
+限流测试：4 passed
+请求限流验证：通过
+每日请求配额：通过
+每日 Token 配额：通过
+429 响应：通过
+完整测试：313 passed
 ```
