@@ -11,3 +11,4 @@ asyncpg==0.30.0
 redis==8.1.0
 fastembed==0.8.1
 chromadb==1.5.9
+langgraph==1.2.12
