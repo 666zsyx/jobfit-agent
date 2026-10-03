@@ -24,6 +24,7 @@ class CachedTaskStatus(BaseModel):
     status: Literal[
         "pending",
         "running",
+        "waiting_confirmation",
         "interrupted",
         "completed",
         "failed",
@@ -32,6 +33,7 @@ class CachedTaskStatus(BaseModel):
     current_step: int = Field(ge=0)
     attempt: int = Field(ge=0)
     max_steps: int = Field(gt=0)
+    current_node: str | None = None
 
     @model_validator(mode="after")
     def validate_step_limit(self):
@@ -57,6 +59,7 @@ async def cache_task_status(
     current_step: int,
     attempt: int,
     max_steps: int,
+    current_node: str | None = None,
     ttl: int = TASK_STATUS_TTL_SECONDS,
 ) -> None:
     if ttl <= 0:
@@ -78,6 +81,7 @@ async def cache_task_status(
             "current_step": current_step,
             "attempt": attempt,
             "max_steps": max_steps,
+            "current_node": current_node,
         },
         ensure_ascii=False,
     )

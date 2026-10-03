@@ -6,10 +6,10 @@ import json
 from typing import Any, Literal
 
 from langgraph.runtime import Runtime
+from langgraph.types import interrupt
 
 from app.graphs.jobfit.runtime import JobFitGraphContext
 from app.graphs.jobfit.state import (
-    ConfirmationDecision,
     JobFitGraphState,
     ReactStatus,
 )
@@ -377,21 +377,51 @@ def assess_evidence(state: JobFitGraphState) -> dict:
 
 
 def human_confirmation(state: JobFitGraphState) -> dict:
-    """阶段三仍然使用普通节点模拟人工确认。
+    """节点：暂停工作流并等待人工确认。"""
 
-    PART 5 会把这个节点替换为 LangGraph interrupt。
-    """
-
-    decision: ConfirmationDecision = (
-        state.get("confirmation_decision") or "approve"
+    payload = interrupt(
+        {
+            "type": "human_confirmation",
+            "pending_report": state.get("pending_report"),
+            "actions": ["approve", "revise", "reject"],
+        }
     )
 
+    if not isinstance(payload, dict):
+        raise TypeError("人工确认 resume 数据必须是字典")
+
+    decision = payload.get("decision")
     if decision not in {"approve", "revise", "reject"}:
-        raise ValueError("confirmation_decision 不合法")
+        raise ValueError("decision 只能是 approve、revise 或 reject")
+
+    reviewed_report = None
+    resume_revision_text = None
+
+    if decision == "reject":
+        reviewed_report = None
+    elif decision == "revise":
+        edited_report = payload.get("edited_report")
+        if edited_report is not None and not isinstance(edited_report, dict):
+            raise ValueError("edited_report 必须是 JSON 对象")
+        reviewed_report = (
+            edited_report
+            if isinstance(edited_report, dict)
+            else state.get("pending_report")
+        )
+
+        raw_revision_text = payload.get("resume_revision_text")
+        if raw_revision_text is not None:
+            resume_revision_text = str(raw_revision_text).strip()
+            if not resume_revision_text:
+                raise ValueError("resume_revision_text 不能为空")
+    else:
+        reviewed_report = state.get("pending_report")
 
     return {
         **_node_update("human_confirmation"),
         "confirmation_decision": decision,
+        "reviewed_report": reviewed_report,
+        "resume_revision_text": resume_revision_text,
     }
 
 

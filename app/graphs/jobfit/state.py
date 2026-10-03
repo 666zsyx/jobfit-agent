@@ -40,6 +40,8 @@ class JobFitGraphState(TypedDict, total=False):
     final_answer: str | None
     react_status: ReactStatus | None
     pending_report: dict[str, Any] | None
+    reviewed_report: dict[str, Any] | None
+    resume_revision_text: str | None
 
     confirmation_decision: ConfirmationDecision | None
     report_id: int | None

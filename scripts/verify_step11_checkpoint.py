@@ -11,6 +11,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 from typing import Any
 
+from langgraph.types import Command
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.event_loop import configure_event_loop_policy
@@ -144,35 +145,63 @@ async def main() -> None:
 
     async with open_postgres_checkpointer(setup=True) as saver:
         graph = build_jobfit_graph(checkpointer=saver)
-        first_result = await graph.ainvoke(
+        interrupted_result = await graph.ainvoke(
             initial_state,
             config=config,
             context=runtime_context,
         )
 
+    assert "__interrupt__" in interrupted_result
+    assert interrupted_result["pending_report"]["summary"]
+
+    edited_report = {
+        "summary": "修改后的 Checkpoint 报告",
+        "result_json": {"answer": "修改后的结论", "chunk_ids": [101]},
+    }
+
     async with open_postgres_checkpointer() as saver:
         graph = build_jobfit_graph(checkpointer=saver)
-        snapshot = await graph.aget_state(config)
-        persisted = snapshot.values
+        waiting_snapshot = await graph.aget_state(config)
+        resumed_result = await graph.ainvoke(
+            Command(
+                resume={
+                    "decision": "revise",
+                    "edited_report": edited_report,
+                    "resume_revision_text": "修改后的简历版本",
+                }
+            ),
+            config=config,
+            context=runtime_context,
+        )
+        final_snapshot = await graph.aget_state(config)
         await saver.adelete_thread(thread_id)
 
-    assert first_result["status"] == "completed"
-    assert first_result["final_answer"] == "Checkpoint 验证完成"
-    assert first_result["report_id"] == 101
-    assert persisted["final_answer"] == "Checkpoint 验证完成"
-    assert persisted["report_id"] == 101
-    assert snapshot.next == ()
+    assert list(waiting_snapshot.next) == ["human_confirmation"]
+    assert resumed_result["status"] == "completed"
+    assert resumed_result["confirmation_decision"] == "revise"
+    assert resumed_result["reviewed_report"] == edited_report
+    assert resumed_result["resume_revision_text"] == "修改后的简历版本"
+    assert final_snapshot.next == ()
 
     print(
         json.dumps(
             {
                 "task_id": task_id,
                 "thread_id": thread_id,
-                "status": first_result["status"],
-                "final_answer": persisted["final_answer"],
-                "report_id": persisted["report_id"],
+                "interrupted": "__interrupt__" in interrupted_result,
+                "waiting_node": list(waiting_snapshot.next),
+                "resume_decision": resumed_result[
+                    "confirmation_decision"
+                ],
+                "reviewed_summary": resumed_result[
+                    "reviewed_report"
+                ]["summary"],
+                "resume_revision_text": resumed_result[
+                    "resume_revision_text"
+                ],
+                "status": resumed_result["status"],
                 "checkpoint_reopened": True,
-                "checkpoint_next": list(snapshot.next),
+                "checkpoint_next": list(final_snapshot.next),
                 "cleanup_completed": True,
             },
             ensure_ascii=False,

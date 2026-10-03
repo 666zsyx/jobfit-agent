@@ -8,6 +8,7 @@ from redis.exceptions import ConnectionError as RedisConnectionError
 from app.core.exceptions import LLMServiceError, TaskStateConflictError
 from app.routers import agent as agent_router
 from app.schemas.analysis_task_api import (
+    GraphTaskExecutionResult,
     PersistedAgentExecutionResult,
 )
 from app.schemas.chat import TokenUsage
@@ -20,6 +21,7 @@ def make_task() -> SimpleNamespace:
         current_step=0,
         attempt=0,
         max_steps=8,
+        current_node=None,
     )
 
 
@@ -107,6 +109,7 @@ def test_create_task_returns_201_response(
             "current_step": 0,
             "attempt": 0,
             "max_steps": 8,
+            "current_node": None,
         },
     }
     assert calls == [
@@ -125,6 +128,7 @@ def test_create_task_returns_201_response(
             "current_step": 0,
             "attempt": 0,
             "max_steps": 8,
+            "current_node": None,
         }
     ]
 
@@ -283,6 +287,7 @@ def test_get_task_returns_cache_hit_without_database(
             "current_step": 2,
             "attempt": 1,
             "max_steps": 8,
+            "current_node": None,
         }
 
     monkeypatch.setattr(
@@ -303,6 +308,7 @@ def test_get_task_returns_cache_hit_without_database(
         "current_step": 2,
         "attempt": 1,
         "max_steps": 8,
+        "current_node": None,
     }
 
 
@@ -356,6 +362,7 @@ def test_get_task_cache_miss_reads_database_and_backfills_cache(
         "current_step": 0,
         "attempt": 0,
         "max_steps": 8,
+        "current_node": None,
     }
     assert cache_calls == [
         {
@@ -365,6 +372,7 @@ def test_get_task_cache_miss_reads_database_and_backfills_cache(
             "current_step": 0,
             "attempt": 0,
             "max_steps": 8,
+            "current_node": None,
         }
     ]
 
@@ -445,3 +453,131 @@ def test_get_task_returns_404_when_not_owned(
 
     assert response.status_code == 404
     assert response.json()["message"] == "任务不存在或无权访问"
+
+
+def test_run_graph_task_endpoint_returns_result(
+    client,
+    auth_headers,
+    monkeypatch,
+):
+    calls = []
+
+    async def fake_run_graph_persisted_task(session_factory, **kwargs):
+        calls.append(kwargs)
+        return GraphTaskExecutionResult(
+            task_id=10,
+            status="waiting_confirmation",
+            current_node="human_confirmation",
+            current_step=2,
+            interrupted=True,
+            pending_confirmation={"summary": "待确认"},
+        )
+
+    monkeypatch.setattr(
+        agent_router,
+        "run_graph_persisted_task",
+        fake_run_graph_persisted_task,
+    )
+
+    response = client.post(
+        "/api/agent/tasks/10/graph/run",
+        headers=auth_headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["data"]["status"] == "waiting_confirmation"
+    assert response.json()["data"]["current_node"] == "human_confirmation"
+    assert calls[0]["user_id"] == 1
+    assert calls[0]["task_id"] == 10
+
+
+def test_resume_graph_task_endpoint_passes_revision(
+    client,
+    auth_headers,
+    monkeypatch,
+):
+    calls = []
+
+    async def fake_resume_graph_persisted_task(session_factory, **kwargs):
+        calls.append(kwargs)
+        return GraphTaskExecutionResult(
+            task_id=10,
+            status="completed",
+            current_node="finalize",
+            current_step=2,
+            report_id=99,
+            report_version=1,
+            new_resume_version_id=101,
+        )
+
+    monkeypatch.setattr(
+        agent_router,
+        "resume_graph_persisted_task",
+        fake_resume_graph_persisted_task,
+    )
+
+    response = client.post(
+        "/api/agent/tasks/10/graph/resume",
+        headers=auth_headers,
+        json={
+            "decision": "revise",
+            "edited_report": {
+                "summary": "确认后报告",
+                "result_json": {"answer": "确认"},
+            },
+            "resume_revision_text": "修改后的简历",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["data"]["status"] == "completed"
+    assert calls[0]["decision"] == "revise"
+    assert calls[0]["resume_revision_text"] == "修改后的简历"
+
+
+def test_resume_graph_task_requires_edited_content_for_revise(
+    client,
+    auth_headers,
+):
+    response = client.post(
+        "/api/agent/tasks/10/graph/resume",
+        headers=auth_headers,
+        json={"decision": "revise"},
+    )
+
+    assert response.status_code == 422
+
+
+def test_get_graph_confirmation_endpoint_returns_pending(
+    client,
+    auth_headers,
+    monkeypatch,
+):
+    async def fake_get_graph_task_confirmation(session_factory, **kwargs):
+        assert kwargs["user_id"] == 1
+        assert kwargs["task_id"] == 10
+        return GraphTaskExecutionResult(
+            task_id=10,
+            status="waiting_confirmation",
+            current_node="human_confirmation",
+            current_step=2,
+            interrupted=True,
+            pending_confirmation={"summary": "待确认"},
+        )
+
+    monkeypatch.setattr(
+        agent_router,
+        "get_graph_task_confirmation",
+        fake_get_graph_task_confirmation,
+    )
+
+    response = client.get(
+        "/api/agent/tasks/10/graph/confirmation",
+        headers=auth_headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["data"]["interrupted"] is True
+    assert response.json()["data"]["pending_confirmation"] == {
+        "summary": "待确认"
+    }

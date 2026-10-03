@@ -66,6 +66,7 @@ async def _cache_run_status_safely(
     current_step: int,
     attempt: int,
     max_steps: int,
+    current_node: str | None = None,
 ) -> None:
     if redis_client is None:
         return
@@ -79,6 +80,7 @@ async def _cache_run_status_safely(
             current_step=current_step,
             attempt=attempt,
             max_steps=max_steps,
+            current_node=current_node,
         )
     except RedisError:
         logger.warning(
@@ -121,6 +123,8 @@ async def _prepare_run_snapshot(
     *,
     user_id: int,
     task_id: int,
+    allowed_statuses: set[str] | None = None,
+    increment_attempt: bool = True,
 ) -> AnalysisTaskRunSnapshot:
     """用短事务锁定任务并提交 running 状态与运行快照。"""
 
@@ -140,7 +144,9 @@ async def _prepare_run_snapshot(
             if task is None:
                 raise LookupError("任务不存在或无权访问")
 
-            if task.status not in RUNNABLE_TASK_STATUSES:
+            if task.status not in (
+                allowed_statuses or RUNNABLE_TASK_STATUSES
+            ):
                 raise TaskStateConflictError(
                     f"任务状态 {task.status} 不允许执行"
                 )
@@ -188,7 +194,8 @@ async def _prepare_run_snapshot(
 
             previous_current_step = task.current_step
             task.status = "running"
-            task.attempt += 1
+            if increment_attempt:
+                task.attempt += 1
             task.started_at = datetime.now(timezone.utc)
             task.finished_at = None
             task.error_code = None
@@ -211,6 +218,7 @@ async def _prepare_run_snapshot(
                 user_id=user.user_id,
                 username=user.username,
                 role=user.role,
+                job_id=job.job_id,
                 job_description=job.raw_description,
                 resume_profile=resume_profile,
                 conversation_id=task.conversation_id,

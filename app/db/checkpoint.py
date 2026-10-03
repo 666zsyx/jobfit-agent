@@ -42,21 +42,33 @@ def to_psycopg_conn_string(database_url: str | None = None) -> str:
     raise ValueError("database_url 必须是 PostgreSQL 连接串")
 
 
-def checkpoint_thread_id(task_id: int) -> str:
+def checkpoint_thread_id(
+    task_id: int,
+    attempt: int | None = None,
+) -> str:
     """为分析任务生成稳定的 Checkpoint 线程 ID。"""
 
     if task_id <= 0:
         raise ValueError("task_id 必须大于 0")
 
-    return f"jobfit-task-{task_id}"
+    if attempt is None:
+        return f"jobfit-task-{task_id}"
+
+    if attempt <= 0:
+        raise ValueError("attempt 必须大于 0")
+
+    return f"jobfit-task-{task_id}-attempt-{attempt}"
 
 
-def build_checkpoint_config(task_id: int) -> dict[str, Any]:
+def build_checkpoint_config(
+    task_id: int,
+    attempt: int | None = None,
+) -> dict[str, Any]:
     """生成 LangGraph 调用需要的 config。"""
 
     return {
         "configurable": {
-            "thread_id": checkpoint_thread_id(task_id),
+            "thread_id": checkpoint_thread_id(task_id, attempt),
         }
     }
 

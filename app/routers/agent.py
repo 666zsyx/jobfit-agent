@@ -24,9 +24,15 @@ from app.schemas.agent_events import AgentEvent, format_sse_event
 from app.schemas.analysis_task_api import (
     AnalysisTaskCreateRequest,
     AnalysisTaskResponse,
+    GraphTaskConfirmationRequest,
 )
 from app.schemas.auth import CurrentUser
 from app.schemas.react_agent import JobFitAgentRequest
+from app.services.graph_agent import (
+    get_graph_task_confirmation,
+    resume_graph_persisted_task,
+    run_graph_persisted_task,
+)
 from app.services.persisted_agent import (
     create_persisted_task,
     run_persisted_task,
@@ -71,6 +77,7 @@ async def create_analysis_task_endpoint(
             current_step=task.current_step,
             attempt=task.attempt,
             max_steps=task.max_steps,
+            current_node=task.current_node,
         )
     except RedisError:
         logger.warning(
@@ -85,6 +92,7 @@ async def create_analysis_task_endpoint(
         current_step=task.current_step,
         attempt=task.attempt,
         max_steps=task.max_steps,
+        current_node=task.current_node,
     )
     payload = success_response(data=data)
     payload["code"] = status.HTTP_201_CREATED
@@ -165,6 +173,7 @@ async def get_analysis_task_endpoint(
         current_step=task.current_step,
         attempt=task.attempt,
         max_steps=task.max_steps,
+        current_node=task.current_node,
     )
 
     try:
@@ -176,6 +185,7 @@ async def get_analysis_task_endpoint(
             current_step=task.current_step,
             attempt=task.attempt,
             max_steps=task.max_steps,
+            current_node=task.current_node,
         )
     except RedisError:
         logger.warning(
@@ -309,6 +319,85 @@ async def stream_analysis_task_endpoint(
 
 
 # 运行一次受控的 JobFit ReAct 分析。
+@router.post("/tasks/{task_id}/graph/run")
+async def run_graph_task_endpoint(
+    task_id: int,
+    current_user: CurrentUser = Depends(get_current_user),
+) -> dict:
+    """执行 LangGraph 版持久化岗位分析任务。"""
+
+    try:
+        result = await run_graph_persisted_task(
+            async_session_factory,
+            user_id=current_user.id,
+            task_id=task_id,
+            redis_client=get_redis_client(),
+        )
+    except LookupError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except TaskStateConflictError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
+    return success_response(data=result)
+
+
+@router.post("/tasks/{task_id}/graph/resume")
+async def resume_graph_task_endpoint(
+    task_id: int,
+    request: GraphTaskConfirmationRequest,
+    current_user: CurrentUser = Depends(get_current_user),
+) -> dict:
+    """提交人工确认并恢复 LangGraph 任务。"""
+
+    try:
+        result = await resume_graph_persisted_task(
+            async_session_factory,
+            user_id=current_user.id,
+            task_id=task_id,
+            decision=request.decision,
+            edited_report=request.edited_report,
+            resume_revision_text=request.resume_revision_text,
+            redis_client=get_redis_client(),
+        )
+    except LookupError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except TaskStateConflictError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
+    return success_response(data=result)
+
+
+@router.get("/tasks/{task_id}/graph/confirmation")
+async def get_graph_task_confirmation_endpoint(
+    task_id: int,
+    current_user: CurrentUser = Depends(get_current_user),
+) -> dict:
+    """读取当前任务的待确认报告。"""
+
+    try:
+        result = await get_graph_task_confirmation(
+            async_session_factory,
+            user_id=current_user.id,
+            task_id=task_id,
+        )
+    except LookupError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    return success_response(data=result)
+
+
 @router.post("/match")
 async def match_jobfit_agent(
     request: JobFitAgentRequest,

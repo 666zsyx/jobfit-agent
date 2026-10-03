@@ -4,6 +4,9 @@ import asyncio
 import json
 from typing import Any
 
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.types import Command
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.graphs.jobfit import JobFitGraphContext, build_jobfit_graph
@@ -149,6 +152,39 @@ def make_initial_state(**overrides) -> dict:
     return state
 
 
+async def run_graph_with_decision(
+    graph,
+    state: dict,
+    context: JobFitGraphContext,
+    *,
+    decision: str = "approve",
+    edited_report: dict | None = None,
+    resume_revision_text: str | None = None,
+    thread_id: str = "test-thread",
+) -> tuple[dict, dict]:
+    config = {"configurable": {"thread_id": thread_id}}
+    first_result = await graph.ainvoke(
+        state,
+        config=config,
+        context=context,
+    )
+    if "__interrupt__" not in first_result:
+        return first_result, first_result
+
+    resume_payload = {"decision": decision}
+    if edited_report is not None:
+        resume_payload["edited_report"] = edited_report
+    if resume_revision_text is not None:
+        resume_payload["resume_revision_text"] = resume_revision_text
+
+    final_result = await graph.ainvoke(
+        Command(resume=resume_payload),
+        config=config,
+        context=context,
+    )
+    return first_result, final_result
+
+
 def test_graph_matches_handwritten_react_contract(monkeypatch) -> None:
     registry = make_registry(executed=[])
     manual_events: list[AgentEvent] = []
@@ -194,7 +230,7 @@ def test_graph_matches_handwritten_react_contract(monkeypatch) -> None:
         )
     )
 
-    graph = build_jobfit_graph()
+    graph = build_jobfit_graph(checkpointer=InMemorySaver())
     graph_chat = make_chat_sequence(
         registry=registry,
         responses=[
@@ -223,10 +259,11 @@ def test_graph_matches_handwritten_react_contract(monkeypatch) -> None:
         "event_sink": make_event_sink(graph_events),
     }
 
-    graph_result = asyncio.run(
-        graph.ainvoke(
+    _, graph_result = asyncio.run(
+        run_graph_with_decision(
+            graph,
             make_initial_state(),
-            context=graph_context,
+            graph_context,
         )
     )
 
@@ -285,7 +322,7 @@ def test_graph_matches_max_steps_contract(monkeypatch) -> None:
         )
     )
 
-    graph = build_jobfit_graph()
+    graph = build_jobfit_graph(checkpointer=InMemorySaver())
     graph_context: JobFitGraphContext = {
         "chat_with_tools": make_chat_sequence(
             registry=registry,
@@ -305,10 +342,11 @@ def test_graph_matches_max_steps_contract(monkeypatch) -> None:
         "event_sink": None,
     }
 
-    graph_result = asyncio.run(
-        graph.ainvoke(
+    _, graph_result = asyncio.run(
+        run_graph_with_decision(
+            graph,
             make_initial_state(max_steps=1),
-            context=graph_context,
+            graph_context,
         )
     )
 
@@ -324,7 +362,7 @@ def test_graph_matches_max_steps_contract(monkeypatch) -> None:
 
 def test_graph_rejects_without_saving_report() -> None:
     registry = make_registry(executed=[])
-    graph = build_jobfit_graph()
+    graph = build_jobfit_graph(checkpointer=InMemorySaver())
     context: JobFitGraphContext = {
         "chat_with_tools": make_chat_sequence(
             registry=registry,
@@ -342,10 +380,12 @@ def test_graph_rejects_without_saving_report() -> None:
         "event_sink": None,
     }
 
-    result = asyncio.run(
-        graph.ainvoke(
-            make_initial_state(confirmation_decision="reject"),
-            context=context,
+    _, result = asyncio.run(
+        run_graph_with_decision(
+            graph,
+            make_initial_state(),
+            context,
+            decision="reject",
         )
     )
 
@@ -353,6 +393,48 @@ def test_graph_rejects_without_saving_report() -> None:
     assert result["error_code"] == "user_rejected"
     assert result.get("report_id") is None
     assert result["trace"][-1] == "cancel"
+
+
+def test_graph_revise_uses_edited_report() -> None:
+    registry = make_registry(executed=[])
+    graph = build_jobfit_graph(checkpointer=InMemorySaver())
+    context: JobFitGraphContext = {
+        "chat_with_tools": make_chat_sequence(
+            registry=registry,
+            responses=[
+                LLMWithToolsResult(
+                    content="等待用户确认",
+                    tool_calls=[],
+                    usage=make_usage(10, 2),
+                    latency_ms=5,
+                )
+            ],
+        ),
+        "tool_registry": registry,
+        "tool_context_factory": make_context_factory(event_sink=None),
+        "event_sink": None,
+    }
+    edited_report = {
+        "summary": "修改后的报告",
+        "result_json": {"answer": "用户修改后的结论"},
+    }
+
+    first, result = asyncio.run(
+        run_graph_with_decision(
+            graph,
+            make_initial_state(),
+            context,
+            decision="revise",
+            edited_report=edited_report,
+            resume_revision_text="修改后的简历版本",
+        )
+    )
+
+    assert "__interrupt__" in first
+    assert result["confirmation_decision"] == "revise"
+    assert result["reviewed_report"] == edited_report
+    assert result["resume_revision_text"] == "修改后的简历版本"
+    assert result["status"] == "completed"
 
 
 def test_prepare_run_validates_required_identifiers() -> None:
@@ -468,7 +550,7 @@ def test_graph_executes_real_rag_tool_and_preserves_evidence_pack(
             collect_tool_audit=True,
         )
 
-    graph = build_jobfit_graph()
+    graph = build_jobfit_graph(checkpointer=InMemorySaver())
     context: JobFitGraphContext = {
         "chat_with_tools": make_chat_sequence(
             registry=registry,
@@ -494,10 +576,11 @@ def test_graph_executes_real_rag_tool_and_preserves_evidence_pack(
         "event_sink": None,
     }
 
-    result = asyncio.run(
-        graph.ainvoke(
+    _, result = asyncio.run(
+        run_graph_with_decision(
+            graph,
             make_initial_state(),
-            context=context,
+            context,
         )
     )
 
