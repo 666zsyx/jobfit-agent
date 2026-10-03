@@ -501,7 +501,7 @@ Checkpoint 保存什么，不保存什么
 
 ```text
 [x] 设计冻结
-[ ] LangGraph 最小闭环
+[x] LangGraph 最小闭环
 [ ] JobFit Graph 骨架
 [ ] 核心业务节点迁移
 [ ] PostgreSQL Checkpoint
@@ -510,4 +510,40 @@ Checkpoint 保存什么，不保存什么
 [ ] SSE 扩展
 [ ] 双引擎对比
 [ ] 文档、测试、Git、push 和 tag
+```
+
+---
+
+## 16. PART 1 验证记录
+
+学习轨目录：
+
+```text
+D:\agentstudy\study-roads\step11_langgraph
+```
+
+已验证：
+
+```text
+State / Node / Edge / 条件跳转
+SqliteSaver Checkpoint
+interrupt 人工暂停
+Command(resume=...) 恢复
+批准 / 修改 / 拒绝
+两个独立 Python 进程之间恢复
+```
+
+依赖版本：
+
+```text
+langgraph==1.2.12
+langgraph-checkpoint-sqlite==3.1.1
+pytest==9.1.1
+```
+
+验证命令与结果：
+
+```text
+python -m pytest D:\agentstudy\study-roads\step11_langgraph\tests -q
+6 passed
 ```
