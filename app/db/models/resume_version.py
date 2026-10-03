@@ -36,7 +36,7 @@ class ResumeVersion(Base):
             name="resume_versions_version_no_check",
         ),
         CheckConstraint(
-            "source_type IN ('text', 'pdf')",
+            "source_type IN ('text', 'pdf', 'docx', 'txt')",
             name="resume_versions_source_type_check",
         ),
         {"schema": "jobfit"},

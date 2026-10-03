@@ -50,6 +50,17 @@ class UnsafeInputError(AppError):
 
 
 # 表示任务当前状态不允许执行请求的操作。
+class ResumeFileError(AppError):
+    def __init__(
+        self,
+        message: str,
+        error_code: str,
+        status_code: int = 422,
+    ):
+        self.error_code = error_code
+        super().__init__(message=message, status_code=status_code)
+
+
 class RateLimitExceededError(AppError):
     def __init__(
         self,
@@ -84,9 +95,13 @@ async def app_error_handler(request: Request, exc: AppError):
         content={
             "code": exc.status_code,
             "message": exc.message,
-            "data": {"limit_type": exc.limit_type}
-            if isinstance(exc, RateLimitExceededError)
-            else None,
+            "data": (
+                {"limit_type": exc.limit_type}
+                if isinstance(exc, RateLimitExceededError)
+                else {"error_code": exc.error_code}
+                if isinstance(exc, ResumeFileError)
+                else None
+            ),
         },
     )
 
