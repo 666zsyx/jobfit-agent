@@ -506,8 +506,8 @@ Checkpoint 保存什么，不保存什么
 [x] 核心业务节点迁移
 [x] PostgreSQL Checkpoint
 [x] 人工确认与 Resume
-[ ] 失败重试与恢复
-[ ] SSE 扩展
+[x] 失败重试与恢复
+[x] SSE 扩展
 [ ] 双引擎对比
 [ ] 文档、测试、Git、push 和 tag
 ```
@@ -802,4 +802,93 @@ final_status=completed
 report saved
 resume version appended
 cleanup_completed=true
+```
+
+---
+
+## 21. PART 6 验证记录
+
+失败分类和重试已实现：
+
+```text
+app/graphs/jobfit/retry.py
+
+LLMServiceError 502 / 503 / 504
+TimeoutError
+ConnectionError
+OSError
+```
+
+以上错误可以重试，其他业务错误不盲目重试。
+
+重试策略：
+
+```text
+仅在 agent_decide 节点启用 RetryPolicy
+max_attempts=3
+指数退避
+不自动重试 execute_tools，避免重复副作用
+```
+
+节点事件包装：
+
+```text
+node_started
+node_finished
+node_failed
+retry_scheduled
+waiting_confirmation
+```
+
+Graph SSE 事件：
+
+```text
+graph_started
+task_started
+node_started
+step_started
+tool_started
+tool_finished
+node_finished
+retry_scheduled
+waiting_confirmation
+resumed
+task_completed
+cancelled
+heartbeat
+error
+done
+```
+
+新增接口：
+
+```text
+GET /api/agent/tasks/{task_id}/graph/stream
+```
+
+安全边界：
+
+```text
+不发送隐藏思维链
+不发送简历正文、JD 正文和敏感参数
+只发送节点名、阶段、安全状态和最终内容
+```
+
+测试结果：
+
+```text
+python -m pytest -q
+279 passed
+
+新增验证：
+短时 LLM 503 失败后自动重试成功
+Graph SSE 返回事件流和 done
+```
+
+真实 PostgreSQL 回归：
+
+```text
+verify_step11_checkpoint.py 通过
+verify_step11_graph_agent.py 通过
+测试线程和业务数据清理完成
 ```
