@@ -77,6 +77,7 @@ async def search_resume_chunks_by_vector(
                 title=chunk.title,
                 content=chunk.content,
                 content_hash=chunk.content_hash,
+                position=chunk.position,
                 start_offset=chunk.start_offset,
                 end_offset=chunk.end_offset,
                 chunker_version=chunk.chunker_version,
