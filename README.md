@@ -6,7 +6,7 @@
 
 ## 当前阶段
 
-STEP 08：RAG 混合检索、证据链、Rerank、岗位匹配闭环与检索评估。
+STEP 11：LangGraph 重构、PostgreSQL Checkpoint、人工确认、中断恢复、失败重试和双引擎对比。
 
 当前已经支持：
 
@@ -19,7 +19,11 @@ STEP 08：RAG 混合检索、证据链、Rerank、岗位匹配闭环与检索评
 - `POST /api/agent/tasks`：创建可持久化的岗位分析任务。
 - `POST /api/agent/tasks/{task_id}/run`：执行持久化任务。
 - `GET /api/agent/tasks/{task_id}`：从 Redis/PostgreSQL 查询任务状态。
-- `GET /api/agent/tasks/{task_id}/stream`：通过 SSE 返回 Agent 执行事件。
+- `GET /api/agent/tasks/{task_id}/stream`：通过 SSE 返回手写 ReAct 执行事件。
+- `POST /api/agent/tasks/{task_id}/graph/run`：执行 LangGraph 版岗位分析任务。
+- `POST /api/agent/tasks/{task_id}/graph/resume`：提交人工确认并恢复 Graph 任务。
+- `GET /api/agent/tasks/{task_id}/graph/confirmation`：查询待确认报告。
+- `GET /api/agent/tasks/{task_id}/graph/stream`：通过 SSE 返回 Graph 节点和执行事件。
 
 STEP 08 新增 RAG 能力：
 
@@ -29,6 +33,17 @@ STEP 08 新增 RAG 能力：
 - `BAAI/bge-reranker-base` 重排、EvidencePack 和 chunk_id 引用校验。
 - 持久化 Agent 自动完成 Chunking、向量索引、混合检索和引用报告。
 - 30 条固定评估集和 Markdown/JSON 评估报告。
+
+STEP 11 新增能力：
+
+- 显式 LangGraph StateGraph：`prepare_run → load_context → agent_decide → execute_tools → assess_evidence → human_confirmation → save_report → finalize`。
+- PostgreSQL Checkpoint：`thread_id = jobfit-task-{task_id}-attempt-{attempt}`。
+- 人工确认：支持 approve、revise、reject 和中断恢复。
+- 修改确认后可追加新的 `resume_version`。
+- `agent_decide` 节点级重试，只重试临时 LLM、网络和超时错误。
+- SSE 增加 Graph 节点、重试、等待确认和恢复事件。
+- 保留手写 ReAct，并通过契约脚本验证两版最终回答、工具轨迹、Usage 和核心事件一致。
+
 
 岗位提取接口使用 Prompt、JSON Schema、JSON 模式和 Pydantic 双重校验。模型调用成功但输出为空或不符合 Schema 时，最多尝试两次；认证、限流、超时和网络错误不会进入结构重试。
 
@@ -43,7 +58,7 @@ STEP 05 已增加工具注册与单次 Function Calling 编排基础。当前注
 
 STEP 06 新增 `app/services/react_agent.py` 和 `POST /api/agent/match`。ReAct 服务最多执行 8 轮模型决策；模型每轮可以选择调用工具或给出最终回答。每次工具调用都会写入 `trace`，所有外层模型调用的 Token Usage 会累计，达到最大步数时返回 `max_steps_reached`。
 
-外层编排的一次工具往返最多调用模型两次；工具 handler 内部可能再次调用模型，例如岗位或简历结构化提取，当前内层模型 Usage 尚未合并到外层统计。工具参数统一使用 Pydantic 校验，用户身份由后端 `ToolContext` 注入，工具 handler 最多执行 30 秒；调用日志只记录工具名、用户 ID、参数键、状态和耗时，不记录 JD、简历或报告正文。当前有数据库持久化工具等待 STEP 07 实现。
+外层编排的一次工具往返最多调用模型两次；工具 handler 内部可能再次调用模型，例如岗位或简历结构化提取，当前内层模型 Usage 尚未合并到外层统计。工具参数统一使用 Pydantic 校验，用户身份由后端 `ToolContext` 注入，工具 handler 最多执行 30 秒；调用日志只记录工具名、用户 ID、参数键、状态和耗时，不记录 JD、简历或报告正文。数据库持久化、报告版本和工具审计已于 STEP 07 完成。
 
 当前鉴权仍为演示版本：
 
@@ -51,7 +66,7 @@ STEP 06 新增 `app/services/react_agent.py` 和 `POST /api/agent/match`。ReAct
 Authorization: Bearer demo-token
 ```
 
-真实用户系统将在后续阶段实现。STEP 06 只做部署就绪检查，不新增公开环境；STEP 07 后建立私有 staging，STEP 12 后正式公网部署。
+真实用户系统将在后续阶段实现。远程私有 staging 延期到 Linux 云服务器，STEP 12 后完成正式公网部署。
 
 ## 环境准备
 
@@ -109,6 +124,7 @@ RERANKER_MODEL_NAME=BAAI/bge-reranker-base
 
 ```powershell
 .\.venv\Scripts\python.exe -m alembic upgrade head
+.\.venv\Scripts\python.exe .\scripts\setup_langgraph_checkpoint.py
 ```
 
 ## 本地启动

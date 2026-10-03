@@ -27,7 +27,7 @@ class AnalysisTask(Base):
     __table_args__ = (
         CheckConstraint(
             "status IN ("
-            "'pending', 'running', 'interrupted', "
+            "'pending', 'running', 'waiting_confirmation', 'interrupted', "
             "'completed', 'failed', 'cancelled'"
             ")",
             name="analysis_tasks_status_check",
@@ -134,6 +134,10 @@ class AnalysisTask(Base):
         nullable=False,
         server_default="8",
     )
+    current_node: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
     error_code: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
@@ -184,9 +188,3 @@ class AnalysisTask(Base):
         passive_deletes=True,
         order_by="ToolCallRecord.step_no",
     )
-
-
-
-
-
-

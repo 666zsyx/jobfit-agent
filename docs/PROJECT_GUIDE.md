@@ -42,12 +42,22 @@ STEP 05：功能、测试、真实验收、文档、Git、远程 push 和 tag �
 STEP 06：完成；功能、测试、真实模型、HTTP、部署就绪、文档和本地 Git 闭环均已完成
 STEP 07：代码、数据库/Redis、SSE、真实模型持久化、自动化测试和本地验收完成；私有 staging 待 Docker 环境。
 STEP 08：RAG 数据模型、Chunking、Embedding、向量检索、混合召回、Rerank、引用校验、Agent 集成和检索评估全部完成。
+STEP 09～10：Agent 架构复盘、边界校准和 STEP 11 重构指导完成；完整源码定向学习延期。
+STEP 11：LangGraph 重构、PostgreSQL Checkpoint、人工确认、中断恢复、节点重试、SSE 和双引擎对比全部完成。
 ```
 
 当前代码分支：
 
 ```text
 main
+```
+
+STEP 11 对应版本：
+
+```text
+tag: step-11-langgraph
+engine: LangGraph
+workflow: prepare_run → load_context → agent_decide → execute_tools → assess_evidence → human_confirmation → save_report → finalize
 ```
 
 STEP 06 对应版本：
@@ -1624,6 +1634,51 @@ STEP 12：安全、评估、监控和性能优化完成后正式公网部署
 - 职业能力知识库仍可在后续扩展。
 - 私有 staging 继续延期到 Linux 云服务器。
 
+# 十四点七、STEP 11：LangGraph 重构、Checkpoint 与 Human-in-the-loop
+
+完成：
+
+- 新增 `app/graphs/jobfit/` 显式状态图，保留手写 ReAct 实现。
+- LangGraph 节点复用现有 LLM、ToolRegistry、ToolExecutor、RAG、Repository、用户隔离和引用校验。
+- PostgreSQL Checkpoint 使用 `jobfit-task-{task_id}-attempt-{attempt}` 作为线程 ID。
+- `human_confirmation` 使用 `interrupt` 暂停，使用 `Command(resume=...)` 恢复。
+- 支持 approve、revise、reject；修改确认可追加新的 `resume_version`。
+- `analysis_tasks` 增加 `waiting_confirmation` 状态和 `current_node` 字段。
+- `agent_decide` 增加节点级重试，仅重试临时 LLM、网络、超时和服务端错误。
+- Graph SSE 增加节点开始、结束、失败、重试、等待确认和恢复事件。
+- 新增手写版与 Graph 版契约对比脚本和对比文档。
+
+关键接口：
+
+```text
+POST /api/agent/tasks/{task_id}/graph/run
+POST /api/agent/tasks/{task_id}/graph/resume
+GET  /api/agent/tasks/{task_id}/graph/confirmation
+GET  /api/agent/tasks/{task_id}/graph/stream
+```
+
+关键边界：
+
+- Graph State 不保存数据库连接、API Key 或隐藏思维链。
+- Graph 节点不能绕过 Repository 和 ToolContext 直接读取其他用户数据。
+- 人工确认前不写最终报告；恢复后写操作保持幂等边界。
+- 不自动重试有副作用的工具执行。
+- 手写 ReAct 继续保留，作为底层心智和兼容路径。
+
+验证结果：
+
+```text
+完整测试：279 passed
+双版本对比：answer/status/steps/usage/tool_trace/core_events 全部一致
+PostgreSQL Checkpoint 中断恢复：通过
+Graph Agent 人工确认和简历版本追加：通过
+```
+
+限制：
+
+- Checkpoint 表由 LangGraph setup 脚本维护，暂未纳入业务 Alembic 表。
+- 私有 staging 继续延期到 Linux 云服务器。
+
 # 十五、每个大 STEP 完成后的维护清单
 
 每完成一个大 STEP，必须更新本文档：
@@ -1676,6 +1731,10 @@ STEP 12：安全、评估、监控和性能优化完成后正式公网部署
 12. app/services/matching.py
 13. tests/test_jobfit_tools.py
 14. tests/test_tool_calling_service.py
+15. app/graphs/jobfit/graph.py
+16. app/graphs/jobfit/nodes.py
+17. app/services/graph_agent.py
+18. docs/STEP11_ENGINE_COMPARISON.md
 ```
 
 重点关注：
@@ -1707,6 +1766,12 @@ STEP 12：安全、评估、监控和性能优化完成后正式公网部署
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
+```
+
+初始化 LangGraph Checkpoint：
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\setup_langgraph_checkpoint.py
 ```
 
 检查当前分支：

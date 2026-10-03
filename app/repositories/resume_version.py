@@ -1,6 +1,6 @@
 # 提供按用户隔离的简历版本数据访问。
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Resume, ResumeVersion
@@ -70,5 +70,42 @@ class ResumeVersionRepository:
         self.session.add(resume_version)
         await self.session.flush()
         return resume_version
+
+    async def create_next_for_user(
+        self,
+        resume_id: int,
+        user_id: int,
+        raw_text: str,
+        extracted_sections: dict | None = None,
+        source_type: str = "text",
+    ) -> ResumeVersion:
+        """追加当前用户简历的下一个版本。"""
+
+        parent_statement = (
+            select(Resume.resume_id)
+            .where(
+                Resume.resume_id == resume_id,
+                Resume.user_id == user_id,
+                Resume.deleted_at.is_(None),
+            )
+            .with_for_update()
+        )
+        parent_resume_id = await self.session.scalar(parent_statement)
+        if parent_resume_id is None:
+            raise LookupError("简历不存在或无权访问")
+
+        version_statement = select(
+            func.coalesce(func.max(ResumeVersion.version_no), 0) + 1
+        ).where(ResumeVersion.resume_id == resume_id)
+        version_no = await self.session.scalar(version_statement)
+
+        return await self.create_for_user(
+            resume_id=resume_id,
+            user_id=user_id,
+            version_no=version_no,
+            raw_text=raw_text,
+            extracted_sections=extracted_sections,
+            source_type=source_type,
+        )
 
 

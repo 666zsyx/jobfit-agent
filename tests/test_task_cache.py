@@ -58,6 +58,7 @@ def test_cache_task_status_set_and_get():
                 "current_step": 2,
                 "attempt": 1,
                 "max_steps": 8,
+                "current_node": None,
             }
         finally:
             await redis.aclose()

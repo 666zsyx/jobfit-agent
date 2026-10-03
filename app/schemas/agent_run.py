@@ -10,6 +10,7 @@ class AnalysisTaskRunSnapshot(BaseModel):
     user_id: int = Field(gt=0)
     username: str = Field(min_length=1)
     role: str = Field(min_length=1)
+    job_id: int = Field(gt=0)
     job_description: str = Field(min_length=1)
     resume_profile: dict
     conversation_id: int | None = Field(default=None, gt=0)

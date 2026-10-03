@@ -130,6 +130,7 @@ async def complete_analysis_task(
     status: str,
     current_step: int,
     error_code: str | None = None,
+    current_node: str | None = None,
 ) -> AnalysisTask:
     """更新任务终态，但不提交当前事务。"""
 
@@ -153,6 +154,8 @@ async def complete_analysis_task(
 
     task.status = status
     task.current_step = current_step
+    if current_node is not None:
+        task.current_node = current_node
     task.finished_at = func.now()
     task.updated_at = func.now()
 
@@ -222,6 +225,39 @@ async def mark_analysis_task_interrupted(
     task.error_code = error_code
     task.error_message_safe = error_code
     task.finished_at = func.now()
+    task.updated_at = func.now()
+    await session.flush()
+    return task
+
+
+async def mark_analysis_task_waiting_confirmation(
+    session: AsyncSession,
+    *,
+    user_id: int,
+    task_id: int,
+    current_step: int,
+    current_node: str,
+) -> AnalysisTask:
+    """把运行中的任务标记为等待人工确认。"""
+
+    repository = AnalysisTaskRepository(session)
+    task = await repository.get_for_user(
+        task_id=task_id,
+        user_id=user_id,
+        for_update=True,
+    )
+    if task is None:
+        raise LookupError("任务不存在或无权访问")
+
+    if task.status != "running":
+        return task
+
+    task.status = "waiting_confirmation"
+    task.current_step = current_step
+    task.current_node = current_node
+    task.error_code = None
+    task.error_message_safe = None
+    task.finished_at = None
     task.updated_at = func.now()
     await session.flush()
     return task

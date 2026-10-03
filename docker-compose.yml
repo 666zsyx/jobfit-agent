@@ -51,7 +51,7 @@ services:
     command:
       - sh
       - -c
-      - alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000
+      - alembic upgrade head && python scripts/setup_langgraph_checkpoint.py && uvicorn app.main:app --host 0.0.0.0 --port 8000
     restart: unless-stopped
     healthcheck:
       test:

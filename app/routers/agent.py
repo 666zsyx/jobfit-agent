@@ -24,9 +24,15 @@ from app.schemas.agent_events import AgentEvent, format_sse_event
 from app.schemas.analysis_task_api import (
     AnalysisTaskCreateRequest,
     AnalysisTaskResponse,
+    GraphTaskConfirmationRequest,
 )
 from app.schemas.auth import CurrentUser
 from app.schemas.react_agent import JobFitAgentRequest
+from app.services.graph_agent import (
+    get_graph_task_confirmation,
+    resume_graph_persisted_task,
+    run_graph_persisted_task,
+)
 from app.services.persisted_agent import (
     create_persisted_task,
     run_persisted_task,
@@ -71,6 +77,7 @@ async def create_analysis_task_endpoint(
             current_step=task.current_step,
             attempt=task.attempt,
             max_steps=task.max_steps,
+            current_node=task.current_node,
         )
     except RedisError:
         logger.warning(
@@ -85,6 +92,7 @@ async def create_analysis_task_endpoint(
         current_step=task.current_step,
         attempt=task.attempt,
         max_steps=task.max_steps,
+        current_node=task.current_node,
     )
     payload = success_response(data=data)
     payload["code"] = status.HTTP_201_CREATED
@@ -165,6 +173,7 @@ async def get_analysis_task_endpoint(
         current_step=task.current_step,
         attempt=task.attempt,
         max_steps=task.max_steps,
+        current_node=task.current_node,
     )
 
     try:
@@ -176,6 +185,7 @@ async def get_analysis_task_endpoint(
             current_step=task.current_step,
             attempt=task.attempt,
             max_steps=task.max_steps,
+            current_node=task.current_node,
         )
     except RedisError:
         logger.warning(
@@ -309,6 +319,208 @@ async def stream_analysis_task_endpoint(
 
 
 # 运行一次受控的 JobFit ReAct 分析。
+@router.post("/tasks/{task_id}/graph/run")
+async def run_graph_task_endpoint(
+    task_id: int,
+    current_user: CurrentUser = Depends(get_current_user),
+) -> dict:
+    """执行 LangGraph 版持久化岗位分析任务。"""
+
+    try:
+        result = await run_graph_persisted_task(
+            async_session_factory,
+            user_id=current_user.id,
+            task_id=task_id,
+            redis_client=get_redis_client(),
+        )
+    except LookupError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except TaskStateConflictError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
+    return success_response(data=result)
+
+
+@router.post("/tasks/{task_id}/graph/resume")
+async def resume_graph_task_endpoint(
+    task_id: int,
+    request: GraphTaskConfirmationRequest,
+    current_user: CurrentUser = Depends(get_current_user),
+) -> dict:
+    """提交人工确认并恢复 LangGraph 任务。"""
+
+    try:
+        result = await resume_graph_persisted_task(
+            async_session_factory,
+            user_id=current_user.id,
+            task_id=task_id,
+            decision=request.decision,
+            edited_report=request.edited_report,
+            resume_revision_text=request.resume_revision_text,
+            redis_client=get_redis_client(),
+        )
+    except LookupError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except TaskStateConflictError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
+    return success_response(data=result)
+
+
+@router.get("/tasks/{task_id}/graph/confirmation")
+async def get_graph_task_confirmation_endpoint(
+    task_id: int,
+    current_user: CurrentUser = Depends(get_current_user),
+) -> dict:
+    """读取当前任务的待确认报告。"""
+
+    try:
+        result = await get_graph_task_confirmation(
+            async_session_factory,
+            user_id=current_user.id,
+            task_id=task_id,
+        )
+    except LookupError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    return success_response(data=result)
+
+
+@router.get("/tasks/{task_id}/graph/stream")
+async def stream_graph_task_endpoint(
+    task_id: int,
+    current_user: CurrentUser = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_session),
+) -> StreamingResponse:
+    """以 SSE 流式执行 LangGraph 持久化任务。"""
+
+    task = await AnalysisTaskRepository(session).get_for_user(
+        task_id=task_id,
+        user_id=current_user.id,
+    )
+    if task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="任务不存在或无权访问",
+        )
+
+    async def event_generator():
+        queue: asyncio.Queue[AgentEvent | None] = asyncio.Queue()
+        terminal_event_sent = False
+
+        async def event_sink(event: AgentEvent) -> None:
+            nonlocal terminal_event_sent
+            if event.type in {
+                "task_completed",
+                "task_interrupted",
+                "task_failed",
+                "cancelled",
+                "waiting_confirmation",
+            }:
+                terminal_event_sent = True
+            await queue.put(event)
+
+        async def run_task() -> None:
+            nonlocal terminal_event_sent
+            try:
+                await run_graph_persisted_task(
+                    async_session_factory,
+                    user_id=current_user.id,
+                    task_id=task_id,
+                    redis_client=get_redis_client(),
+                    event_sink=event_sink,
+                )
+            except asyncio.CancelledError:
+                raise
+            except TaskStateConflictError as exc:
+                if not terminal_event_sent:
+                    await queue.put(
+                        AgentEvent(
+                            type="error",
+                            task_id=task_id,
+                            content=str(exc),
+                            data={"code": 409},
+                        )
+                    )
+            except LookupError as exc:
+                if not terminal_event_sent:
+                    await queue.put(
+                        AgentEvent(
+                            type="error",
+                            task_id=task_id,
+                            content=str(exc),
+                            data={"code": 404},
+                        )
+                    )
+            except Exception:
+                logger.exception(
+                    "Graph SSE 任务执行失败 task_id=%s",
+                    task_id,
+                )
+                if not terminal_event_sent:
+                    await queue.put(
+                        AgentEvent(
+                            type="error",
+                            task_id=task_id,
+                            content="任务执行失败",
+                            data={"code": 500},
+                        )
+                    )
+            finally:
+                await queue.put(None)
+
+        background_task = asyncio.create_task(run_task())
+        try:
+            while True:
+                try:
+                    event = await asyncio.wait_for(
+                        queue.get(),
+                        timeout=15,
+                    )
+                except TimeoutError:
+                    yield format_sse_event(
+                        AgentEvent(
+                            type="heartbeat",
+                            task_id=task_id,
+                        )
+                    )
+                    continue
+
+                if event is None:
+                    break
+
+                yield format_sse_event(event)
+
+            yield "event: done\ndata: [DONE]\n\n"
+        finally:
+            if not background_task.done():
+                background_task.cancel()
+                with suppress(asyncio.CancelledError):
+                    await background_task
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
 @router.post("/match")
 async def match_jobfit_agent(
     request: JobFitAgentRequest,
