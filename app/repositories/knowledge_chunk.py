@@ -1,6 +1,6 @@
 # 提供按用户隔离的知识 Chunk 数据访问。
 
-from sqlalchemy import select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import KnowledgeChunk, Resume, ResumeVersion
@@ -161,16 +161,49 @@ class KnowledgeChunkRepository:
             )
             self.session.add(chunk)
         else:
+            content_changed = chunk.content_hash != content_hash
             chunk.section_type = section_type
             chunk.title = title
             chunk.content = content
             chunk.content_hash = content_hash
             chunk.start_offset = start_offset
             chunk.end_offset = end_offset
-            chunk.index_status = index_status
+
+            if content_changed:
+                chunk.index_status = "pending"
+                chunk.embedding_model = None
+                chunk.embedding_dimension = None
 
         await self.session.flush()
         return chunk
+
+    async def mark_stale_except_positions(
+        self,
+        *,
+        user_id: int,
+        resume_version_id: int,
+        chunker_version: str,
+        active_positions: set[int],
+    ) -> int:
+        """把本轮未生成的旧 Chunk 标记为 stale。"""
+
+        statement = update(KnowledgeChunk).where(
+            KnowledgeChunk.user_id == user_id,
+            KnowledgeChunk.resume_version_id == resume_version_id,
+            KnowledgeChunk.chunker_version == chunker_version,
+        )
+
+        if active_positions:
+            statement = statement.where(
+                KnowledgeChunk.position.not_in(active_positions)
+            )
+
+        statement = statement.values(
+            index_status="stale",
+            updated_at=func.now(),
+        ).execution_options(synchronize_session="fetch")
+        result = await self.session.execute(statement)
+        return result.rowcount or 0
 
     async def mark_index_status_for_user(
         self,
