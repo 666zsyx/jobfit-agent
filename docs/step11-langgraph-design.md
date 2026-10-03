@@ -504,7 +504,7 @@ Checkpoint 保存什么，不保存什么
 [x] LangGraph 最小闭环
 [x] JobFit Graph 骨架
 [x] 核心业务节点迁移
-[ ] PostgreSQL Checkpoint
+[x] PostgreSQL Checkpoint
 [ ] 人工确认与 Resume
 [ ] 失败重试与恢复
 [ ] SSE 扩展
@@ -641,4 +641,70 @@ max_steps 终止行为一致
 ```text
 python -m pytest -q
 265 passed
+```
+
+---
+
+## 19. PART 4 验证记录
+
+新增 PostgreSQL Checkpoint 支持：
+
+```text
+app/db/checkpoint.py
+app/core/event_loop.py
+scripts/setup_langgraph_checkpoint.py
+scripts/verify_step11_checkpoint.py
+tests/test_checkpoint_config.py
+```
+
+线程标识：
+
+```text
+task_id
+→ jobfit-task-{task_id}
+→ LangGraph configurable.thread_id
+```
+
+数据库职责：
+
+```text
+PostgreSQL Checkpoint 保存 Graph State 和控制位置
+PostgreSQL 业务表保存任务、报告、审计和简历事实
+Redis 只保存短期缓存和运行锁
+Chroma 只保存可重建的向量索引
+```
+
+Windows 兼容处理：
+
+```text
+psycopg 3 异步连接不支持 ProactorEventLoop
+应用启动前切换到 SelectorEventLoop
+```
+
+Checkpoint 表初始化：
+
+```text
+python scripts/setup_langgraph_checkpoint.py
+```
+
+真实 PostgreSQL 验证：
+
+```text
+写入 Graph State
+关闭 Checkpoint 连接
+重新打开连接
+读取同一 thread_id 的 State
+验证 final_answer 和 report_id
+删除验证线程
+```
+
+验证结果：
+
+```text
+python -m pytest -q
+272 passed
+
+python scripts/verify_step11_checkpoint.py
+checkpoint_reopened=true
+cleanup_completed=true
 ```
