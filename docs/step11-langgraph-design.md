@@ -509,7 +509,7 @@ Checkpoint 保存什么，不保存什么
 [x] 失败重试与恢复
 [x] SSE 扩展
 [x] 双引擎对比
-[ ] 文档、测试、Git、push 和 tag
+[x] 文档、测试、Git、push 和 tag
 ```
 
 ---
@@ -963,4 +963,46 @@ executed_tools_equal=true
 ```text
 python -m pytest -q
 279 passed
+```
+
+---
+
+## 23. STEP 11 最终验收
+
+完整测试：
+
+```text
+279 passed
+```
+
+真实 PostgreSQL 验证：
+
+```text
+Checkpoint 中断恢复通过
+Graph Agent 人工确认与恢复通过
+报告保存和 resume_version 追加通过
+测试线程与业务数据清理通过
+```
+
+双引擎对比：
+
+```text
+answer_equal=true
+status_equal=true
+steps_equal=true
+usage_equal=true
+tool_trace_equal=true
+core_events_equal=true
+executed_tools_equal=true
+```
+
+最终 Git 闭环：
+
+```text
+feature/step-11-langgraph
+→ merge main
+→ push origin main
+→ delete feature branch
+→ tag step-11-langgraph
+→ push tag
 ```
