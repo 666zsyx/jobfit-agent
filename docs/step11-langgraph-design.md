@@ -503,7 +503,7 @@ Checkpoint 保存什么，不保存什么
 [x] 设计冻结
 [x] LangGraph 最小闭环
 [x] JobFit Graph 骨架
-[ ] 核心业务节点迁移
+[x] 核心业务节点迁移
 [ ] PostgreSQL Checkpoint
 [ ] 人工确认与 Resume
 [ ] 失败重试与恢复
@@ -589,4 +589,56 @@ human_confirmation
 ```text
 python -m pytest -q
 264 passed
+```
+
+---
+
+## 18. PART 3 验证记录
+
+Graph 已接入真实运行时能力：
+
+```text
+LLM chat_with_tools
+ToolRegistry
+ToolExecutor
+ToolContext
+工具审计
+RAG search_resume_evidence
+EvidencePack 状态保留
+max_steps 循环终止
+SSE step/tool/content 事件
+```
+
+运行时依赖通过 LangGraph `context_schema` 注入：
+
+```text
+chat_with_tools
+tool_registry
+tool_context_factory
+event_sink
+```
+
+这些对象不进入 Graph State，也不会被 Checkpoint 序列化。
+
+已建立手写 ReAct 与 Graph 版契约测试：
+
+```text
+最终回答一致
+ReAct 状态一致
+模型决策步数一致
+Token Usage 一致
+工具调用轨迹一致
+工具审计事件一致
+SSE 事件顺序一致
+max_steps 终止行为一致
+```
+
+新增真实 RAG 工具测试，验证 Graph 执行
+`search_resume_evidence` 后会把 EvidencePack 写回 Graph State。
+
+测试结果：
+
+```text
+python -m pytest -q
+265 passed
 ```
