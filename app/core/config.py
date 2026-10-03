@@ -22,6 +22,7 @@ class Settings(BaseModel):
     embedding_cache_path: str
     vector_index_path: str
     vector_collection_name: str
+    reranker_model_name: str
 
 
 def get_settings() -> Settings:
@@ -49,6 +50,10 @@ def get_settings() -> Settings:
         "VECTOR_COLLECTION_NAME",
         "jobfit_resume_chunks_v1",
     )
+    reranker_model_name = os.getenv(
+        "RERANKER_MODEL_NAME",
+        "BAAI/bge-reranker-base",
+    )
 
     if not api_key or not base_url or not model:
         raise RuntimeError("LLM 配置不完整，请检查 .env")
@@ -70,6 +75,7 @@ def get_settings() -> Settings:
         embedding_cache_path=embedding_cache_path,
         vector_index_path=vector_index_path,
         vector_collection_name=vector_collection_name,
+        reranker_model_name=reranker_model_name,
     )
 
 

@@ -87,3 +87,38 @@ class HybridSearchHit(RetrievalHit):
     vector_rank: int | None = Field(default=None, ge=1)
     fusion_score: float = Field(gt=0)
     rank: int = Field(ge=1)
+
+
+class RerankedSearchHit(HybridSearchHit):
+    """Reranker 重排后的候选，保留融合排名。"""
+
+    rerank_score: float
+    rerank_rank: int = Field(ge=1)
+
+
+class EvidenceItem(RetrievalHit):
+    """最终进入上下文的一条证据。"""
+
+    relevance_score: float
+    rank: int = Field(ge=1)
+
+
+class EvidencePack(BaseModel):
+    """一次岗位要求分析使用的 Top-N 证据包。"""
+
+    model_config = ConfigDict(extra="forbid")
+
+    requirement: str = Field(min_length=1, max_length=500)
+    items: list[EvidenceItem] = Field(max_length=20)
+    rerank_applied: bool
+    degraded: bool = False
+    fallback_reason: str | None = None
+
+    @model_validator(mode="after")
+    def validate_unique_chunks(self):
+        chunk_ids = [item.chunk_id for item in self.items]
+
+        if len(chunk_ids) != len(set(chunk_ids)):
+            raise ValueError("EvidencePack 不能包含重复 chunk_id")
+
+        return self
