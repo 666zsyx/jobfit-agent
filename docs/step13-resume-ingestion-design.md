@@ -412,7 +412,7 @@ DOCX ZIP Bomb 被拒绝
 [x] PART 0：设计与基线
 [x] PART 1：解析服务和文件校验
 [x] PART 2：简历版本持久化
-[ ] PART 3：上传 API 和查询 API
+[x] PART 3：上传 API 和查询 API
 [ ] PART 4：结构提取衔接
 [ ] PART 5：测试、文档和 Git 闭环
 ```
@@ -475,7 +475,7 @@ reportlab==5.0.1（开发测试）
 
 ```text
 解析测试：12 passed
-完整测试：330 passed
+完整测试：335 passed
 ```
 
 ---
@@ -514,6 +514,54 @@ source_type 保存为 pdf / docx / txt
 ```text
 简历持久化测试：3 passed
 ORM 测试：通过
-完整测试：330 passed
+完整测试：335 passed
 Alembic upgrade：4864bd55d0dd
+```
+
+---
+
+## 16. PART 3 验证记录
+
+新增接口：
+
+```text
+POST /api/resumes/upload
+GET  /api/resumes
+GET  /api/resumes/{resume_id}
+```
+
+上传接口：
+
+```text
+multipart/form-data
+支持 file / resume_id / title
+上传前限制读取大小
+解析后保存为简历版本
+返回 resume_id、resume_version_id、版本号、字符数和预览
+```
+
+查询接口：
+
+```text
+只查询当前用户简历
+列表返回最新版本摘要
+详情返回版本列表
+不返回其他用户数据
+```
+
+安全：
+
+```text
+上传接口接入限流
+解析错误使用安全错误码
+旧版 .doc 返回 415
+不长期保存原始文件
+```
+
+验证结果：
+
+```text
+上传和查询 API 测试：5 passed
+持久化测试：3 passed
+完整测试：335 passed
 ```
