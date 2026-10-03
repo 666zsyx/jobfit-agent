@@ -4,6 +4,21 @@
 
 基于 RAG 和工具调用的可解释岗位匹配与差距分析 Agent。
 
+## 项目文档
+
+- [项目全景与维护文档](docs/PROJECT_GUIDE.md)
+- [系统架构](docs/ARCHITECTURE.md)
+- [演示指南](docs/DEMO_GUIDE.md)
+- [面试问答](docs/INTERVIEW_QA.md)
+- [简历项目描述](docs/RESUME_PROJECT.md)
+- [RAG 评估](docs/RAG_EVALUATION.md)
+- [Agent 评估](docs/AGENT_EVALUATION.md)
+- [可观测性](docs/OBSERVABILITY.md)
+- [成本统计](docs/COST_TRACKING.md)
+- [安全设计](docs/SECURITY.md)
+- [限流设计](docs/RATE_LIMIT.md)
+- [部署说明](docs/DEPLOYMENT.md)
+
 ## 当前阶段
 
 STEP 11：LangGraph 重构、PostgreSQL Checkpoint、人工确认、中断恢复、失败重试和双引擎对比。

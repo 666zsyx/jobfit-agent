@@ -431,7 +431,7 @@ Graph run / resume
 [x] PART 4：安全加固
 [x] PART 5：限流与配额
 [x] PART 6：部署资产
-[ ] PART 7：演示与面试材料
+[x] PART 7：演示与面试材料
 [ ] PART 8：质量门禁与 Git 闭环
 ```
 
@@ -818,4 +818,68 @@ readiness 测试：2 passed
 生产 Compose YAML：解析通过
 完整测试：315 passed
 远程 Linux 部署：待远程验证
+```
+
+---
+
+## 22. PART 7 验证记录
+
+新增：
+
+```text
+docs/ARCHITECTURE.md
+docs/DEMO_GUIDE.md
+docs/INTERVIEW_QA.md
+docs/RESUME_PROJECT.md
+```
+
+架构文档覆盖：
+
+```text
+系统上下文
+手写 ReAct
+LangGraph StateGraph
+RAG 数据流
+Checkpoint 和 Human-in-the-loop
+安全和可观测性
+部署形态
+当前限制
+```
+
+演示指南覆盖：
+
+```text
+五分钟演示
+十分钟完整演示
+RAG/Agent 评估
+Checkpoint 验证
+安全、限流和部署检查
+```
+
+面试材料覆盖：
+
+```text
+为什么做 Agent
+为什么保留双版本
+工具安全
+RAG 与混合检索
+Rerank 与引用校验
+Checkpoint 与人工确认
+重试和副作用
+Prompt Injection
+评估、成本、限流
+为什么不用 Multi-Agent
+```
+
+简历材料覆盖：
+
+```text
+项目一句话描述
+Agent 工程方向 bullet
+RAG 方向 bullet
+生产化方向 bullet
+技术栈
+量化亮点
+STAR 回答
+诚实边界
 ```
