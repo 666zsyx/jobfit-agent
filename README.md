@@ -21,7 +21,7 @@
 
 ## 当前阶段
 
-STEP 11：LangGraph 重构、PostgreSQL Checkpoint、人工确认、中断恢复、失败重试和双引擎对比。
+STEP 12：Agent 评估、可观测性、Token 成本、安全加固、限流配额、就绪检查和生产部署资产。远程 Linux staging 待验证。
 
 当前已经支持：
 
@@ -39,6 +39,17 @@ STEP 11：LangGraph 重构、PostgreSQL Checkpoint、人工确认、中断恢复
 - `POST /api/agent/tasks/{task_id}/graph/resume`：提交人工确认并恢复 Graph 任务。
 - `GET /api/agent/tasks/{task_id}/graph/confirmation`：查询待确认报告。
 - `GET /api/agent/tasks/{task_id}/graph/stream`：通过 SSE 返回 Graph 节点和执行事件。
+
+STEP 12 新增能力：
+
+- 15 条固定 Agent 评估集：任务完成率、工具正确率、引用、拒答、确认恢复和无依据建议。
+- request_id、结构化日志、任务耗时分解和敏感字段脱敏。
+- 外层与内层模型 Usage 合并、Token 成本估算和成本报表。
+- Prompt Injection 检测、安全提示、边界标签转义和 HTTP 安全头。
+- Redis 按用户/接口限流、每日请求配额、每日 Token 配额和 429 响应。
+- `/ready` 就绪检查：PostgreSQL、Checkpoint、Redis。
+- 生产 Docker Compose、非 root Dockerfile 和部署配置检查。
+
 
 STEP 08 新增 RAG 能力：
 

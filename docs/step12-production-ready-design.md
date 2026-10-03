@@ -432,7 +432,7 @@ Graph run / resume
 [x] PART 5：限流与配额
 [x] PART 6：部署资产
 [x] PART 7：演示与面试材料
-[ ] PART 8：质量门禁与 Git 闭环
+[x] PART 8：质量门禁与 Git 闭环
 ```
 
 ---
@@ -882,4 +882,50 @@ RAG 方向 bullet
 量化亮点
 STAR 回答
 诚实边界
+```
+
+---
+
+## 23. STEP 12 最终验收
+
+自动化测试：
+
+```text
+315 passed
+```
+
+评估：
+
+```text
+Agent 评估 15 cases，strict_passed=true
+RAG 评估 30 cases
+```
+
+工程验证：
+
+```text
+Checkpoint 中断恢复通过
+Graph Agent 人工确认和恢复通过
+双引擎核心行为一致
+安全检测通过
+限流和配额通过
+部署依赖就绪检查通过
+```
+
+最终 Git 闭环：
+
+```text
+feature/step-12-production-ready
+→ merge main
+→ push origin main
+→ delete feature branch
+→ tag step-12-production-ready
+→ push tag
+```
+
+部署边界：
+
+```text
+远程 Linux staging 和公网部署仍需在云服务器执行
+当前完成本机测试、部署资产和依赖就绪验证
 ```
