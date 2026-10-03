@@ -505,7 +505,7 @@ Checkpoint 保存什么，不保存什么
 [x] JobFit Graph 骨架
 [x] 核心业务节点迁移
 [x] PostgreSQL Checkpoint
-[ ] 人工确认与 Resume
+[x] 人工确认与 Resume
 [ ] 失败重试与恢复
 [ ] SSE 扩展
 [ ] 双引擎对比
@@ -706,5 +706,100 @@ python -m pytest -q
 
 python scripts/verify_step11_checkpoint.py
 checkpoint_reopened=true
+cleanup_completed=true
+```
+
+---
+
+## 20. PART 5 验证记录
+
+人工确认已使用 LangGraph `interrupt`：
+
+```text
+assess_evidence
+→ human_confirmation
+→ interrupt
+→ Command(resume=...)
+→ save_report / cancel
+```
+
+支持确认动作：
+
+```text
+approve
+revise
+reject
+```
+
+修改确认支持：
+
+```text
+edited_report
+resume_revision_text
+```
+
+数据库变更：
+
+```text
+analysis_tasks.status 增加 waiting_confirmation
+analysis_tasks.current_node 增加可空字段
+Alembic revision: c2508fd83a64
+```
+
+新增服务：
+
+```text
+app/services/graph_agent.py
+run_graph_persisted_task
+resume_graph_persisted_task
+get_graph_task_confirmation
+```
+
+新增接口：
+
+```text
+POST /api/agent/tasks/{task_id}/graph/run
+POST /api/agent/tasks/{task_id}/graph/resume
+GET /api/agent/tasks/{task_id}/graph/confirmation
+```
+
+持久化行为：
+
+```text
+Graph 暂停时任务状态为 waiting_confirmation
+恢复后批准报告写入 reports
+修改确认后追加新的 resume_version
+拒绝时任务状态为 cancelled，不保存报告
+工具审计只在最终完成或取消时写入一次，避免恢复造成重复记录
+```
+
+真实 PostgreSQL 验证：
+
+```text
+graph run
+→ interrupt
+→ 关闭连接
+→ 重新打开连接
+→ Command resume
+→ completed
+```
+
+验证结果：
+
+```text
+python -m pytest -q
+277 passed
+
+python scripts/verify_step11_checkpoint.py
+interrupted=true
+waiting_node=human_confirmation
+resume_decision=revise
+cleanup_completed=true
+
+python scripts/verify_step11_graph_agent.py
+waiting_status=waiting_confirmation
+final_status=completed
+report saved
+resume version appended
 cleanup_completed=true
 ```
