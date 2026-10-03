@@ -84,6 +84,48 @@ async def check_knowledge_chunks() -> None:
         assert own_chunk.content == "Python、FastAPI、PostgreSQL"
         assert other_chunk is None
 
+        upserted = await repository.upsert_for_user(
+            user_id=owner.user_id,
+            resume_version_id=version.resume_version_id,
+            section_type="skills",
+            title="技能",
+            content="Python、FastAPI、PostgreSQL、Redis",
+            content_hash=f"{content_hash}-updated",
+            position=1,
+            start_offset=0,
+            end_offset=34,
+        )
+        assert upserted.chunk_id == chunk.chunk_id
+
+        chunks = await repository.list_for_resume_version(
+            user_id=owner.user_id,
+            resume_version_id=version.resume_version_id,
+        )
+        assert len(chunks) == 1
+        assert chunks[0].content.endswith("Redis")
+
+        indexed = await repository.mark_index_status_for_user(
+            chunk_id=chunk.chunk_id,
+            user_id=owner.user_id,
+            index_status="indexed",
+            embedding_model="fake-embedding",
+            embedding_dimension=3,
+        )
+        assert indexed.index_status == "indexed"
+        assert indexed.embedding_model == "fake-embedding"
+        assert indexed.embedding_dimension == 3
+
+        try:
+            await repository.mark_index_status_for_user(
+                chunk_id=chunk.chunk_id,
+                user_id=other_user.user_id,
+                index_status="indexed",
+            )
+        except LookupError:
+            print("cross-user status update rejected: ok")
+        else:
+            raise AssertionError("跨用户状态更新未被拒绝")
+
         try:
             await repository.create_for_user(
                 user_id=other_user.user_id,

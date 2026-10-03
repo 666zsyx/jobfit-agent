@@ -1,4 +1,4 @@
-# 验证九个 ORM 模型的结构、约束、索引、外键和关系配置。
+# 验证十个 ORM 模型的结构、约束、索引、外键和关系配置。
 
 from sqlalchemy.orm import configure_mappers
 

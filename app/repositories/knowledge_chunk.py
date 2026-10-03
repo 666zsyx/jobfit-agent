@@ -12,6 +12,34 @@ class KnowledgeChunkRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
+    async def _lock_parent_resume_version(
+        self,
+        *,
+        user_id: int,
+        resume_version_id: int,
+    ) -> int:
+        """锁定并验证简历版本属于当前用户。"""
+
+        statement = (
+            select(ResumeVersion.resume_version_id)
+            .join(
+                Resume,
+                ResumeVersion.resume_id == Resume.resume_id,
+            )
+            .where(
+                ResumeVersion.resume_version_id == resume_version_id,
+                Resume.user_id == user_id,
+                Resume.deleted_at.is_(None),
+            )
+            .with_for_update()
+        )
+        parent_resume_version_id = await self.session.scalar(statement)
+
+        if parent_resume_version_id is None:
+            raise LookupError("简历版本不存在或无权访问")
+
+        return parent_resume_version_id
+
     async def get_for_user(
         self,
         chunk_id: int,
@@ -63,26 +91,10 @@ class KnowledgeChunkRepository:
         embedding_model: str | None = None,
         embedding_dimension: int | None = None,
     ) -> KnowledgeChunk:
-        # 锁定父简历，防止校验通过后简历被并发软删除。
-        parent_statement = (
-            select(ResumeVersion.resume_version_id)
-            .join(
-                Resume,
-                ResumeVersion.resume_id == Resume.resume_id,
-            )
-            .where(
-                ResumeVersion.resume_version_id == resume_version_id,
-                Resume.user_id == user_id,
-                Resume.deleted_at.is_(None),
-            )
-            .with_for_update()
+        await self._lock_parent_resume_version(
+            user_id=user_id,
+            resume_version_id=resume_version_id,
         )
-        parent_resume_version_id = await self.session.scalar(
-            parent_statement
-        )
-
-        if parent_resume_version_id is None:
-            raise LookupError("简历版本不存在或无权访问")
 
         chunk = KnowledgeChunk(
             user_id=user_id,
@@ -100,5 +112,85 @@ class KnowledgeChunkRepository:
             embedding_dimension=embedding_dimension,
         )
         self.session.add(chunk)
+        await self.session.flush()
+        return chunk
+
+    async def upsert_for_user(
+        self,
+        *,
+        user_id: int,
+        resume_version_id: int,
+        section_type: str,
+        title: str,
+        content: str,
+        content_hash: str,
+        position: int,
+        start_offset: int | None = None,
+        end_offset: int | None = None,
+        chunker_version: str = "v1",
+        index_status: str = "pending",
+    ) -> KnowledgeChunk:
+        """按版本身份幂等写入 Chunk，供后续重建流程复用。"""
+
+        await self._lock_parent_resume_version(
+            user_id=user_id,
+            resume_version_id=resume_version_id,
+        )
+
+        statement = select(KnowledgeChunk).where(
+            KnowledgeChunk.user_id == user_id,
+            KnowledgeChunk.resume_version_id == resume_version_id,
+            KnowledgeChunk.chunker_version == chunker_version,
+            KnowledgeChunk.position == position,
+        )
+        chunk = await self.session.scalar(statement)
+
+        if chunk is None:
+            chunk = KnowledgeChunk(
+                user_id=user_id,
+                resume_version_id=resume_version_id,
+                section_type=section_type,
+                title=title,
+                content=content,
+                content_hash=content_hash,
+                position=position,
+                start_offset=start_offset,
+                end_offset=end_offset,
+                chunker_version=chunker_version,
+                index_status=index_status,
+            )
+            self.session.add(chunk)
+        else:
+            chunk.section_type = section_type
+            chunk.title = title
+            chunk.content = content
+            chunk.content_hash = content_hash
+            chunk.start_offset = start_offset
+            chunk.end_offset = end_offset
+            chunk.index_status = index_status
+
+        await self.session.flush()
+        return chunk
+
+    async def mark_index_status_for_user(
+        self,
+        *,
+        chunk_id: int,
+        user_id: int,
+        index_status: str,
+        embedding_model: str | None = None,
+        embedding_dimension: int | None = None,
+    ) -> KnowledgeChunk:
+        chunk = await self.get_for_user(
+            chunk_id=chunk_id,
+            user_id=user_id,
+        )
+
+        if chunk is None:
+            raise LookupError("知识 Chunk 不存在或无权访问")
+
+        chunk.index_status = index_status
+        chunk.embedding_model = embedding_model
+        chunk.embedding_dimension = embedding_dimension
         await self.session.flush()
         return chunk
