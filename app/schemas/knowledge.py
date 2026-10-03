@@ -41,3 +41,22 @@ class KnowledgeChunkDraft(BaseModel):
 
         return self
 
+
+
+class VectorSearchHit(BaseModel):
+    """向量召回后回查 PostgreSQL 得到的权威证据。"""
+
+    model_config = ConfigDict(extra="forbid")
+
+    chunk_id: int = Field(ge=1)
+    user_id: int = Field(ge=1)
+    resume_version_id: int = Field(ge=1)
+    section_type: ResumeSectionType
+    title: str = Field(min_length=1, max_length=100)
+    content: str = Field(min_length=1, max_length=20_000)
+    content_hash: str = Field(min_length=64, max_length=64)
+    start_offset: int | None = Field(default=None, ge=0)
+    end_offset: int | None = Field(default=None, ge=1)
+    chunker_version: str = Field(min_length=1)
+    similarity: float = Field(ge=-1, le=1)
+    rank: int = Field(ge=1)

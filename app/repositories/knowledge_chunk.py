@@ -51,6 +51,22 @@ class KnowledgeChunkRepository:
         )
         return await self.session.scalar(statement)
 
+    async def get_many_for_user(
+        self,
+        *,
+        chunk_ids: list[int],
+        user_id: int,
+    ) -> list[KnowledgeChunk]:
+        if not chunk_ids:
+            return []
+
+        statement = select(KnowledgeChunk).where(
+            KnowledgeChunk.user_id == user_id,
+            KnowledgeChunk.chunk_id.in_(chunk_ids),
+        )
+        result = await self.session.scalars(statement)
+        return list(result.all())
+
     async def list_for_resume_version(
         self,
         *,
@@ -202,6 +218,35 @@ class KnowledgeChunkRepository:
             index_status="stale",
             updated_at=func.now(),
         ).execution_options(synchronize_session="fetch")
+        result = await self.session.execute(statement)
+        return result.rowcount or 0
+
+    async def mark_many_index_status_for_user(
+        self,
+        *,
+        chunk_ids: list[int],
+        user_id: int,
+        index_status: str,
+        embedding_model: str | None = None,
+        embedding_dimension: int | None = None,
+    ) -> int:
+        if not chunk_ids:
+            return 0
+
+        statement = (
+            update(KnowledgeChunk)
+            .where(
+                KnowledgeChunk.user_id == user_id,
+                KnowledgeChunk.chunk_id.in_(chunk_ids),
+            )
+            .values(
+                index_status=index_status,
+                embedding_model=embedding_model,
+                embedding_dimension=embedding_dimension,
+                updated_at=func.now(),
+            )
+            .execution_options(synchronize_session="fetch")
+        )
         result = await self.session.execute(statement)
         return result.rowcount or 0
 
