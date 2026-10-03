@@ -39,7 +39,30 @@ class StructuredOutputError(AppError):
         super().__init__(message=message, status_code=status_code)
 
 
+# 表示外部输入包含高风险 Prompt Injection 特征。
+class UnsafeInputError(AppError):
+    def __init__(
+        self,
+        message: str = "输入包含不安全指令",
+        status_code: int = 400,
+    ):
+        super().__init__(message=message, status_code=status_code)
+
+
 # 表示任务当前状态不允许执行请求的操作。
+class RateLimitExceededError(AppError):
+    def __init__(
+        self,
+        message: str = "请求过于频繁或配额不足",
+        retry_after_seconds: int = 60,
+        limit_type: str = "rate_limit",
+        status_code: int = 429,
+    ):
+        self.retry_after_seconds = max(retry_after_seconds, 1)
+        self.limit_type = limit_type
+        super().__init__(message=message, status_code=status_code)
+
+
 class TaskStateConflictError(AppError):
     def __init__(
         self,
@@ -51,12 +74,19 @@ class TaskStateConflictError(AppError):
 
 # 把项目业务异常转换为统一错误响应。
 async def app_error_handler(request: Request, exc: AppError):
+    headers = {}
+    if isinstance(exc, RateLimitExceededError):
+        headers["Retry-After"] = str(exc.retry_after_seconds)
+
     return JSONResponse(
         status_code=exc.status_code,
+        headers=headers,
         content={
             "code": exc.status_code,
             "message": exc.message,
-            "data": None,
+            "data": {"limit_type": exc.limit_type}
+            if isinstance(exc, RateLimitExceededError)
+            else None,
         },
     )
 

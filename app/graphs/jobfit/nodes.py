@@ -8,6 +8,11 @@ from typing import Any, Literal
 from langgraph.runtime import Runtime
 from langgraph.types import interrupt
 
+from app.core.cost_tracking import (
+    UsageRecord,
+    finish_usage_collection,
+    start_usage_collection,
+)
 from app.graphs.jobfit.runtime import JobFitGraphContext
 from app.graphs.jobfit.state import (
     JobFitGraphState,
@@ -55,6 +60,18 @@ def _merge_usage(
         ),
         "total_tokens": total_usage.total_tokens + current.total_tokens,
     }
+
+
+def _merge_usage_records(
+    total: dict[str, int] | None,
+    records: list[UsageRecord],
+) -> dict[str, int]:
+    merged = dict(total or _zero_usage())
+    for record in records:
+        merged["prompt_tokens"] += record.prompt_tokens
+        merged["completion_tokens"] += record.completion_tokens
+        merged["total_tokens"] += record.total_tokens
+    return merged
 
 
 def _build_assistant_tool_message(
@@ -137,6 +154,8 @@ def prepare_run(state: JobFitGraphState) -> dict:
         "current_step": 0,
         "max_steps": max_steps,
         "usage": _zero_usage(),
+        "model_ms": 0,
+        "tool_ms": 0,
         "tool_calls": [],
         "pending_report": None,
         "final_answer": None,
@@ -190,15 +209,28 @@ async def agent_decide(
         ),
     )
 
-    model_result = await runtime.context["chat_with_tools"](
-        messages=state.get("messages", []),
-        tools=registry.openai_definitions(),
-    )
+    usage_token = start_usage_collection()
+    try:
+        model_result = await runtime.context["chat_with_tools"](
+            messages=state.get("messages", []),
+            tools=registry.openai_definitions(),
+        )
+    except Exception:
+        finish_usage_collection(usage_token)
+        raise
+    model_usage_records = finish_usage_collection(usage_token)
 
     update = {
         **_node_update("agent_decide"),
         "current_step": current_step,
         "usage": _merge_usage(state.get("usage"), model_result.usage),
+        "model_ms": (
+            state.get("model_ms", 0) + model_result.latency_ms
+        ),
+        "usage_records": [
+            record.model_dump(mode="json")
+            for record in model_usage_records
+        ],
     }
 
     if model_result.tool_calls:
@@ -251,6 +283,7 @@ async def execute_tools(
     event_sink = runtime.context.get("event_sink")
     trace: list[ReactToolExecution] = []
     tool_messages: list[dict[str, str]] = []
+    inner_usage_records: list[UsageRecord] = []
 
     for tool_call in tool_calls:
         await _emit_event(
@@ -286,13 +319,21 @@ async def execute_tools(
             if isinstance(raw_arguments, dict):
                 parsed_arguments = raw_arguments
 
-            execution_result = await execute_tool(
-                registry=registry,
-                tool_name=tool_call.name,
-                arguments=raw_arguments,
-                context=context,
-                step_no=step,
-                tool_call_id=tool_call.id,
+            usage_token = start_usage_collection()
+            try:
+                execution_result = await execute_tool(
+                    registry=registry,
+                    tool_name=tool_call.name,
+                    arguments=raw_arguments,
+                    context=context,
+                    step_no=step,
+                    tool_call_id=tool_call.id,
+                )
+            except Exception:
+                finish_usage_collection(usage_token)
+                raise
+            inner_usage_records.extend(
+                finish_usage_collection(usage_token)
             )
 
         await _emit_event(
@@ -343,6 +384,21 @@ async def execute_tools(
             for pack in context.retrieved_evidence_packs
         ],
         "pending_report": context.pending_report,
+        "usage": _merge_usage_records(
+            state.get("usage"),
+            inner_usage_records,
+        ),
+        "usage_records": [
+            record.model_dump(mode="json")
+            for record in inner_usage_records
+        ],
+        "tool_ms": (
+            state.get("tool_ms", 0)
+            + sum(
+                event.duration_ms or 0
+                for event in context.tool_audit_events
+            )
+        ),
     }
 
 

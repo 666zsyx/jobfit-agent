@@ -74,6 +74,7 @@ class GraphTaskExecutionResult(BaseModel):
     report_version: int | None = None
     new_resume_version_id: int | None = None
     pending_confirmation: dict | None = None
+    usage: dict[str, int] | None = None
 
 
 class PersistedAgentExecutionResult(BaseModel):

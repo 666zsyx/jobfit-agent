@@ -6,14 +6,24 @@ from pydantic import BaseModel, Field
 
 
 # 表示一条客户端聊天消息。
+MAX_CHAT_MESSAGE_LENGTH = 20_000
+MAX_CHAT_MESSAGES = 50
+
+
 class ChatMessage(BaseModel):
     role: Literal["system", "user", "assistant"]
-    content: str = Field(min_length=1)
+    content: str = Field(
+        min_length=1,
+        max_length=MAX_CHAT_MESSAGE_LENGTH,
+    )
 
 
 # 表示非流式聊天请求。
 class ChatRequest(BaseModel):
-    messages: list[ChatMessage] = Field(min_length=1)
+    messages: list[ChatMessage] = Field(
+        min_length=1,
+        max_length=MAX_CHAT_MESSAGES,
+    )
 
 
 # 表示一次模型调用的输入、输出和总 Token。

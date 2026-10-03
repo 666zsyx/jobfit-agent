@@ -44,6 +44,7 @@ STEP 07：代码、数据库/Redis、SSE、真实模型持久化、自动化测�
 STEP 08：RAG 数据模型、Chunking、Embedding、向量检索、混合召回、Rerank、引用校验、Agent 集成和检索评估全部完成。
 STEP 09～10：Agent 架构复盘、边界校准和 STEP 11 重构指导完成；完整源码定向学习延期。
 STEP 11：LangGraph 重构、PostgreSQL Checkpoint、人工确认、中断恢复、节点重试、SSE 和双引擎对比全部完成。
+STEP 12：Agent 评估、可观测性、Token 成本、安全、限流、就绪检查和生产部署资产完成；远程 staging 待 Linux。
 ```
 
 当前代码分支：
@@ -58,6 +59,14 @@ STEP 11 对应版本：
 tag: step-11-langgraph
 engine: LangGraph
 workflow: prepare_run → load_context → agent_decide → execute_tools → assess_evidence → human_confirmation → save_report → finalize
+```
+
+STEP 12 对应版本：
+
+```text
+tag: step-12-production-ready
+engine: production hardening
+features: evaluation, observability, cost, security, rate limit, readiness, deployment assets
 ```
 
 STEP 06 对应版本：
@@ -1679,6 +1688,37 @@ Graph Agent 人工确认和简历版本追加：通过
 - Checkpoint 表由 LangGraph setup 脚本维护，暂未纳入业务 Alembic 表。
 - 私有 staging 继续延期到 Linux 云服务器。
 
+
+# 十四点八、STEP 12：评估、安全、可观测性与生产化
+
+完成：
+
+- 新增 15 条固定 Agent 评估集和评估脚本。
+- 增加 request_id、结构化日志、任务指标、耗时分解和日志脱敏。
+- 合并外层和内层模型 Usage，计算 Token 成本和模型聚合成本。
+- 增加 Prompt Injection 检测、安全提示、边界转义和 HTTP 安全头。
+- 增加 Redis 限流、每日请求配额、每日 Token 配额和 429 响应。
+- 新增 `/ready` 就绪检查，验证 PostgreSQL、Checkpoint 和 Redis。
+- 新增生产 Compose、非 root Dockerfile 和部署配置检查。
+- 新增架构图、演示指南、面试问答和简历项目描述。
+
+关键指标：
+
+```text
+自动化测试：315 passed
+Agent 评估：15 cases，strict_passed=true
+RAG 评估：30 cases
+双引擎核心行为：一致
+安全、限流、就绪检查：通过
+```
+
+当前限制：
+
+- 远程 Linux staging 尚未执行。
+- 固定窗口限流可升级为滑动窗口或令牌桶。
+- 长任务可迁移到独立 Worker 和消息队列。
+- 评估集仍需要独立 holdout 复验。
+
 # 十五、每个大 STEP 完成后的维护清单
 
 每完成一个大 STEP，必须更新本文档：
@@ -1735,6 +1775,11 @@ Graph Agent 人工确认和简历版本追加：通过
 16. app/graphs/jobfit/nodes.py
 17. app/services/graph_agent.py
 18. docs/STEP11_ENGINE_COMPARISON.md
+19. app/services/graph_agent.py
+20. docs/ARCHITECTURE.md
+21. docs/DEMO_GUIDE.md
+22. docs/INTERVIEW_QA.md
+23. docs/RESUME_PROJECT.md
 ```
 
 重点关注：
@@ -1772,6 +1817,18 @@ Graph Agent 人工确认和简历版本追加：通过
 
 ```powershell
 .\.venv\Scripts\python.exe .\scripts\setup_langgraph_checkpoint.py
+```
+
+运行 Agent 评估：
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\evaluate_agent.py --strict
+```
+
+检查部署配置：
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\check_deployment_config.py --strict --connect
 ```
 
 检查当前分支：

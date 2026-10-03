@@ -17,6 +17,7 @@ from app.cache.task_state import (
 from app.core.exceptions import TaskStateConflictError
 from app.core.response import success_response
 from app.dependencies.auth import get_current_user
+from app.dependencies.rate_limit import make_rate_limit_dependency
 from app.dependencies.database import get_db_session
 from app.db.session import async_session_factory
 from app.repositories import AnalysisTaskRepository
@@ -37,6 +38,7 @@ from app.services.persisted_agent import (
     create_persisted_task,
     run_persisted_task,
 )
+from app.services.rate_limit import record_daily_token_usage
 from app.services.react_agent import run_jobfit_agent
 from app.tools import ToolContext
 
@@ -50,6 +52,9 @@ async def create_analysis_task_endpoint(
     request: AnalysisTaskCreateRequest,
     current_user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
+    _rate_limit: None = Depends(
+        make_rate_limit_dependency("tasks_create")
+    ),
 ) -> JSONResponse:
     """创建当前用户的持久化岗位分析任务。"""
 
@@ -106,6 +111,9 @@ async def create_analysis_task_endpoint(
 async def run_analysis_task_endpoint(
     task_id: int,
     current_user: CurrentUser = Depends(get_current_user),
+    _rate_limit: None = Depends(
+        make_rate_limit_dependency("agent_run")
+    ),
 ) -> dict:
     """执行当前用户的持久化岗位分析任务。"""
 
@@ -126,6 +134,11 @@ async def run_analysis_task_endpoint(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         ) from exc
+    await record_daily_token_usage(
+        get_redis_client(),
+        user_id=current_user.id,
+        total_tokens=result.usage.total_tokens,
+    )
     return success_response(data=result)
 
 
@@ -134,6 +147,9 @@ async def get_analysis_task_endpoint(
     task_id: int,
     current_user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
+    _rate_limit: None = Depends(
+        make_rate_limit_dependency("tasks_read")
+    ),
 ) -> dict:
     """优先从 Redis 获取当前用户的任务状态。"""
 
@@ -202,6 +218,9 @@ async def stream_analysis_task_endpoint(
     task_id: int,
     current_user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
+    _rate_limit: None = Depends(
+        make_rate_limit_dependency("agent_stream")
+    ),
 ) -> StreamingResponse:
     """以 SSE 流式返回任务执行过程。"""
 
@@ -227,6 +246,16 @@ async def stream_analysis_task_endpoint(
                 "task_failed",
             }:
                 terminal_event_sent = True
+            if event.type == "task_completed":
+                usage = event.data.get("usage") or {}
+                total_tokens = int(
+                    usage.get("total_tokens", 0)
+                )
+                await record_daily_token_usage(
+                    get_redis_client(),
+                    user_id=current_user.id,
+                    total_tokens=total_tokens,
+                )
             await queue.put(event)
 
         async def run_task() -> None:
@@ -323,6 +352,9 @@ async def stream_analysis_task_endpoint(
 async def run_graph_task_endpoint(
     task_id: int,
     current_user: CurrentUser = Depends(get_current_user),
+    _rate_limit: None = Depends(
+        make_rate_limit_dependency("graph_run")
+    ),
 ) -> dict:
     """执行 LangGraph 版持久化岗位分析任务。"""
 
@@ -343,6 +375,12 @@ async def run_graph_task_endpoint(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         ) from exc
+    usage = result.usage or {}
+    await record_daily_token_usage(
+        get_redis_client(),
+        user_id=current_user.id,
+        total_tokens=int(usage.get("total_tokens", 0)),
+    )
     return success_response(data=result)
 
 
@@ -351,6 +389,9 @@ async def resume_graph_task_endpoint(
     task_id: int,
     request: GraphTaskConfirmationRequest,
     current_user: CurrentUser = Depends(get_current_user),
+    _rate_limit: None = Depends(
+        make_rate_limit_dependency("graph_resume")
+    ),
 ) -> dict:
     """提交人工确认并恢复 LangGraph 任务。"""
 
@@ -374,6 +415,12 @@ async def resume_graph_task_endpoint(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         ) from exc
+    usage = result.usage or {}
+    await record_daily_token_usage(
+        get_redis_client(),
+        user_id=current_user.id,
+        total_tokens=int(usage.get("total_tokens", 0)),
+    )
     return success_response(data=result)
 
 
@@ -381,6 +428,9 @@ async def resume_graph_task_endpoint(
 async def get_graph_task_confirmation_endpoint(
     task_id: int,
     current_user: CurrentUser = Depends(get_current_user),
+    _rate_limit: None = Depends(
+        make_rate_limit_dependency("graph_confirmation")
+    ),
 ) -> dict:
     """读取当前任务的待确认报告。"""
 
@@ -403,6 +453,9 @@ async def stream_graph_task_endpoint(
     task_id: int,
     current_user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
+    _rate_limit: None = Depends(
+        make_rate_limit_dependency("graph_stream")
+    ),
 ) -> StreamingResponse:
     """以 SSE 流式执行 LangGraph 持久化任务。"""
 
@@ -430,6 +483,13 @@ async def stream_graph_task_endpoint(
                 "waiting_confirmation",
             }:
                 terminal_event_sent = True
+            if event.type == "task_completed":
+                usage = event.data.get("usage") or {}
+                await record_daily_token_usage(
+                    get_redis_client(),
+                    user_id=current_user.id,
+                    total_tokens=int(usage.get("total_tokens", 0)),
+                )
             await queue.put(event)
 
         async def run_task() -> None:
@@ -525,6 +585,9 @@ async def stream_graph_task_endpoint(
 async def match_jobfit_agent(
     request: JobFitAgentRequest,
     current_user: CurrentUser = Depends(get_current_user),
+    _rate_limit: None = Depends(
+        make_rate_limit_dependency("agent_match")
+    ),
 ) -> dict:
     context = ToolContext(current_user=current_user)
 
@@ -534,4 +597,9 @@ async def match_jobfit_agent(
         context=context,
     )
 
+    await record_daily_token_usage(
+        get_redis_client(),
+        user_id=current_user.id,
+        total_tokens=result.usage.total_tokens,
+    )
     return success_response(data=result)

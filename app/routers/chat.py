@@ -7,12 +7,15 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
 from app.core.exceptions import LLMServiceError
+from app.cache.client import get_redis_client
 from app.core.response import success_response
+from app.dependencies.rate_limit import make_rate_limit_dependency
 from app.dependencies.auth import get_current_user
 from app.schemas.auth import CurrentUser
 from app.schemas.chat import ChatRequest
 from app.services.llm import chat as llm_chat
 from app.services.llm import stream_chat as llm_stream_chat
+from app.services.rate_limit import record_daily_token_usage
 
 router = APIRouter(prefix="/api", tags=["chat"])
 
@@ -22,12 +25,20 @@ router = APIRouter(prefix="/api", tags=["chat"])
 async def chat_endpoint(
     request: ChatRequest,
     current_user: CurrentUser = Depends(get_current_user),
+    _rate_limit: None = Depends(
+        make_rate_limit_dependency("chat")
+    ),
 ) -> dict:
     message_dicts = [
         message.model_dump()
         for message in request.messages
     ]
     result = await llm_chat(message_dicts)
+    await record_daily_token_usage(
+        get_redis_client(),
+        user_id=current_user.id,
+        total_tokens=result.usage.total_tokens,
+    )
     return success_response(data=result)
 
 
@@ -36,6 +47,9 @@ async def chat_endpoint(
 async def stream_chat_endpoint(
     request: ChatRequest,
     current_user: CurrentUser = Depends(get_current_user),
+    _rate_limit: None = Depends(
+        make_rate_limit_dependency("chat_stream")
+    ),
 ) -> StreamingResponse:
     message_dicts = [
         message.model_dump()
@@ -45,6 +59,12 @@ async def stream_chat_endpoint(
     async def event_generator() -> AsyncIterator[str]:
         try:
             async for event in llm_stream_chat(message_dicts):
+                if event.type == "usage" and event.usage is not None:
+                    await record_daily_token_usage(
+                        get_redis_client(),
+                        user_id=current_user.id,
+                        total_tokens=event.usage.total_tokens,
+                    )
                 payload = event.model_dump(exclude_none=True)
                 data = json.dumps(payload, ensure_ascii=False)
                 yield f"data: {data}\n\n"
