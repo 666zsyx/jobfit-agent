@@ -279,8 +279,16 @@ def test_graph_matches_handwritten_react_contract(monkeypatch) -> None:
         item.model_dump(mode="json")
         for item in manual_context.tool_audit_events
     ] == graph_result["tool_audit_events"]
+    core_event_types = {
+        "step_started",
+        "tool_started",
+        "tool_finished",
+        "content",
+    }
     assert [event.type for event in manual_events] == [
-        event.type for event in graph_events
+        event.type
+        for event in graph_events
+        if event.type in core_event_types
     ]
     assert [
         message["role"]
@@ -358,6 +366,49 @@ def test_graph_matches_max_steps_contract(monkeypatch) -> None:
     assert graph_result["tool_trace"][0]["tool_name"] == (
         "search_resume_evidence"
     )
+
+
+def test_graph_retries_transient_llm_error() -> None:
+    from app.core.exceptions import LLMServiceError
+
+    registry = make_registry(executed=[])
+    events: list[AgentEvent] = []
+    calls = {"count": 0}
+
+    async def flaky_chat(messages, tools):
+        calls["count"] += 1
+        if calls["count"] == 1:
+            raise LLMServiceError("temporary", status_code=503)
+        return LLMWithToolsResult(
+            content="重试后完成",
+            tool_calls=[],
+            usage=make_usage(10, 2),
+            latency_ms=5,
+        )
+
+    graph = build_jobfit_graph(checkpointer=InMemorySaver())
+    context: JobFitGraphContext = {
+        "chat_with_tools": flaky_chat,
+        "tool_registry": registry,
+        "tool_context_factory": make_context_factory(
+            event_sink=make_event_sink(events)
+        ),
+        "event_sink": make_event_sink(events),
+    }
+
+    _, result = asyncio.run(
+        run_graph_with_decision(
+            graph,
+            make_initial_state(),
+            context,
+        )
+    )
+
+    assert calls["count"] == 2
+    assert result["status"] == "completed"
+    assert result["final_answer"] == "重试后完成"
+    assert "retry_scheduled" in [event.type for event in events]
+    assert "node_failed" in [event.type for event in events]
 
 
 def test_graph_rejects_without_saving_report() -> None:

@@ -8,8 +8,13 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 AgentEventType = Literal[
+    "graph_started",
     "task_started",
     "step_started",
+    "node_started",
+    "node_finished",
+    "node_failed",
+    "retry_scheduled",
     "tool_started",
     "tool_finished",
     "retrieval_started",
@@ -21,6 +26,9 @@ AgentEventType = Literal[
     "task_completed",
     "task_interrupted",
     "task_failed",
+    "waiting_confirmation",
+    "resumed",
+    "cancelled",
     "heartbeat",
     "error",
 ]

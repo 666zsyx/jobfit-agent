@@ -351,6 +351,17 @@ async def _execute_graph_task(
         await _emit_event(
             event_sink,
             AgentEvent(
+                type="graph_started",
+                task_id=task_id,
+                data={
+                    "attempt": snapshot.attempt,
+                    "resume": is_resume,
+                },
+            ),
+        )
+        await _emit_event(
+            event_sink,
+            AgentEvent(
                 type="task_started",
                 task_id=task_id,
                 data={
@@ -389,6 +400,14 @@ async def _execute_graph_task(
             graph = build_jobfit_graph(checkpointer=saver)
 
             if is_resume:
+                await _emit_event(
+                    event_sink,
+                    AgentEvent(
+                        type="resumed",
+                        task_id=task_id,
+                        data={"attempt": snapshot.attempt},
+                    ),
+                )
                 checkpoint_state = await graph.aget_state(config)
                 if not checkpoint_state.next:
                     raise TaskStateConflictError(
@@ -433,6 +452,30 @@ async def _execute_graph_task(
             max_steps=snapshot.max_steps,
             current_node=result.current_node,
         )
+
+        if result.status == "completed":
+            await _emit_event(
+                event_sink,
+                AgentEvent(
+                    type="task_completed",
+                    task_id=task_id,
+                    content=result.final_answer,
+                    data={
+                        "status": result.status,
+                        "report_id": result.report_id,
+                        "current_node": result.current_node,
+                    },
+                ),
+            )
+        elif result.status == "cancelled":
+            await _emit_event(
+                event_sink,
+                AgentEvent(
+                    type="cancelled",
+                    task_id=task_id,
+                    data={"status": result.status},
+                ),
+            )
         return result
     except asyncio.CancelledError:
         await _persist_failure_state(

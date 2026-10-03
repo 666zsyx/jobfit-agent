@@ -76,3 +76,72 @@ def test_stream_task_returns_sse_events(
     assert "event: task_completed" in body
     assert "event: done" in body
     assert "data: [DONE]" in body
+
+def test_graph_stream_returns_sse_events(
+    client,
+    auth_headers,
+    monkeypatch,
+):
+    class FakeRepository:
+        def __init__(self, session):
+            pass
+
+        async def get_for_user(self, *, task_id, user_id):
+            return SimpleNamespace(task_id=task_id)
+
+    async def fake_run_graph_persisted_task(
+        session_factory,
+        *,
+        user_id,
+        task_id,
+        redis_client,
+        event_sink,
+    ):
+        await event_sink(
+            AgentEvent(
+                type="graph_started",
+                task_id=task_id,
+                data={"attempt": 1},
+            )
+        )
+        await event_sink(
+            AgentEvent(
+                type="node_started",
+                task_id=task_id,
+                data={"node": "agent_decide"},
+            )
+        )
+        await event_sink(
+            AgentEvent(
+                type="waiting_confirmation",
+                task_id=task_id,
+                data={"node": "human_confirmation"},
+            )
+        )
+
+    monkeypatch.setattr(
+        agent_router,
+        "AnalysisTaskRepository",
+        FakeRepository,
+    )
+    monkeypatch.setattr(
+        agent_router,
+        "run_graph_persisted_task",
+        fake_run_graph_persisted_task,
+    )
+
+    with client.stream(
+        "GET",
+        "/api/agent/tasks/10/graph/stream",
+        headers=auth_headers,
+    ) as response:
+        assert response.status_code == 200
+        assert response.headers["content-type"].startswith(
+            "text/event-stream"
+        )
+        body = "".join(response.iter_text())
+
+    assert "event: graph_started" in body
+    assert "event: node_started" in body
+    assert "event: waiting_confirmation" in body
+    assert "event: done" in body

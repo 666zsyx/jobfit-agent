@@ -398,6 +398,129 @@ async def get_graph_task_confirmation_endpoint(
     return success_response(data=result)
 
 
+@router.get("/tasks/{task_id}/graph/stream")
+async def stream_graph_task_endpoint(
+    task_id: int,
+    current_user: CurrentUser = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_session),
+) -> StreamingResponse:
+    """以 SSE 流式执行 LangGraph 持久化任务。"""
+
+    task = await AnalysisTaskRepository(session).get_for_user(
+        task_id=task_id,
+        user_id=current_user.id,
+    )
+    if task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="任务不存在或无权访问",
+        )
+
+    async def event_generator():
+        queue: asyncio.Queue[AgentEvent | None] = asyncio.Queue()
+        terminal_event_sent = False
+
+        async def event_sink(event: AgentEvent) -> None:
+            nonlocal terminal_event_sent
+            if event.type in {
+                "task_completed",
+                "task_interrupted",
+                "task_failed",
+                "cancelled",
+                "waiting_confirmation",
+            }:
+                terminal_event_sent = True
+            await queue.put(event)
+
+        async def run_task() -> None:
+            nonlocal terminal_event_sent
+            try:
+                await run_graph_persisted_task(
+                    async_session_factory,
+                    user_id=current_user.id,
+                    task_id=task_id,
+                    redis_client=get_redis_client(),
+                    event_sink=event_sink,
+                )
+            except asyncio.CancelledError:
+                raise
+            except TaskStateConflictError as exc:
+                if not terminal_event_sent:
+                    await queue.put(
+                        AgentEvent(
+                            type="error",
+                            task_id=task_id,
+                            content=str(exc),
+                            data={"code": 409},
+                        )
+                    )
+            except LookupError as exc:
+                if not terminal_event_sent:
+                    await queue.put(
+                        AgentEvent(
+                            type="error",
+                            task_id=task_id,
+                            content=str(exc),
+                            data={"code": 404},
+                        )
+                    )
+            except Exception:
+                logger.exception(
+                    "Graph SSE 任务执行失败 task_id=%s",
+                    task_id,
+                )
+                if not terminal_event_sent:
+                    await queue.put(
+                        AgentEvent(
+                            type="error",
+                            task_id=task_id,
+                            content="任务执行失败",
+                            data={"code": 500},
+                        )
+                    )
+            finally:
+                await queue.put(None)
+
+        background_task = asyncio.create_task(run_task())
+        try:
+            while True:
+                try:
+                    event = await asyncio.wait_for(
+                        queue.get(),
+                        timeout=15,
+                    )
+                except TimeoutError:
+                    yield format_sse_event(
+                        AgentEvent(
+                            type="heartbeat",
+                            task_id=task_id,
+                        )
+                    )
+                    continue
+
+                if event is None:
+                    break
+
+                yield format_sse_event(event)
+
+            yield "event: done\ndata: [DONE]\n\n"
+        finally:
+            if not background_task.done():
+                background_task.cancel()
+                with suppress(asyncio.CancelledError):
+                    await background_task
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
 @router.post("/match")
 async def match_jobfit_agent(
     request: JobFitAgentRequest,

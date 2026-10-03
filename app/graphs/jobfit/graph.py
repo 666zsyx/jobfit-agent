@@ -20,8 +20,10 @@ from app.graphs.jobfit.nodes import (
     route_after_tools,
     save_report,
 )
+from app.graphs.jobfit.retry import LLM_RETRY_POLICY
 from app.graphs.jobfit.runtime import JobFitGraphContext
 from app.graphs.jobfit.state import JobFitGraphState
+from app.graphs.jobfit.wrappers import wrap_graph_node
 
 
 def build_jobfit_graph(checkpointer: Any | None = None):
@@ -35,15 +37,43 @@ def build_jobfit_graph(checkpointer: Any | None = None):
         context_schema=JobFitGraphContext,
     )
 
-    builder.add_node("prepare_run", prepare_run)
-    builder.add_node("load_context", load_context)
-    builder.add_node("agent_decide", agent_decide)
-    builder.add_node("execute_tools", execute_tools)
-    builder.add_node("assess_evidence", assess_evidence)
-    builder.add_node("human_confirmation", human_confirmation)
-    builder.add_node("save_report", save_report)
-    builder.add_node("finalize", finalize)
-    builder.add_node("cancel", cancel)
+    builder.add_node(
+        "prepare_run",
+        wrap_graph_node("prepare_run", prepare_run),
+    )
+    builder.add_node(
+        "load_context",
+        wrap_graph_node("load_context", load_context),
+    )
+    builder.add_node(
+        "agent_decide",
+        wrap_graph_node("agent_decide", agent_decide),
+        retry_policy=LLM_RETRY_POLICY,
+    )
+    builder.add_node(
+        "execute_tools",
+        wrap_graph_node("execute_tools", execute_tools),
+    )
+    builder.add_node(
+        "assess_evidence",
+        wrap_graph_node("assess_evidence", assess_evidence),
+    )
+    builder.add_node(
+        "human_confirmation",
+        wrap_graph_node("human_confirmation", human_confirmation),
+    )
+    builder.add_node(
+        "save_report",
+        wrap_graph_node("save_report", save_report),
+    )
+    builder.add_node(
+        "finalize",
+        wrap_graph_node("finalize", finalize),
+    )
+    builder.add_node(
+        "cancel",
+        wrap_graph_node("cancel", cancel),
+    )
 
     builder.add_edge(START, "prepare_run")
     builder.add_edge("prepare_run", "load_context")
