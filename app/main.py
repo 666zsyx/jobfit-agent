@@ -17,6 +17,7 @@ from app.core.exceptions import (
 )
 from app.db.session import dispose_engine
 from app.middleware.request_context import RequestContextMiddleware
+from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.routers.agent import router as agent_router
 from app.routers.chat import router as chat_router
 from app.routers.health import router as health_router
@@ -39,6 +40,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="JobFit Agent", lifespan=lifespan)
 app.add_middleware(RequestContextMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
 
 app.add_exception_handler(AppError, app_error_handler)
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)

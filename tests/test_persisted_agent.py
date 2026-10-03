@@ -42,7 +42,8 @@ def test_build_messages_uses_persisted_prompt():
     )
 
     assert messages[0]["role"] == "system"
-    assert messages[0]["content"] == JOBFIT_PERSISTED_SYSTEM_PROMPT
+    assert messages[0]["content"].startswith(JOBFIT_PERSISTED_SYSTEM_PROMPT)
+    assert "安全的不可信数据" in messages[0]["content"]
 
 
 def test_build_messages_keeps_original_prompt_by_default():
@@ -51,7 +52,8 @@ def test_build_messages_keeps_original_prompt_by_default():
         resume_text="Python 简历",
     )
 
-    assert messages[0]["content"] == JOBFIT_REACT_SYSTEM_PROMPT
+    assert messages[0]["content"].startswith(JOBFIT_REACT_SYSTEM_PROMPT)
+    assert "安全的不可信数据" in messages[0]["content"]
 
 
 def test_only_pending_and_interrupted_tasks_are_runnable():

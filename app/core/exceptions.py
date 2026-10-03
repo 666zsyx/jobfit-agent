@@ -39,6 +39,16 @@ class StructuredOutputError(AppError):
         super().__init__(message=message, status_code=status_code)
 
 
+# 表示外部输入包含高风险 Prompt Injection 特征。
+class UnsafeInputError(AppError):
+    def __init__(
+        self,
+        message: str = "输入包含不安全指令",
+        status_code: int = 400,
+    ):
+        super().__init__(message=message, status_code=status_code)
+
+
 # 表示任务当前状态不允许执行请求的操作。
 class TaskStateConflictError(AppError):
     def __init__(
