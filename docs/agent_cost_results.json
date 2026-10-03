@@ -1,0 +1,10 @@
+{
+  "task_count": 0,
+  "currency": "USD",
+  "calls": 0,
+  "prompt_tokens": 0,
+  "completion_tokens": 0,
+  "total_tokens": 0,
+  "estimated_cost": 0,
+  "by_model": {}
+}

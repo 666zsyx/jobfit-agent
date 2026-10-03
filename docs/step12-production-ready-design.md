@@ -427,7 +427,7 @@ Graph run / resume
 [x] PART 0：设计与基线
 [x] PART 1：Agent 评估
 [x] PART 2：可观测性
-[ ] PART 3：Token 成本
+[x] PART 3：Token 成本
 [ ] PART 4：安全加固
 [ ] PART 5：限流与配额
 [ ] PART 6：部署资产
@@ -551,6 +551,76 @@ Alembic revision 59152edc1d2e
 
 ```text
 Observability 测试：7 passed
-完整测试：294 passed
+完整测试：300 passed
 真实 Graph 任务 request_id 和 metrics_json 落库通过
+```
+
+---
+
+## 17. PART 3 验证记录
+
+新增：
+
+```text
+app/core/cost_tracking.py
+scripts/report_agent_cost.py
+tests/test_cost_tracking.py
+docs/COST_TRACKING.md
+docs/COST_REPORT.md
+docs/agent_cost_results.json
+```
+
+记录模型调用：
+
+```text
+chat
+chat_json
+chat_with_tools
+stream_chat
+```
+
+记录字段：
+
+```text
+model
+call_type
+prompt_tokens
+completion_tokens
+total_tokens
+latency_ms
+```
+
+Graph 内部：
+
+```text
+agent_decide 记录外层模型调用
+execute_tools 记录内层工具模型调用
+内层 Usage 合并到 Graph State.usage
+所有 UsageRecord 进入 Checkpoint状态
+```
+
+成本配置：
+
+```text
+LLM_INPUT_PRICE_PER_1M
+LLM_OUTPUT_PRICE_PER_1M
+COST_CURRENCY
+```
+
+任务指标：
+
+```text
+estimated_cost
+currency
+usage_call_count
+usage_by_model
+```
+
+验证结果：
+
+```text
+成本模块测试：5 passed
+内层工具 Usage 合并测试：通过
+成本报表脚本：运行通过
+完整测试：300 passed
 ```
