@@ -35,6 +35,7 @@ class ResumeRepository:
     async def list_for_user(
         self,
         user_id: int,
+        with_versions: bool = False,
     ) -> list[Resume]:
         statement = (
             select(Resume)
@@ -47,6 +48,11 @@ class ResumeRepository:
                 Resume.resume_id.desc(),
             )
         )
+        if with_versions:
+            statement = statement.options(
+                selectinload(Resume.versions)
+            )
+
         result = await self.session.scalars(statement)
         return list(result.all())
 
