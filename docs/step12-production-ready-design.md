@@ -426,7 +426,7 @@ Graph run / resume
 ```text
 [x] PART 0：设计与基线
 [x] PART 1：Agent 评估
-[ ] PART 2：可观测性
+[x] PART 2：可观测性
 [ ] PART 3：Token 成本
 [ ] PART 4：安全加固
 [ ] PART 5：限流与配额
@@ -493,4 +493,64 @@ docs/AGENT_EVALUATION.md
 ```text
 Agent 评估测试：8 passed
 完整测试：287 passed
+```
+
+---
+
+## 16. PART 2 验证记录
+
+新增：
+
+```text
+app/core/observability.py
+app/core/logging.py
+app/middleware/request_context.py
+tests/test_observability.py
+docs/OBSERVABILITY.md
+```
+
+request_id：
+
+```text
+X-Request-ID 透传或生成
+响应头返回 X-Request-ID
+日志上下文关联 request_id
+任务日志关联 task_id
+```
+
+日志：
+
+```text
+支持 text / JSON 格式
+API Key、Bearer、password、secret、token 脱敏
+不记录 JD、简历、报告正文和隐藏思维链
+```
+
+任务指标：
+
+```text
+total_ms
+model_ms
+tool_ms
+node_ms
+steps
+usage
+node_metrics
+error_code
+```
+
+数据库：
+
+```text
+analysis_tasks.last_request_id
+analysis_tasks.metrics_json
+Alembic revision 59152edc1d2e
+```
+
+验证结果：
+
+```text
+Observability 测试：7 passed
+完整测试：294 passed
+真实 Graph 任务 request_id 和 metrics_json 落库通过
 ```
