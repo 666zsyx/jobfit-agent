@@ -414,7 +414,7 @@ DOCX ZIP Bomb 被拒绝
 [x] PART 2：简历版本持久化
 [x] PART 3：上传 API 和查询 API
 [x] PART 4：结构提取衔接
-[ ] PART 5：测试、文档和 Git 闭环
+[x] PART 5：测试、文档和 Git 闭环
 ```
 
 ---
@@ -613,4 +613,57 @@ POST /api/resumes/{resume_id}/versions/{resume_version_id}/extract
 ```text
 上传和结构提取测试：8 passed
 完整测试：338 passed
+```
+
+---
+
+## 18. STEP 13 最终验收
+
+新增：
+
+```text
+docs/RESUME_INGESTION.md
+scripts/verify_step13_resume_ingestion.py
+```
+
+完整支持：
+
+```text
+PDF 文本型解析
+DOCX 段落和表格解析
+TXT 解析
+简历版本持久化
+source_type = pdf / docx / txt
+结构提取可选执行
+结构提取失败后重试
+最小简历列表和详情 API
+```
+
+真实 PostgreSQL 验证：
+
+```text
+生成 DOCX / PDF / TXT
+解析三种格式
+创建 Resume
+追加三个 ResumeVersion
+校验 source_type 顺序
+清理测试用户和简历
+```
+
+验证结果：
+
+```text
+完整测试：338 passed
+真实简历版本验证：通过
+```
+
+Git 闭环：
+
+```text
+feature/step-13-resume-ingestion
+→ merge main
+→ push origin main
+→ delete feature branch
+→ tag step-13-resume-ingestion
+→ push tag
 ```

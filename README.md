@@ -4,6 +4,17 @@
 
 基于 RAG 和工具调用的可解释岗位匹配与差距分析 Agent。
 
+STEP 13 新增能力：
+
+- `POST /api/resumes/upload`：上传 PDF、DOCX 和 TXT 简历。
+- PDF 使用 pdfplumber + pypdf 回退解析，DOCX 解析段落和表格。
+- 增加文件大小、页数、ZIP Bomb、加密 PDF 和扫描 PDF 检测。
+- 支持创建新简历或追加新简历版本。
+- 可选调用现有简历结构提取。
+- 结构提取失败不丢 raw_text，可通过接口重试。
+- 新增最小简历列表和详情 API。
+
+
 ## 项目文档
 
 - [项目全景与维护文档](docs/PROJECT_GUIDE.md)
@@ -18,10 +29,11 @@
 - [安全设计](docs/SECURITY.md)
 - [限流设计](docs/RATE_LIMIT.md)
 - [部署说明](docs/DEPLOYMENT.md)
+- [简历文件接入](docs/RESUME_INGESTION.md)
 
 ## 当前阶段
 
-STEP 12：Agent 评估、可观测性、Token 成本、安全加固、限流配额、就绪检查和生产部署资产。远程 Linux staging 待验证。
+STEP 13：PDF / DOCX / TXT 简历上传、解析、版本保存和结构提取重试。
 
 当前已经支持：
 

@@ -45,6 +45,7 @@ STEP 08：RAG 数据模型、Chunking、Embedding、向量检索、混合召回�
 STEP 09～10：Agent 架构复盘、边界校准和 STEP 11 重构指导完成；完整源码定向学习延期。
 STEP 11：LangGraph 重构、PostgreSQL Checkpoint、人工确认、中断恢复、节点重试、SSE 和双引擎对比全部完成。
 STEP 12：Agent 评估、可观测性、Token 成本、安全、限流、就绪检查和生产部署资产完成；远程 staging 待 Linux。
+STEP 13：PDF / DOCX / TXT 简历上传、解析、版本保存、结构提取和重试完成。
 ```
 
 当前代码分支：
@@ -1719,6 +1720,35 @@ RAG 评估：30 cases
 - 长任务可迁移到独立 Worker 和消息队列。
 - 评估集仍需要独立 holdout 复验。
 
+
+# 十四点九、STEP 13：简历文件接入
+
+完成：
+
+- 支持 PDF、DOCX、TXT 文件上传和解析。
+- PDF 使用 pdfplumber + pypdf 回退，DOCX 使用 python-docx。
+- 增加文件大小、PDF 页数、文本长度、ZIP Bomb、加密 PDF 和扫描 PDF 检查。
+- 新增 `POST /api/resumes/upload`。
+- 新增 `GET /api/resumes` 和 `GET /api/resumes/{resume_id}`。
+- 支持创建新简历或追加简历版本。
+- `resume_versions.source_type` 扩展为 `text / pdf / docx / txt`。
+- 上传后可选择调用现有简历结构提取。
+- 结构提取失败保留 raw_text，并支持单独重试。
+
+验证结果：
+
+```text
+完整测试：338 passed
+真实 PostgreSQL PDF / DOCX / TXT 版本验证：通过
+```
+
+当前限制：
+
+- 扫描 PDF 和图片需要 OCR。
+- 旧版 .doc 需要转换为 DOCX。
+- 没有前端上传页面，当前使用 Swagger。
+- 原始文件不长期保存。
+
 # 十五、每个大 STEP 完成后的维护清单
 
 每完成一个大 STEP，必须更新本文档：
@@ -1780,6 +1810,10 @@ RAG 评估：30 cases
 21. docs/DEMO_GUIDE.md
 22. docs/INTERVIEW_QA.md
 23. docs/RESUME_PROJECT.md
+24. docs/RESUME_INGESTION.md
+25. app/services/resume_file_parser.py
+26. app/services/resume_ingestion.py
+27. tests/test_resume_upload_api.py
 ```
 
 重点关注：
