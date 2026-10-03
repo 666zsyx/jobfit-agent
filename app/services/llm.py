@@ -14,6 +14,7 @@ from openai import (
 )
 
 from app.core.config import settings
+from app.core.cost_tracking import record_usage
 from app.core.exceptions import LLMServiceError
 from app.schemas.chat import (
     ChatResult,
@@ -97,13 +98,25 @@ async def _chat(
         if text is None:
             raise LLMServiceError("模型没有返回内容。")
 
+        token_usage = TokenUsage(
+            prompt_tokens=usage.prompt_tokens,
+            completion_tokens=usage.completion_tokens,
+            total_tokens=usage.total_tokens,
+        )
+        record_usage(
+            model=settings.llm_model,
+            call_type=(
+                "chat_json"
+                if response_format is not None
+                else "chat"
+            ),
+            usage=token_usage,
+            latency_ms=latency_ms,
+        )
+
         return ChatResult(
             answer=text,
-            usage=TokenUsage(
-                prompt_tokens=usage.prompt_tokens,
-                completion_tokens=usage.completion_tokens,
-                total_tokens=usage.total_tokens,
-            ),
+            usage=token_usage,
             latency_ms=latency_ms,
         )
 
@@ -178,14 +191,22 @@ async def chat_with_tools(
                 "模型没有返回内容或工具调用。"
             )
 
+        token_usage = TokenUsage(
+            prompt_tokens=usage.prompt_tokens,
+            completion_tokens=usage.completion_tokens,
+            total_tokens=usage.total_tokens,
+        )
+        record_usage(
+            model=settings.llm_model,
+            call_type="chat_with_tools",
+            usage=token_usage,
+            latency_ms=latency_ms,
+        )
+
         return LLMWithToolsResult(
             content=message.content,
             tool_calls=tool_calls,
-            usage=TokenUsage(
-                prompt_tokens=usage.prompt_tokens,
-                completion_tokens=usage.completion_tokens,
-                total_tokens=usage.total_tokens,
-            ),
+            usage=token_usage,
             latency_ms=latency_ms,
         )
 
@@ -237,13 +258,21 @@ async def stream_chat(
 
         latency_ms = round((perf_counter() - start) * 1000)
 
+        token_usage = TokenUsage(
+            prompt_tokens=usage.prompt_tokens,
+            completion_tokens=usage.completion_tokens,
+            total_tokens=usage.total_tokens,
+        )
+        record_usage(
+            model=settings.llm_model,
+            call_type="stream_chat",
+            usage=token_usage,
+            latency_ms=latency_ms,
+        )
+
         yield LLMStreamEvent(
             type="usage",
-            usage=TokenUsage(
-                prompt_tokens=usage.prompt_tokens,
-                completion_tokens=usage.completion_tokens,
-                total_tokens=usage.total_tokens,
-            ),
+            usage=token_usage,
             latency_ms=latency_ms,
         )
     except AuthenticationError as exc:

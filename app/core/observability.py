@@ -38,6 +38,12 @@ class TaskMetrics(BaseModel):
     usage: dict[str, int] = Field(default_factory=dict)
     node_metrics: list[dict[str, Any]] = Field(default_factory=list)
     error_code: str | None = None
+    estimated_cost: float = Field(default=0.0, ge=0)
+    currency: str = "USD"
+    usage_call_count: int = Field(default=0, ge=0)
+    usage_by_model: dict[str, dict[str, int | float]] = Field(
+        default_factory=dict
+    )
 
 
 def new_request_id() -> str:
@@ -126,6 +132,10 @@ def build_task_metrics(
     usage: dict[str, int] | None = None,
     node_metrics: list[dict[str, Any]] | None = None,
     error_code: str | None = None,
+    estimated_cost: float = 0.0,
+    currency: str = "USD",
+    usage_call_count: int = 0,
+    usage_by_model: dict[str, dict[str, int | float]] | None = None,
 ) -> TaskMetrics:
     normalized_nodes = node_metrics or []
     node_ms = sum(
@@ -145,6 +155,10 @@ def build_task_metrics(
         usage=usage or {},
         node_metrics=normalized_nodes,
         error_code=error_code,
+        estimated_cost=max(estimated_cost, 0.0),
+        currency=currency,
+        usage_call_count=max(usage_call_count, 0),
+        usage_by_model=usage_by_model or {},
     )
 
 

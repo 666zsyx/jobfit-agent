@@ -16,6 +16,10 @@ from app.cache.task_state import (
     acquire_task_run_lock,
     release_task_run_lock,
 )
+from app.core.cost_tracking import (
+    UsageRecord,
+    summarize_usage_cost,
+)
 from app.core.exceptions import LLMServiceError, TaskStateConflictError
 from app.core.observability import (
     build_task_metrics,
@@ -144,6 +148,11 @@ def _build_graph_metrics(
 ) -> dict:
     """把 Graph State 中的指标整理为数据库 JSON。"""
 
+    usage_records = [
+        UsageRecord.model_validate(item)
+        for item in graph_result.get("usage_records", [])
+    ]
+    cost = summarize_usage_cost(usage_records)
     metrics = build_task_metrics(
         request_id=get_request_id(),
         total_ms=total_ms,
@@ -153,6 +162,13 @@ def _build_graph_metrics(
         usage=graph_result.get("usage", {}),
         node_metrics=graph_result.get("node_metrics", []),
         error_code=graph_result.get("error_code"),
+        estimated_cost=cost.estimated_cost,
+        currency=cost.currency,
+        usage_call_count=cost.calls,
+        usage_by_model={
+            model: aggregate.model_dump(mode="json")
+            for model, aggregate in cost.by_model.items()
+        },
     )
     return metrics.model_dump(mode="json")
 

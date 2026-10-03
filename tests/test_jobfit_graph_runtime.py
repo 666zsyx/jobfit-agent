@@ -640,3 +640,76 @@ def test_graph_executes_real_rag_tool_and_preserves_evidence_pack(
     assert result["retrieved_evidence_packs"][0]["items"][0][
         "chunk_id"
     ] == 101
+
+def test_graph_collects_inner_tool_model_usage() -> None:
+    from app.core.cost_tracking import record_usage
+    from app.schemas.chat import TokenUsage
+
+    class ExtractArgs(BaseModel):
+        model_config = ConfigDict(extra="forbid")
+        job_description: str = Field(min_length=1)
+
+    async def extract_handler(args, context):
+        record_usage(
+            model="inner-test-model",
+            call_type="chat_json",
+            usage=TokenUsage(
+                prompt_tokens=20,
+                completion_tokens=10,
+                total_tokens=30,
+            ),
+            latency_ms=7,
+        )
+        return {"requirements": ["Python"]}
+
+    registry = ToolRegistry()
+    registry.register(
+        ToolSpec(
+            name="extract_job_requirements",
+            description="记录内层模型 Usage 的测试工具。",
+            args_model=ExtractArgs,
+            handler=extract_handler,
+        )
+    )
+    graph = build_jobfit_graph(checkpointer=InMemorySaver())
+    context: JobFitGraphContext = {
+        "chat_with_tools": make_chat_sequence(
+            registry=registry,
+            responses=[
+                LLMWithToolsResult(
+                    content=None,
+                    tool_calls=[
+                        ToolCall(
+                            id="call-inner-1",
+                            name="extract_job_requirements",
+                            arguments='{"job_description": "需要 Python"}',
+                        )
+                    ],
+                    usage=make_usage(10, 5),
+                    latency_ms=5,
+                ),
+                LLMWithToolsResult(
+                    content="完成",
+                    tool_calls=[],
+                    usage=make_usage(10, 5),
+                    latency_ms=5,
+                ),
+            ],
+        ),
+        "tool_registry": registry,
+        "tool_context_factory": make_context_factory(event_sink=None),
+        "event_sink": None,
+    }
+
+    _, result = asyncio.run(
+        run_graph_with_decision(
+            graph,
+            make_initial_state(),
+            context,
+        )
+    )
+
+    assert result["usage"]["total_tokens"] == 60
+    assert len(result["usage_records"]) == 1
+    assert result["usage_records"][0]["model"] == "inner-test-model"
+    assert result["usage_records"][0]["total_tokens"] == 30

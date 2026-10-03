@@ -18,6 +18,11 @@ from app.cache.task_state import (
     release_task_run_lock,
 )
 from app.core.exceptions import LLMServiceError, TaskStateConflictError
+from app.core.cost_tracking import (
+    finish_usage_collection,
+    start_usage_collection,
+    summarize_usage_cost,
+)
 from app.core.observability import (
     build_task_metrics,
     get_request_id,
@@ -364,9 +369,11 @@ async def _prepare_rag_safely(
 def _build_react_metrics(
     react_result,
     audit_events,
+    usage_records,
     *,
     error_code: str | None = None,
 ) -> dict:
+    cost = summarize_usage_cost(usage_records)
     metrics = build_task_metrics(
         request_id=get_request_id(),
         total_ms=react_result.latency_ms,
@@ -378,6 +385,13 @@ def _build_react_metrics(
         steps=react_result.steps,
         usage=react_result.usage.model_dump(mode="json"),
         error_code=error_code,
+        estimated_cost=cost.estimated_cost,
+        currency=cost.currency,
+        usage_call_count=cost.calls,
+        usage_by_model={
+            model: aggregate.model_dump(mode="json")
+            for model, aggregate in cost.by_model.items()
+        },
     )
     return metrics.model_dump(mode="json")
 
@@ -449,6 +463,7 @@ async def _run_persisted_task_core(
         collect_tool_audit=True,
     )
 
+    usage_token = start_usage_collection()
     try:
         react_result = await run_react_loop(
             messages=build_jobfit_react_messages(
@@ -463,6 +478,7 @@ async def _run_persisted_task_core(
             event_sink=event_sink,
         )
     except asyncio.CancelledError:
+        finish_usage_collection(usage_token)
         await _persist_failure_state(
             session_factory,
             user_id=user_id,
@@ -491,6 +507,7 @@ async def _run_persisted_task_core(
         )
         raise
     except Exception as exc:
+        finish_usage_collection(usage_token)
         failed_interrupted = isinstance(exc, LLMServiceError)
         failure_status = await _persist_failure_state(
             session_factory,
@@ -537,6 +554,8 @@ async def _run_persisted_task_core(
             ),
         )
         raise
+
+    usage_records = finish_usage_collection(usage_token)
 
     try:
         async with session_factory() as session:
@@ -628,6 +647,7 @@ async def _run_persisted_task_core(
                     metrics_json=_build_react_metrics(
                         react_result,
                         context.tool_audit_events,
+                        usage_records,
                         error_code=error_code,
                     ),
                     last_request_id=get_request_id(),

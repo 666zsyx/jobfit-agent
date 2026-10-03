@@ -53,6 +53,7 @@ class JobFitGraphState(TypedDict, total=False):
     node_metrics: Annotated[list[dict[str, Any]], operator.add]
     model_ms: int
     tool_ms: int
+    usage_records: Annotated[list[dict[str, Any]], operator.add]
 
 
 __all__ = [
