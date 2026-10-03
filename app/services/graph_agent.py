@@ -180,6 +180,7 @@ async def _persist_waiting_confirmation(
     task_id: int,
     current_step: int,
     pending_confirmation: dict | None,
+    usage: dict | None,
     metrics_json: dict,
     request_id: str | None,
 ) -> GraphTaskExecutionResult:
@@ -204,7 +205,7 @@ async def _persist_waiting_confirmation(
         current_step=current_step,
         interrupted=True,
         pending_confirmation=pending_confirmation,
-        usage=graph_result.get("usage"),
+        usage=usage,
     )
 
 
@@ -498,6 +499,7 @@ async def _execute_graph_task(
                 pending_confirmation=graph_result.get(
                     "pending_report"
                 ),
+                usage=graph_result.get("usage"),
                 metrics_json=metrics_json,
                 request_id=request_id,
             )
