@@ -13,6 +13,16 @@ class ResumeUploadResponse(BaseModel):
     source_type: str
     char_count: int = Field(ge=1)
     preview: str
+    extraction_status: str
+    extraction_error_code: str | None = None
+
+
+class ResumeExtractionResponse(BaseModel):
+    resume_id: int = Field(gt=0)
+    resume_version_id: int = Field(gt=0)
+    extraction_status: str
+    extraction_error_code: str | None = None
+    has_extracted_sections: bool
 
 
 class ResumeVersionSummary(BaseModel):
@@ -21,6 +31,7 @@ class ResumeVersionSummary(BaseModel):
     source_type: str
     char_count: int = Field(ge=1)
     preview: str
+    has_extracted_sections: bool
     created_at: datetime
 
 
@@ -48,6 +59,7 @@ class ResumeDetail(BaseModel):
 
 __all__ = [
     "ResumeDetail",
+    "ResumeExtractionResponse",
     "ResumeSummary",
     "ResumeUploadResponse",
     "ResumeVersionSummary",

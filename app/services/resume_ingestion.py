@@ -2,13 +2,35 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import PurePath
+from typing import Literal
 
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.cost_tracking import (
+    finish_usage_collection,
+    start_usage_collection,
+)
+from app.core.exceptions import (
+    LLMServiceError,
+    StructuredOutputError,
+    UnsafeInputError,
+)
 from app.repositories import ResumeRepository, ResumeVersionRepository
+from app.services.resume_extraction import extract_resume_sections
 from app.services.resume_file_parser import ResumeParseResult
+
+
+logger = logging.getLogger(__name__)
+
+
+class ResumeExtractionOutcome(BaseModel):
+    status: Literal["completed", "failed", "skipped"]
+    extracted_sections: dict | None = None
+    error_code: str | None = None
+    total_tokens: int = Field(default=0, ge=0)
 
 
 class ResumeIngestionResult(BaseModel):
@@ -18,6 +40,52 @@ class ResumeIngestionResult(BaseModel):
     title: str
     source_type: str
     char_count: int = Field(ge=1)
+
+
+async def extract_resume_sections_safely(
+    resume_text: str,
+) -> ResumeExtractionOutcome:
+    """可选执行结构提取，失败不影响 raw_text 保存。"""
+
+    usage_token = start_usage_collection()
+    try:
+        extraction = await extract_resume_sections(resume_text)
+    except StructuredOutputError:
+        records = finish_usage_collection(usage_token)
+        return ResumeExtractionOutcome(
+            status="failed",
+            error_code="structured_output_error",
+            total_tokens=sum(record.total_tokens for record in records),
+        )
+    except LLMServiceError:
+        records = finish_usage_collection(usage_token)
+        return ResumeExtractionOutcome(
+            status="failed",
+            error_code="llm_service_error",
+            total_tokens=sum(record.total_tokens for record in records),
+        )
+    except UnsafeInputError:
+        records = finish_usage_collection(usage_token)
+        return ResumeExtractionOutcome(
+            status="failed",
+            error_code="unsafe_input",
+            total_tokens=sum(record.total_tokens for record in records),
+        )
+    except Exception:
+        records = finish_usage_collection(usage_token)
+        logger.warning("简历结构提取失败", exc_info=True)
+        return ResumeExtractionOutcome(
+            status="failed",
+            error_code="extraction_failed",
+            total_tokens=sum(record.total_tokens for record in records),
+        )
+
+    records = finish_usage_collection(usage_token)
+    return ResumeExtractionOutcome(
+        status="completed",
+        extracted_sections=extraction.model_dump(mode="json"),
+        total_tokens=sum(record.total_tokens for record in records),
+    )
 
 
 def _default_resume_title(parsed: ResumeParseResult) -> str:
@@ -81,6 +149,8 @@ async def persist_parsed_resume(
 
 
 __all__ = [
+    "ResumeExtractionOutcome",
     "ResumeIngestionResult",
+    "extract_resume_sections_safely",
     "persist_parsed_resume",
 ]

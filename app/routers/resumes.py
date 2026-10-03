@@ -5,15 +5,17 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.cache.client import get_redis_client
 from app.core.exceptions import ResumeFileError
 from app.core.response import success_response
 from app.dependencies.auth import get_current_user
 from app.dependencies.database import get_db_session
 from app.dependencies.rate_limit import make_rate_limit_dependency
-from app.repositories import ResumeRepository
+from app.repositories import ResumeRepository, ResumeVersionRepository
 from app.schemas.auth import CurrentUser
 from app.schemas.resume_upload import (
     ResumeDetail,
+    ResumeExtractionResponse,
     ResumeSummary,
     ResumeUploadResponse,
     ResumeVersionSummary,
@@ -22,7 +24,12 @@ from app.services.resume_file_parser import (
     MAX_RESUME_FILE_BYTES,
     parse_resume_file_async,
 )
-from app.services.resume_ingestion import persist_parsed_resume
+from app.services.rate_limit import record_daily_token_usage
+from app.services.resume_ingestion import (
+    ResumeExtractionOutcome,
+    extract_resume_sections_safely,
+    persist_parsed_resume,
+)
 
 
 router = APIRouter(prefix="/api/resumes", tags=["resumes"])
@@ -40,6 +47,7 @@ def _version_summary(version) -> ResumeVersionSummary:
         source_type=version.source_type,
         char_count=len(version.raw_text),
         preview=_preview(version.raw_text),
+        has_extracted_sections=bool(version.extracted_sections),
         created_at=version.created_at,
     )
 
@@ -84,6 +92,7 @@ async def upload_resume_endpoint(
     file: UploadFile = File(...),
     resume_id: int | None = Form(default=None),
     title: str | None = Form(default=None),
+    extract_sections: bool = Form(default=True),
     current_user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
     _rate_limit: None = Depends(
@@ -99,6 +108,16 @@ async def upload_resume_endpoint(
         data=data,
     )
 
+    if extract_sections:
+        extraction = await extract_resume_sections_safely(parsed.text)
+    else:
+        extraction = ResumeExtractionOutcome(status="skipped")
+    await record_daily_token_usage(
+        get_redis_client(),
+        user_id=current_user.id,
+        total_tokens=extraction.total_tokens,
+    )
+
     try:
         async with session.begin():
             result = await persist_parsed_resume(
@@ -107,6 +126,7 @@ async def upload_resume_endpoint(
                 parsed=parsed,
                 resume_id=resume_id,
                 title=title,
+                extracted_sections=extraction.extracted_sections,
             )
     except LookupError as exc:
         raise HTTPException(
@@ -123,6 +143,8 @@ async def upload_resume_endpoint(
             source_type=result.source_type,
             char_count=result.char_count,
             preview=_preview(parsed.text),
+            extraction_status=extraction.status,
+            extraction_error_code=extraction.error_code,
         )
     )
 
@@ -179,6 +201,60 @@ async def get_resume_endpoint(
                 _version_summary(version)
                 for version in resume.versions
             ],
+        )
+    )
+
+
+@router.post("/{resume_id}/versions/{resume_version_id}/extract")
+async def extract_resume_version_endpoint(
+    resume_id: int,
+    resume_version_id: int,
+    force: bool = False,
+    current_user: CurrentUser = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_session),
+    _rate_limit: None = Depends(
+        make_rate_limit_dependency("resume_extract")
+    ),
+) -> dict:
+    """重试或强制执行简历结构化提取。"""
+
+    async with session.begin():
+        version = await ResumeVersionRepository(session).get_for_user(
+            resume_version_id=resume_version_id,
+            user_id=current_user.id,
+            for_update=True,
+        )
+        if version is None or version.resume_id != resume_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="简历版本不存在或无权访问",
+            )
+
+        if version.extracted_sections and not force:
+            extraction = ResumeExtractionOutcome(
+                status="completed",
+                extracted_sections=version.extracted_sections,
+            )
+        else:
+            extraction = await extract_resume_sections_safely(
+                version.raw_text
+            )
+            if extraction.status == "completed":
+                version.extracted_sections = extraction.extracted_sections
+                await session.flush()
+
+    await record_daily_token_usage(
+        get_redis_client(),
+        user_id=current_user.id,
+        total_tokens=extraction.total_tokens,
+    )
+    return success_response(
+        data=ResumeExtractionResponse(
+            resume_id=resume_id,
+            resume_version_id=resume_version_id,
+            extraction_status=extraction.status,
+            extraction_error_code=extraction.error_code,
+            has_extracted_sections=bool(version.extracted_sections),
         )
     )
 
