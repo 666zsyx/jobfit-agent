@@ -428,7 +428,7 @@ Graph run / resume
 [x] PART 1：Agent 评估
 [x] PART 2：可观测性
 [x] PART 3：Token 成本
-[ ] PART 4：安全加固
+[x] PART 4：安全加固
 [ ] PART 5：限流与配额
 [ ] PART 6：部署资产
 [ ] PART 7：演示与面试材料
@@ -623,4 +623,64 @@ usage_by_model
 内层工具 Usage 合并测试：通过
 成本报表脚本：运行通过
 完整测试：300 passed
+```
+
+---
+
+## 18. PART 4 验证记录
+
+新增：
+
+```text
+app/services/prompt_injection.py
+app/middleware/security_headers.py
+scripts/verify_step12_security.py
+tests/test_security.py
+docs/SECURITY.md
+```
+
+Prompt Injection：
+
+```text
+low：正常处理
+medium：作为数据，增加安全提示
+high：拒绝输入
+```
+
+高风险规则：
+
+```text
+忽略系统指令
+泄露 system prompt
+执行 shell / PowerShell / bash
+jailbreak / DAN mode
+```
+
+边界保护：
+
+```text
+岗位 JD 和简历结束标签转义
+系统提示明确外部内容不可信
+手写 ReAct 和 LangGraph 都经过安全 Prompt 构造
+```
+
+HTTP 和输入安全：
+
+```text
+X-Content-Type-Options
+X-Frame-Options
+Referrer-Policy
+Permissions-Policy
+单条聊天消息最多 20,000 字符
+单次最多 50 条消息
+```
+
+验证结果：
+
+```text
+安全测试：9 passed
+Prompt Injection 验证脚本：通过
+高风险 JD / 简历被拒绝
+安全响应头存在
+完整测试：309 passed
 ```
