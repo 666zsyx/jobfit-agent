@@ -430,7 +430,7 @@ Graph run / resume
 [x] PART 3：Token 成本
 [x] PART 4：安全加固
 [x] PART 5：限流与配额
-[ ] PART 6：部署资产
+[x] PART 6：部署资产
 [ ] PART 7：演示与面试材料
 [ ] PART 8：质量门禁与 Git 闭环
 ```
@@ -755,4 +755,67 @@ graph_stream
 每日 Token 配额：通过
 429 响应：通过
 完整测试：313 passed
+```
+
+---
+
+## 20. PART 6 验证记录
+
+新增：
+
+```text
+scripts/check_deployment_config.py
+docker-compose.prod.yml
+docs/DEPLOYMENT.md
+app/services/readiness.py
+tests/test_readiness.py
+```
+
+健康与就绪：
+
+```text
+/health：进程存活
+/ready：PostgreSQL、Checkpoint、Redis 全部正常
+```
+
+配置检查：
+
+```text
+必需环境变量
+生产占位符
+DATABASE_URL
+REDIS_URL
+限流配置
+JSON 日志配置
+模型价格提醒
+```
+
+Dockerfile：
+
+```text
+复制 app、alembic、scripts
+非 root 用户运行
+健康检查使用 /ready
+```
+
+生产 Compose：
+
+```text
+postgres
+redis
+jobfit-agent
+持久化 volume
+健康检查
+迁移和 Checkpoint 初始化
+```
+
+验证结果：
+
+```text
+配置检查：通过
+依赖检查：database=ok，checkpoint=ok，redis=ok
+readiness 测试：2 passed
+生产 Compose YAML：解析通过
+完整测试：315 passed
+远程 Linux 部署：待远程验证
 ```
