@@ -52,7 +52,7 @@ EXPECTED_COLUMNS = {
     AnalysisTask: {
         "task_id", "user_id", "conversation_id", "resume_version_id",
         "job_id", "status", "current_step", "attempt", "max_steps",
-        "current_node",
+        "current_node", "last_request_id", "metrics_json",
         "error_code", "error_message_safe", "started_at", "finished_at",
         "created_at", "updated_at", "deleted_at",
     },

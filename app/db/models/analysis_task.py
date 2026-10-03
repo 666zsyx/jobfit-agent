@@ -15,6 +15,7 @@ from sqlalchemy import (
     Text,
     func,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -136,6 +137,14 @@ class AnalysisTask(Base):
     )
     current_node: Mapped[str | None] = mapped_column(
         Text,
+        nullable=True,
+    )
+    last_request_id: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+    metrics_json: Mapped[dict | None] = mapped_column(
+        JSONB,
         nullable=True,
     )
     error_code: Mapped[str | None] = mapped_column(

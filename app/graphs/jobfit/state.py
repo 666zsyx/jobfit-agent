@@ -50,6 +50,9 @@ class JobFitGraphState(TypedDict, total=False):
     current_node: str
     error_code: str | None
     trace: Annotated[list[str], operator.add]
+    node_metrics: Annotated[list[dict[str, Any]], operator.add]
+    model_ms: int
+    tool_ms: int
 
 
 __all__ = [

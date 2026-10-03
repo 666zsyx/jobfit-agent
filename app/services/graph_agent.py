@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from time import perf_counter
 from uuid import uuid4
 
 from langgraph.types import Command
@@ -16,6 +17,12 @@ from app.cache.task_state import (
     release_task_run_lock,
 )
 from app.core.exceptions import LLMServiceError, TaskStateConflictError
+from app.core.observability import (
+    build_task_metrics,
+    get_request_id,
+    reset_task_id,
+    set_task_id,
+)
 from app.db.checkpoint import (
     build_checkpoint_config,
     open_postgres_checkpointer,
@@ -130,6 +137,26 @@ def _fallback_report(graph_result: dict) -> dict:
     }
 
 
+def _build_graph_metrics(
+    graph_result: dict,
+    *,
+    total_ms: int,
+) -> dict:
+    """把 Graph State 中的指标整理为数据库 JSON。"""
+
+    metrics = build_task_metrics(
+        request_id=get_request_id(),
+        total_ms=total_ms,
+        model_ms=graph_result.get("model_ms", 0),
+        tool_ms=graph_result.get("tool_ms", 0),
+        steps=graph_result.get("current_step", 0),
+        usage=graph_result.get("usage", {}),
+        node_metrics=graph_result.get("node_metrics", []),
+        error_code=graph_result.get("error_code"),
+    )
+    return metrics.model_dump(mode="json")
+
+
 async def _persist_waiting_confirmation(
     session_factory: async_sessionmaker[AsyncSession],
     *,
@@ -137,6 +164,8 @@ async def _persist_waiting_confirmation(
     task_id: int,
     current_step: int,
     pending_confirmation: dict | None,
+    metrics_json: dict,
+    request_id: str | None,
 ) -> GraphTaskExecutionResult:
     """保存等待人工确认状态。"""
 
@@ -148,6 +177,8 @@ async def _persist_waiting_confirmation(
                 task_id=task_id,
                 current_step=current_step,
                 current_node="human_confirmation",
+                metrics_json=metrics_json,
+                last_request_id=request_id,
             )
 
     return GraphTaskExecutionResult(
@@ -165,6 +196,8 @@ async def _persist_graph_completion(
     *,
     snapshot,
     graph_result: dict,
+    metrics_json: dict,
+    request_id: str | None,
 ) -> GraphTaskExecutionResult:
     """在人工确认后保存报告、简历版本和任务终态。"""
 
@@ -199,6 +232,8 @@ async def _persist_graph_completion(
                     current_step=current_step,
                     error_code="user_rejected",
                     current_node="cancel",
+                    metrics_json=metrics_json,
+                    last_request_id=request_id,
                 )
         return GraphTaskExecutionResult(
             task_id=task.task_id,
@@ -276,6 +311,8 @@ async def _persist_graph_completion(
                 status="completed",
                 current_step=current_step,
                 current_node="finalize",
+                metrics_json=metrics_json,
+                last_request_id=request_id,
             )
 
     return GraphTaskExecutionResult(
@@ -304,6 +341,7 @@ async def _execute_graph_task(
     owner_token = uuid4().hex
     lock_acquired = False
     snapshot = None
+    task_token = set_task_id(task_id)
 
     if redis_client is not None:
         try:
@@ -324,6 +362,7 @@ async def _execute_graph_task(
             )
 
     try:
+        started_at = perf_counter()
         is_resume = resume_payload is not None
         snapshot = await _prepare_run_snapshot(
             session_factory,
@@ -425,6 +464,13 @@ async def _execute_graph_task(
                     context=runtime_context,
                 )
 
+        total_ms = round((perf_counter() - started_at) * 1000)
+        request_id = get_request_id()
+        metrics_json = _build_graph_metrics(
+            graph_result,
+            total_ms=total_ms,
+        )
+
         if "__interrupt__" in graph_result:
             result = await _persist_waiting_confirmation(
                 session_factory,
@@ -434,12 +480,16 @@ async def _execute_graph_task(
                 pending_confirmation=graph_result.get(
                     "pending_report"
                 ),
+                metrics_json=metrics_json,
+                request_id=request_id,
             )
         else:
             result = await _persist_graph_completion(
                 session_factory,
                 snapshot=snapshot,
                 graph_result=graph_result,
+                metrics_json=metrics_json,
+                request_id=request_id,
             )
 
         await _cache_run_status_safely(
@@ -545,6 +595,7 @@ async def _execute_graph_task(
         )
         raise
     finally:
+        reset_task_id(task_token)
         if redis_client is not None and lock_acquired:
             try:
                 await release_task_run_lock(

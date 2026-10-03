@@ -8,6 +8,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.cache.client import dispose_redis
 from app.core.event_loop import configure_event_loop_policy
+from app.core.logging import configure_logging
 from app.core.exceptions import (
     AppError,
     app_error_handler,
@@ -15,6 +16,7 @@ from app.core.exceptions import (
     validation_exception_handler,
 )
 from app.db.session import dispose_engine
+from app.middleware.request_context import RequestContextMiddleware
 from app.routers.agent import router as agent_router
 from app.routers.chat import router as chat_router
 from app.routers.health import router as health_router
@@ -23,6 +25,7 @@ from app.routers.users import router as users_router
 
 
 configure_event_loop_policy()
+configure_logging()
 
 
 @asynccontextmanager
@@ -35,6 +38,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="JobFit Agent", lifespan=lifespan)
+app.add_middleware(RequestContextMiddleware)
 
 app.add_exception_handler(AppError, app_error_handler)
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)

@@ -131,6 +131,8 @@ async def complete_analysis_task(
     current_step: int,
     error_code: str | None = None,
     current_node: str | None = None,
+    metrics_json: dict | None = None,
+    last_request_id: str | None = None,
 ) -> AnalysisTask:
     """更新任务终态，但不提交当前事务。"""
 
@@ -156,6 +158,10 @@ async def complete_analysis_task(
     task.current_step = current_step
     if current_node is not None:
         task.current_node = current_node
+    if metrics_json is not None:
+        task.metrics_json = metrics_json
+    if last_request_id is not None:
+        task.last_request_id = last_request_id
     task.finished_at = func.now()
     task.updated_at = func.now()
 
@@ -237,6 +243,8 @@ async def mark_analysis_task_waiting_confirmation(
     task_id: int,
     current_step: int,
     current_node: str,
+    metrics_json: dict | None = None,
+    last_request_id: str | None = None,
 ) -> AnalysisTask:
     """把运行中的任务标记为等待人工确认。"""
 
@@ -255,6 +263,10 @@ async def mark_analysis_task_waiting_confirmation(
     task.status = "waiting_confirmation"
     task.current_step = current_step
     task.current_node = current_node
+    if metrics_json is not None:
+        task.metrics_json = metrics_json
+    if last_request_id is not None:
+        task.last_request_id = last_request_id
     task.error_code = None
     task.error_message_safe = None
     task.finished_at = None

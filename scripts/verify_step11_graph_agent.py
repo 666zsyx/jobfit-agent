@@ -14,6 +14,10 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.core.event_loop import configure_event_loop_policy
+from app.core.observability import (
+    reset_request_id,
+    set_request_id,
+)
 from app.db.checkpoint import (
     checkpoint_thread_id,
     open_postgres_checkpointer,
@@ -167,6 +171,8 @@ def make_chat(registry: ToolRegistry):
 async def main() -> None:
     user_id: int | None = None
     task_id: int | None = None
+    request_id = f"step12-observability-{uuid4().hex[:12]}"
+    request_token = set_request_id(request_id)
 
     try:
         suffix = uuid4().hex[:12]
@@ -291,6 +297,11 @@ async def main() -> None:
         assert completed_task is not None
         assert completed_task.status == "completed"
         assert completed_task.current_node == "finalize"
+        assert completed_task.last_request_id == request_id
+        assert completed_task.metrics_json is not None
+        assert completed_task.metrics_json["request_id"] == request_id
+        assert completed_task.metrics_json["node_ms"] >= 0
+        assert completed_task.metrics_json["steps"] >= 1
         assert report is not None
         assert report.summary == "人工确认后的报告"
         assert tool_record_count == 1
@@ -311,6 +322,8 @@ async def main() -> None:
                         second_result.new_resume_version_id
                     ),
                     "resume_version_count": len(versions),
+                    "request_id": request_id,
+                    "metrics": completed_task.metrics_json,
                     "cleanup_completed": True,
                 },
                 ensure_ascii=False,
@@ -318,6 +331,7 @@ async def main() -> None:
             )
         )
     finally:
+        reset_request_id(request_token)
         await cleanup_resources(user_id=user_id, task_id=task_id)
 
 

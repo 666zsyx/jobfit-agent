@@ -18,6 +18,12 @@ from app.cache.task_state import (
     release_task_run_lock,
 )
 from app.core.exceptions import LLMServiceError, TaskStateConflictError
+from app.core.observability import (
+    build_task_metrics,
+    get_request_id,
+    reset_task_id,
+    set_task_id,
+)
 from app.db.models import AnalysisTask
 from app.repositories import (
     AnalysisTaskRepository,
@@ -355,6 +361,27 @@ async def _prepare_rag_safely(
     )
     return True
 
+def _build_react_metrics(
+    react_result,
+    audit_events,
+    *,
+    error_code: str | None = None,
+) -> dict:
+    metrics = build_task_metrics(
+        request_id=get_request_id(),
+        total_ms=react_result.latency_ms,
+        model_ms=react_result.latency_ms,
+        tool_ms=sum(
+            event.duration_ms or 0
+            for event in audit_events
+        ),
+        steps=react_result.steps,
+        usage=react_result.usage.model_dump(mode="json"),
+        error_code=error_code,
+    )
+    return metrics.model_dump(mode="json")
+
+
 async def _run_persisted_task_core(
     session_factory: async_sessionmaker[AsyncSession],
     *,
@@ -598,6 +625,12 @@ async def _run_persisted_task_core(
                     status=task_status,
                     current_step=current_step,
                     error_code=error_code,
+                    metrics_json=_build_react_metrics(
+                        react_result,
+                        context.tool_audit_events,
+                        error_code=error_code,
+                    ),
+                    last_request_id=get_request_id(),
                 )
 
                 await session.commit()
@@ -733,6 +766,7 @@ async def run_persisted_task(
 
     owner_token = uuid4().hex
     lock_acquired = False
+    task_token = set_task_id(task_id)
 
     if redis_client is not None:
         try:
@@ -761,6 +795,7 @@ async def run_persisted_task(
             event_sink=event_sink,
         )
     finally:
+        reset_task_id(task_token)
         if redis_client is not None and lock_acquired:
             try:
                 await release_task_run_lock(

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import inspect
+from time import perf_counter
 from collections.abc import Callable
 
 from langgraph.errors import GraphInterrupt
@@ -52,6 +53,7 @@ def wrap_graph_node(node_name: str, node: Callable):
     if is_async:
 
         async def wrapped(state: dict, runtime: Runtime[JobFitGraphContext]):
+            started_at = perf_counter()
             await _emit_node_event(
                 runtime,
                 event_type="node_started",
@@ -90,17 +92,30 @@ def wrap_graph_node(node_name: str, node: Callable):
                     )
                 raise
 
+            duration_ms = round((perf_counter() - started_at) * 1000)
             await _emit_node_event(
                 runtime,
                 event_type="node_finished",
                 node_name=node_name,
                 task_id=state.get("task_id"),
+                data={"duration_ms": duration_ms},
             )
+            if isinstance(result, dict):
+                result = {
+                    **result,
+                    "node_metrics": [
+                        {
+                            "node": node_name,
+                            "duration_ms": duration_ms,
+                        }
+                    ],
+                }
             return result
 
     else:
 
         async def wrapped(state: dict, runtime: Runtime[JobFitGraphContext]):
+            started_at = perf_counter()
             await _emit_node_event(
                 runtime,
                 event_type="node_started",
@@ -128,12 +143,24 @@ def wrap_graph_node(node_name: str, node: Callable):
                 )
                 raise
 
+            duration_ms = round((perf_counter() - started_at) * 1000)
             await _emit_node_event(
                 runtime,
                 event_type="node_finished",
                 node_name=node_name,
                 task_id=state.get("task_id"),
+                data={"duration_ms": duration_ms},
             )
+            if isinstance(result, dict):
+                result = {
+                    **result,
+                    "node_metrics": [
+                        {
+                            "node": node_name,
+                            "duration_ms": duration_ms,
+                        }
+                    ],
+                }
             return result
 
     wrapped.__name__ = f"{node_name}_graph_node"

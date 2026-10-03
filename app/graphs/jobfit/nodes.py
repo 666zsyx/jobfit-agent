@@ -137,6 +137,8 @@ def prepare_run(state: JobFitGraphState) -> dict:
         "current_step": 0,
         "max_steps": max_steps,
         "usage": _zero_usage(),
+        "model_ms": 0,
+        "tool_ms": 0,
         "tool_calls": [],
         "pending_report": None,
         "final_answer": None,
@@ -199,6 +201,9 @@ async def agent_decide(
         **_node_update("agent_decide"),
         "current_step": current_step,
         "usage": _merge_usage(state.get("usage"), model_result.usage),
+        "model_ms": (
+            state.get("model_ms", 0) + model_result.latency_ms
+        ),
     }
 
     if model_result.tool_calls:
@@ -343,6 +348,13 @@ async def execute_tools(
             for pack in context.retrieved_evidence_packs
         ],
         "pending_report": context.pending_report,
+        "tool_ms": (
+            state.get("tool_ms", 0)
+            + sum(
+                event.duration_ms or 0
+                for event in context.tool_audit_events
+            )
+        ),
     }
 
 
