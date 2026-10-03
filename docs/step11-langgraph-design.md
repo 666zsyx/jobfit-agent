@@ -508,7 +508,7 @@ Checkpoint 保存什么，不保存什么
 [x] 人工确认与 Resume
 [x] 失败重试与恢复
 [x] SSE 扩展
-[ ] 双引擎对比
+[x] 双引擎对比
 [ ] 文档、测试、Git、push 和 tag
 ```
 
@@ -891,4 +891,76 @@ Graph SSE 返回事件流和 done
 verify_step11_checkpoint.py 通过
 verify_step11_graph_agent.py 通过
 测试线程和业务数据清理完成
+```
+
+---
+
+## 22. PART 7 验证记录
+
+双版本入口保持隔离：
+
+```text
+手写 ReAct:
+POST /api/agent/tasks/{task_id}/run
+GET  /api/agent/tasks/{task_id}/stream
+
+LangGraph:
+POST /api/agent/tasks/{task_id}/graph/run
+POST /api/agent/tasks/{task_id}/graph/resume
+GET  /api/agent/tasks/{task_id}/graph/confirmation
+GET  /api/agent/tasks/{task_id}/graph/stream
+```
+
+新增对比脚本：
+
+```text
+scripts/compare_step11_engines.py
+```
+
+新增对比文档：
+
+```text
+docs/STEP11_ENGINE_COMPARISON.md
+```
+
+相同模型响应和工具注册表下验证：
+
+```text
+最终回答一致
+ReAct 状态一致
+模型决策步数一致
+Token Usage 一致
+工具调用轨迹一致
+核心 SSE 事件顺序一致
+工具实际执行输入一致
+```
+
+Graph 版额外提供：
+
+```text
+显式状态图
+PostgreSQL Checkpoint
+人工确认
+中断恢复
+节点级重试
+节点事件
+```
+
+对比脚本输出：
+
+```text
+answer_equal=true
+status_equal=true
+steps_equal=true
+usage_equal=true
+tool_trace_equal=true
+core_events_equal=true
+executed_tools_equal=true
+```
+
+测试结果：
+
+```text
+python -m pytest -q
+279 passed
 ```
