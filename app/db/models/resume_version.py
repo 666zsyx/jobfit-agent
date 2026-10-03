@@ -78,3 +78,7 @@ class ResumeVersion(Base):
         back_populates="resume_version",
     )
 
+    knowledge_chunks: Mapped[list["KnowledgeChunk"]] = relationship(
+        back_populates="resume_version",
+        order_by="KnowledgeChunk.position",
+    )

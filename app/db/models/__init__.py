@@ -4,6 +4,7 @@ from app.db.base import Base
 from app.db.models.analysis_task import AnalysisTask
 from app.db.models.conversation import Conversation
 from app.db.models.job import Job
+from app.db.models.knowledge_chunk import KnowledgeChunk
 from app.db.models.message import Message
 from app.db.models.report import Report
 from app.db.models.resume import Resume
@@ -17,6 +18,7 @@ __all__ = [
     "Resume",
     "ResumeVersion",
     "Job",
+    "KnowledgeChunk",
     "Conversation",
     "Message",
     "AnalysisTask",

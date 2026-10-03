@@ -7,6 +7,7 @@ from app.db.models import (
     Base,
     Conversation,
     Job,
+    KnowledgeChunk,
     Message,
     Report,
     Resume,
@@ -33,6 +34,12 @@ EXPECTED_COLUMNS = {
         "job_id", "user_id", "title", "company_name",
         "raw_description", "extracted_requirements", "status",
         "created_at", "updated_at", "deleted_at",
+    },
+    KnowledgeChunk: {
+        "chunk_id", "user_id", "resume_version_id", "section_type",
+        "title", "content", "content_hash", "position",
+        "start_offset", "end_offset", "chunker_version", "index_status",
+        "embedding_model", "embedding_dimension", "created_at", "updated_at",
     },
     Conversation: {
         "conversation_id", "user_id", "title", "status",
@@ -71,6 +78,16 @@ EXPECTED_CONSTRAINT_NAMES = {
         "resume_versions_source_type_check",
     },
     Job: {"jobs_status_check"},
+    KnowledgeChunk: {
+        "knowledge_chunks_resume_version_id_chunker_version_position_key",
+        "knowledge_chunks_position_check",
+        "knowledge_chunks_section_type_check",
+        "knowledge_chunks_start_offset_check",
+        "knowledge_chunks_end_offset_check",
+        "knowledge_chunks_offset_order_check",
+        "knowledge_chunks_index_status_check",
+        "knowledge_chunks_embedding_dimension_check",
+    },
     Conversation: {"conversations_status_check"},
     Message: {
         "messages_conversation_id_sequence_no_key",
@@ -97,6 +114,11 @@ EXPECTED_INDEX_NAMES = {
     Resume: {"idx_resumes_user_created_at"},
     ResumeVersion: set(),
     Job: {"idx_jobs_user_created_at"},
+    KnowledgeChunk: {
+        "idx_knowledge_chunks_user_resume_version",
+        "idx_knowledge_chunks_resume_version_status",
+        "idx_knowledge_chunks_user_content_hash",
+    },
     Conversation: {"idx_conversations_user_updated_at"},
     Message: set(),
     AnalysisTask: {
@@ -115,6 +137,10 @@ EXPECTED_FOREIGN_KEY_NAMES = {
     Resume: {"resumes_user_id_fkey"},
     ResumeVersion: {"resume_versions_resume_id_fkey"},
     Job: {"jobs_user_id_fkey"},
+    KnowledgeChunk: {
+        "knowledge_chunks_user_id_fkey",
+        "knowledge_chunks_resume_version_id_fkey",
+    },
     Conversation: {"conversations_user_id_fkey"},
     Message: {"messages_conversation_id_fkey"},
     AnalysisTask: {
@@ -128,10 +154,10 @@ EXPECTED_FOREIGN_KEY_NAMES = {
 }
 
 
-def test_metadata_contains_nine_tables() -> None:
+def test_metadata_contains_ten_tables() -> None:
     assert set(Base.metadata.tables) == {
         "jobfit.users", "jobfit.resumes", "jobfit.resume_versions",
-        "jobfit.jobs", "jobfit.conversations", "jobfit.messages",
+        "jobfit.jobs", "jobfit.knowledge_chunks", "jobfit.conversations", "jobfit.messages",
         "jobfit.analysis_tasks", "jobfit.reports",
         "jobfit.tool_call_records",
     }
@@ -204,6 +230,11 @@ def test_relationships_are_configured() -> None:
     assert User.analysis_tasks.property.mapper.class_ is AnalysisTask
     assert Resume.user.property.mapper.class_ is User
     assert Resume.versions.property.mapper.class_ is ResumeVersion
+    assert (
+        ResumeVersion.knowledge_chunks.property.mapper.class_
+        is KnowledgeChunk
+    )
+    assert KnowledgeChunk.resume_version.property.mapper.class_ is ResumeVersion
     assert Conversation.messages.property.mapper.class_ is Message
     assert Conversation.analysis_tasks.property.mapper.class_ is AnalysisTask
     assert AnalysisTask.reports.property.mapper.class_ is Report

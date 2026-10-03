@@ -3,6 +3,7 @@
 from app.repositories.analysis_task import AnalysisTaskRepository
 from app.repositories.conversation import ConversationRepository
 from app.repositories.job import JobRepository
+from app.repositories.knowledge_chunk import KnowledgeChunkRepository
 from app.repositories.message import MessageRepository
 from app.repositories.report import ReportRepository
 from app.repositories.resume import ResumeRepository
@@ -15,6 +16,7 @@ __all__ = [
     "ResumeRepository",
     "ResumeVersionRepository",
     "JobRepository",
+    "KnowledgeChunkRepository",
     "ConversationRepository",
     "MessageRepository",
     "AnalysisTaskRepository",
