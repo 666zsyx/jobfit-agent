@@ -1,4 +1,4 @@
-# 组装 JobFit LangGraph 工作流骨架。
+# 组装 JobFit LangGraph 工作流。
 
 from __future__ import annotations
 
@@ -17,18 +17,23 @@ from app.graphs.jobfit.nodes import (
     prepare_run,
     route_after_agent,
     route_after_confirmation,
+    route_after_tools,
     save_report,
 )
+from app.graphs.jobfit.runtime import JobFitGraphContext
 from app.graphs.jobfit.state import JobFitGraphState
 
 
 def build_jobfit_graph(checkpointer: Any | None = None):
     """构建并编译 JobFit Graph。
 
-    阶段一使用假节点验证拓扑；后续阶段会逐步替换为真实服务调用。
+    真实 LLM、工具注册表和 ToolContext 工厂通过运行时的 context 注入。
     """
 
-    builder = StateGraph(JobFitGraphState)
+    builder = StateGraph(
+        JobFitGraphState,
+        context_schema=JobFitGraphContext,
+    )
 
     builder.add_node("prepare_run", prepare_run)
     builder.add_node("load_context", load_context)
@@ -51,7 +56,14 @@ def build_jobfit_graph(checkpointer: Any | None = None):
             "assess_evidence": "assess_evidence",
         },
     )
-    builder.add_edge("execute_tools", "agent_decide")
+    builder.add_conditional_edges(
+        "execute_tools",
+        route_after_tools,
+        {
+            "agent_decide": "agent_decide",
+            "assess_evidence": "assess_evidence",
+        },
+    )
     builder.add_edge("assess_evidence", "human_confirmation")
     builder.add_conditional_edges(
         "human_confirmation",

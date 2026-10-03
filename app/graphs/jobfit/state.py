@@ -7,29 +7,39 @@ from typing import Annotated, Any, Literal, TypedDict
 
 
 ConfirmationDecision = Literal["approve", "revise", "reject"]
+ReactStatus = Literal["completed", "max_steps_reached"]
 
 
 class JobFitGraphState(TypedDict, total=False):
-    """工作流节点共享的最小状态。
+    """工作流节点共享的状态。
 
-    阶段一先使用假数据验证拓扑，不保存数据库 Session、API Key
-    或隐藏思维链。真实 RAG 证据将在后续阶段通过 ID 和摘要接入。
+    运行时依赖通过 LangGraph context 注入，不进入 State。
+    State 只保存可序列化的工作流数据，便于后续接入 Checkpoint。
     """
 
     task_id: int
     job_id: int
     resume_version_id: int
 
+    job_description: str
+    resume_text: str
+    conversation_context: str | None
+    system_prompt: str
+
     max_steps: int
     current_step: int
     context_loaded: bool
-    job_requirement_count: int
-    resume_section_count: int
 
+    messages: Annotated[list[dict[str, Any]], operator.add]
     tool_calls: list[dict[str, Any]]
-    tool_results: Annotated[list[dict[str, Any]], operator.add]
-    evidence_pack: list[dict[str, Any]]
-    pending_report: dict[str, Any]
+    tool_trace: Annotated[list[dict[str, Any]], operator.add]
+    tool_audit_events: Annotated[list[dict[str, Any]], operator.add]
+    retrieved_evidence_packs: list[dict[str, Any]]
+
+    usage: dict[str, int]
+    final_answer: str | None
+    react_status: ReactStatus | None
+    pending_report: dict[str, Any] | None
 
     confirmation_decision: ConfirmationDecision | None
     report_id: int | None
@@ -43,4 +53,5 @@ class JobFitGraphState(TypedDict, total=False):
 __all__ = [
     "ConfirmationDecision",
     "JobFitGraphState",
+    "ReactStatus",
 ]
