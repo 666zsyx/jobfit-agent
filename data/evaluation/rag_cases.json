@@ -1,0 +1,301 @@
+{
+  "version": 1,
+  "corpus": [
+    {
+      "section_key": "python_backend",
+      "section_type": "skills",
+      "title": "Python 后端能力",
+      "content": "Python、FastAPI、Pydantic，具备 Python 后端开发经验。"
+    },
+    {
+      "section_key": "fastapi_api",
+      "section_type": "project_experience",
+      "title": "REST API 设计",
+      "content": "使用 FastAPI 设计 REST API，编写 OpenAPI 接口文档和请求参数校验。"
+    },
+    {
+      "section_key": "postgresql",
+      "section_type": "skills",
+      "title": "PostgreSQL 与迁移",
+      "content": "PostgreSQL 17、SQLAlchemy 2.x、Alembic 迁移、事务和索引设计。"
+    },
+    {
+      "section_key": "redis_async",
+      "section_type": "project_experience",
+      "title": "Redis 与异步任务",
+      "content": "使用 Redis、asyncio 和任务队列实现缓存、运行锁和异步处理。"
+    },
+    {
+      "section_key": "rag_system",
+      "section_type": "project_experience",
+      "title": "RAG 检索系统",
+      "content": "实现 RAG 混合检索、Embedding、Chroma、RRF、Rerank 和引用证据链。"
+    },
+    {
+      "section_key": "agent_loop",
+      "section_type": "project_experience",
+      "title": "ReAct Agent",
+      "content": "手写 ReAct Agent，支持 Function Calling、多轮工具调用、最大步数和 Token 统计。"
+    },
+    {
+      "section_key": "testing",
+      "section_type": "project_experience",
+      "title": "自动化测试",
+      "content": "使用 pytest、httpx 编写单元测试、接口测试和事务回滚测试。"
+    },
+    {
+      "section_key": "docker_deploy",
+      "section_type": "work_experience",
+      "title": "部署与运维",
+      "content": "使用 Docker、Docker Compose、Linux、Nginx 和 CI/CD 完成私有部署。"
+    },
+    {
+      "section_key": "react_frontend",
+      "section_type": "project_experience",
+      "title": "React 前端",
+      "content": "使用 React、TypeScript、Axios 完成前端页面和接口联调。"
+    },
+    {
+      "section_key": "data_algorithm",
+      "section_type": "skills",
+      "title": "算法与 SQL",
+      "content": "掌握数据结构、常见算法、SQL 查询优化，持续完成 LeetCode 练习。"
+    },
+    {
+      "section_key": "communication",
+      "section_type": "work_experience",
+      "title": "协作沟通",
+      "content": "参与需求分析、跨团队协作、接口联调和文档沟通。"
+    },
+    {
+      "section_key": "security",
+      "section_type": "project_experience",
+      "title": "安全边界",
+      "content": "实现用户隔离、Bearer 鉴权、异常脱敏和工具白名单。"
+    },
+    {
+      "section_key": "observability",
+      "section_type": "project_experience",
+      "title": "可观测性",
+      "content": "记录结构化日志、工具审计、耗时统计和 SSE 状态事件。"
+    },
+    {
+      "section_key": "education",
+      "section_type": "education",
+      "title": "教育经历",
+      "content": "计算机科学与技术本科，系统学习数据库和软件开发。"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "exact_python",
+      "requirement": "熟悉 Python",
+      "expected_section_keys": ["python_backend"],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_fastapi",
+      "requirement": "熟悉 FastAPI",
+      "expected_section_keys": ["python_backend", "fastapi_api"],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_postgresql17",
+      "requirement": "熟悉 PostgreSQL 17",
+      "expected_section_keys": ["postgresql"],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_redis",
+      "requirement": "熟悉 Redis",
+      "expected_section_keys": ["redis_async"],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_chroma",
+      "requirement": "使用过 Chroma",
+      "expected_section_keys": ["rag_system"],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_rrf",
+      "requirement": "了解 RRF 排名融合",
+      "expected_section_keys": ["rag_system"],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_react_agent",
+      "requirement": "有 ReAct Agent 开发经验",
+      "expected_section_keys": ["agent_loop"],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_function_calling",
+      "requirement": "实现过 Function Calling",
+      "expected_section_keys": ["agent_loop"],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_pytest",
+      "requirement": "熟悉 pytest",
+      "expected_section_keys": ["testing"],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_docker_compose",
+      "requirement": "使用过 Docker Compose",
+      "expected_section_keys": ["docker_deploy"],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_react_typescript",
+      "requirement": "熟悉 React 和 TypeScript",
+      "expected_section_keys": ["react_frontend"],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_cicd",
+      "requirement": "了解 CI/CD",
+      "expected_section_keys": ["docker_deploy"],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "semantic_python_web",
+      "requirement": "能够开发 Python Web 服务",
+      "expected_section_keys": ["python_backend", "fastapi_api"],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_api_docs",
+      "requirement": "能够设计 HTTP 接口并维护接口文档",
+      "expected_section_keys": ["fastapi_api"],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_database_change",
+      "requirement": "能够设计数据表、索引和版本迁移",
+      "expected_section_keys": ["postgresql"],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_cache_lock",
+      "requirement": "有缓存、并发锁和异步处理经验",
+      "expected_section_keys": ["redis_async"],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_resume_retrieval",
+      "requirement": "能从简历中检索证据并给出引用",
+      "expected_section_keys": ["rag_system"],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_agent_tools",
+      "requirement": "让模型多轮选择工具并完成任务",
+      "expected_section_keys": ["agent_loop"],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_automated_tests",
+      "requirement": "编写自动化测试覆盖接口和数据库流程",
+      "expected_section_keys": ["testing"],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_linux_deploy",
+      "requirement": "把服务部署到 Linux 环境",
+      "expected_section_keys": ["docker_deploy"],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_frontend_api",
+      "requirement": "前端能够调用后端接口",
+      "expected_section_keys": ["react_frontend"],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_team_requirements",
+      "requirement": "能和团队沟通需求并完成联调",
+      "expected_section_keys": ["communication"],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_user_isolation",
+      "requirement": "防止用户读取其他人的数据",
+      "expected_section_keys": ["security"],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_observability",
+      "requirement": "记录工具耗时和错误状态",
+      "expected_section_keys": ["observability"],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_algorithm_sql",
+      "requirement": "具备算法和 SQL 性能优化能力",
+      "expected_section_keys": ["data_algorithm"],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "negative_rust_distributed",
+      "requirement": "有 Rust 大规模分布式系统经验",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_flutter",
+      "requirement": "熟悉 Flutter 移动端开发",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_kubernetes",
+      "requirement": "负责 Kubernetes 生产集群运维",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_spanish_support",
+      "requirement": "能够使用西班牙语提供客户支持",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_embedded_c",
+      "requirement": "有嵌入式 C 驱动开发经验",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    }
+  ]
+}

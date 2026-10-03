@@ -6,7 +6,7 @@
 
 ## 当前阶段
 
-STEP 07：状态、记忆、PostgreSQL/Redis 持久化与 Agent SSE 流式服务。
+STEP 08：RAG 混合检索、证据链、Rerank、岗位匹配闭环与检索评估。
 
 当前已经支持：
 
@@ -21,13 +21,22 @@ STEP 07：状态、记忆、PostgreSQL/Redis 持久化与 Agent SSE 流式服务
 - `GET /api/agent/tasks/{task_id}`：从 Redis/PostgreSQL 查询任务状态。
 - `GET /api/agent/tasks/{task_id}/stream`：通过 SSE 返回 Agent 执行事件。
 
+STEP 08 新增 RAG 能力：
+
+- PostgreSQL `knowledge_chunks`：持久化简历 Chunk、版本、位置和索引状态。
+- FastEmbed `BAAI/bge-small-zh-v1.5` + Chroma：本地 Embedding 和向量检索。
+- BM25 关键词召回 + RRF 混合排序。
+- `BAAI/bge-reranker-base` 重排、EvidencePack 和 chunk_id 引用校验。
+- 持久化 Agent 自动完成 Chunking、向量索引、混合检索和引用报告。
+- 30 条固定评估集和 Markdown/JSON 评估报告。
+
 岗位提取接口使用 Prompt、JSON Schema、JSON 模式和 Pydantic 双重校验。模型调用成功但输出为空或不符合 Schema 时，最多尝试两次；认证、限流、超时和网络错误不会进入结构重试。
 
 STEP 05 已增加工具注册与单次 Function Calling 编排基础。当前注册六个真实工具：
 
 - `extract_job_requirements`：从岗位 JD 提取职责、必备技能和加分项。
 - `extract_resume_sections`：从简历原文提取教育、项目、技能等结构化分段。
-- `search_resume_evidence`：按岗位要求检索简历分段中的原文证据。
+- `search_resume_evidence`：RAG 任务执行 BM25 + 向量混合召回和 Rerank；旧流程可传入 sections 回退。
 - `assess_requirement_match`：根据证据评估 `strong_match`、`partial_match` 或 `insufficient_evidence`。
 - `get_resume_profile`：读取当前任务绑定的持久化简历。
 - `save_match_report`：暂存并持久化结构化匹配报告。
@@ -69,6 +78,11 @@ LLM_BASE_URL=https://api.deepseek.com
 LLM_MODEL=deepseek-flash
 DATABASE_URL=postgresql+asyncpg://jobfit_app:你的密码@127.0.0.1:5432/jobfit_dev
 REDIS_URL=redis://127.0.0.1:6379/0
+EMBEDDING_MODEL_NAME=BAAI/bge-small-zh-v1.5
+EMBEDDING_CACHE_PATH=.cache/fastembed
+VECTOR_INDEX_PATH=.cache/chroma
+VECTOR_COLLECTION_NAME=jobfit_resume_chunks_v1
+RERANKER_MODEL_NAME=BAAI/bge-reranker-base
 ```
 
 安全要求：
@@ -373,7 +387,20 @@ cd D:\agentstudy\jobfit_agent
 .\.venv\Scripts\python.exe .\scripts\verify_step06_react_agent.py
 ```
 
-该脚本会真实调用 DeepSeek，验收岗位提取、简历分段、证据检索、匹配评估、trace 和最终回答。
+该脚本会真实调用 DeepSeek，验收岗位提取、RAG 证据检索、匹配评估、trace、引用报告和最终回答。
+
+运行 RAG 检索评估：
+
+```powershell
+.\\.venv\\Scripts\\python.exe .\\scripts\\evaluate_rag.py
+```
+
+评估报告：
+
+```text
+docs/RAG_EVALUATION.md
+docs/rag_evaluation_results.json
+```
 
 ## Docker
 

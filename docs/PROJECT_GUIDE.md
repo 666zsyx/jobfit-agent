@@ -1,6 +1,6 @@
 # JobFit Agent 项目全景与维护文档
 
-> 最后更新：2026-09-29
+> 最后更新：2026-10-03
 >
 > 适用对象：未来的项目维护者、面试准备者、协作者和几周后重新阅读代码的自己。
 >
@@ -27,7 +27,7 @@ JobFit Agent 是一个基于 RAG 和工具调用的可解释岗位匹配与差�
 → 报告保存
 ```
 
-当前项目已完成模型 API、聊天接口、结构化提取、工具注册、简历分段、关键词证据检索、三态匹配评估、ReAct 循环、PostgreSQL/Alembic 持久化、Redis 缓存与运行锁、工具审计、失败恢复、SSE 流式任务和真实模型持久化验收。
+当前项目已完成模型 API、聊天接口、结构化提取、工具注册、ReAct 循环、PostgreSQL/Alembic 持久化、Redis 缓存与运行锁、工具审计、失败恢复、SSE、RAG Chunk 持久化、FastEmbed 向量检索、BM25 + 向量混合召回、RRF、Cross-Encoder Rerank、EvidencePack、引用校验和 30 条检索评估。
 
 ---
 
@@ -41,6 +41,7 @@ STEP 04：功能、测试、文档、Git 和 tag 完成
 STEP 05：功能、测试、真实验收、文档、Git、远程 push 和 tag 全部完成
 STEP 06：完成；功能、测试、真实模型、HTTP、部署就绪、文档和本地 Git 闭环均已完成
 STEP 07：代码、数据库/Redis、SSE、真实模型持久化、自动化测试和本地验收完成；私有 staging 待 Docker 环境。
+STEP 08：RAG 数据模型、Chunking、Embedding、向量检索、混合召回、Rerank、引用校验、Agent 集成和检索评估全部完成。
 ```
 
 当前代码分支：
@@ -296,7 +297,7 @@ app/services/evidence_search.py
 - 证据内容保留简历分段原文。
 - 按分数降序、原始 section 顺序稳定排序。
 
-该实现后续会在 STEP 08 升级为混合检索、向量检索和重排。
+STEP 08 已升级为持久化知识 Chunk、BM25 关键词召回、FastEmbed 向量召回、RRF 混合排序、Cross-Encoder Rerank 和 EvidencePack 引用链。旧关键词实现保留为非 RAG 兼容回退。
 
 ## 9. 要求匹配评估
 
@@ -566,6 +567,43 @@ requirements-dev.txt
 - 三态结果能保留不确定性，后续再接入更可靠的 RAG 与语义分析。
 
 ---
+
+# 四点五、STEP 08 RAG 技术栈
+
+```text
+Chunk 持久化：PostgreSQL jobfit.knowledge_chunks
+Embedding：FastEmbed BAAI/bge-small-zh-v1.5，512 维
+向量库：Chroma 本地持久化，cosine 距离
+关键词召回：自实现 BM25 + 中英技术 token
+融合：RRF（k=60，默认关键词和向量等权）
+重排：FastEmbed BAAI/bge-reranker-base
+证据门控：rerank logit >= -2.9
+引用校验：只允许 EvidencePack 中的 chunk_id
+评估：30 条固定数据，Recall@5、MRR@5、nDCG@5、Citation Precision、Abstention Accuracy
+```
+
+评估结果记录在：
+
+```text
+docs/RAG_EVALUATION.md
+docs/rag_evaluation_results.json
+```
+
+当前评估集上的关键结果：
+
+```text
+hybrid Recall@5 = 1.0000，Abstention = 0.0000
+rerank_raw Recall@5 = 0.9800，Abstention = 0.0000
+rerank_prod Recall@5 = 0.8600，Abstention = 1.0000，Citation Precision = 0.7533
+```
+
+说明：
+
+```text
+rerank_raw 反映纯排序质量。
+rerank_prod 使用生产门控，牺牲部分正样本召回换取负样本拒答。
+阈值在同一评估集上校准，正式上线前仍应使用独立 holdout 复验。
+```
 
 # 五、当前目录结构
 
@@ -1556,6 +1594,35 @@ STEP 12：安全、评估、监控和性能优化完成后正式公网部署
 - SSE 不包含隐藏思维链，只包含可审计状态、工具事件和最终回答。
 - 同一任务报告版本追加保存，不覆盖历史。
 - 真实 Redis 已本地验收；Docker staging 和公网开放留待后续阶段。
+
+# 十四点六、STEP 08：RAG 混合检索、证据链与检索评估
+
+完成：
+
+- PostgreSQL `knowledge_chunks` 表、Alembic migration 和用户/版本隔离 Repository。
+- 简历版本 section-aware chunking、offset、content_hash 和幂等摄入。
+- FastEmbed EmbeddingProvider、Chroma VectorIndex 和向量重建。
+- BM25 关键词召回、向量召回、RRF 混合融合。
+- Cross-Encoder Rerank、EvidencePack、引用校验和失败回退。
+- 持久化 Agent 自动准备 RAG 索引，`search_resume_evidence` 优先走混合检索和 Rerank。
+- SSE 增加索引和检索事件。
+- 30 条固定评估集、四种策略对比和 Markdown/JSON 报告。
+
+为什么这样设计：
+
+- PostgreSQL 保存权威 Chunk，向量库只保存派生索引。
+- 混合检索兼顾技术词精确匹配和语义改写。
+- RRF 避免直接相加不可比的原始分数。
+- Rerank 提高最终证据排序质量。
+- 引用校验保证报告只能引用真实检索结果。
+- 生产门控阈值通过评估数据校准，而不是凭感觉设置。
+
+当前限制：
+
+- 评估集只有 30 条，阈值需要在独立 holdout 上复验。
+- Chroma 使用本地嵌入模式，尚未做大规模并发和分布式向量服务。
+- 职业能力知识库仍可在后续扩展。
+- 私有 staging 继续延期到 Linux 云服务器。
 
 # 十五、每个大 STEP 完成后的维护清单
 

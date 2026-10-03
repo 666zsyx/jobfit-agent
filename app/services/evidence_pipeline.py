@@ -17,6 +17,9 @@ from app.services.reranking import Reranker
 from app.services.vector_index import VectorIndex
 
 
+DEFAULT_MIN_RERANK_SCORE = -2.9
+
+
 def _hit_document(hit: HybridSearchHit) -> str:
     return f"{hit.title}\n{hit.content}"
 
@@ -98,9 +101,16 @@ def build_evidence_pack_from_reranked(
     requirement: str,
     reranked_hits: list[RerankedSearchHit],
     top_n: int,
+    min_rerank_score: float = DEFAULT_MIN_RERANK_SCORE,
 ) -> EvidencePack:
     if top_n < 1:
         raise ValueError("top_n 必须大于等于 1")
+
+    accepted_hits = [
+        hit
+        for hit in reranked_hits
+        if hit.rerank_score >= min_rerank_score
+    ]
 
     return EvidencePack(
         requirement=requirement.strip(),
@@ -111,7 +121,7 @@ def build_evidence_pack_from_reranked(
                 rank=rank,
             )
             for rank, hit in enumerate(
-                reranked_hits[:top_n],
+                accepted_hits[:top_n],
                 start=1,
             )
         ],
@@ -157,6 +167,7 @@ async def search_resume_chunks_with_evidence(
     candidate_top_k: int,
     rerank_candidate_top_n: int,
     evidence_top_n: int,
+    min_rerank_score: float = DEFAULT_MIN_RERANK_SCORE,
     embedding_provider: EmbeddingProvider,
     vector_index: VectorIndex,
     reranker: Reranker,
@@ -199,4 +210,5 @@ async def search_resume_chunks_with_evidence(
         requirement=requirement,
         reranked_hits=reranked_hits,
         top_n=evidence_top_n,
+        min_rerank_score=min_rerank_score,
     )

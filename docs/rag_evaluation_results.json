@@ -1,0 +1,1416 @@
+{
+  "dataset_version": 1,
+  "case_count": 30,
+  "k": 5,
+  "summary": {
+    "keyword": {
+      "recall_at_k": 0.98,
+      "mrr_at_k": 0.96,
+      "ndcg_at_k": 0.9550002679963349,
+      "precision_at_k": 0.20800000000000002,
+      "citation_precision": 0.5546666666666666,
+      "abstention_accuracy": 0.0,
+      "p50_latency_ms": 1.7982999852392823,
+      "p95_latency_ms": 1.9842999754473567
+    },
+    "vector": {
+      "recall_at_k": 0.86,
+      "mrr_at_k": 0.7026666666666667,
+      "ndcg_at_k": 0.7368967171538615,
+      "precision_at_k": 0.18400000000000002,
+      "citation_precision": 0.18400000000000002,
+      "abstention_accuracy": 0.0,
+      "p50_latency_ms": 6.685700005618855,
+      "p95_latency_ms": 7.517499994719401
+    },
+    "hybrid": {
+      "recall_at_k": 1.0,
+      "mrr_at_k": 0.9333333333333332,
+      "ndcg_at_k": 0.9504743802857166,
+      "precision_at_k": 0.21600000000000003,
+      "citation_precision": 0.21600000000000003,
+      "abstention_accuracy": 0.0,
+      "p50_latency_ms": 8.103200001642108,
+      "p95_latency_ms": 10.450200003106147
+    },
+    "rerank": {
+      "recall_at_k": 0.98,
+      "mrr_at_k": 0.96,
+      "ndcg_at_k": 0.9550002679963349,
+      "precision_at_k": 0.20800000000000002,
+      "citation_precision": 0.20800000000000002,
+      "abstention_accuracy": 0.0,
+      "p50_latency_ms": 255.84189998335205,
+      "p95_latency_ms": 288.87469999608584
+    },
+    "rerank_prod": {
+      "recall_at_k": 0.86,
+      "mrr_at_k": 0.84,
+      "ndcg_at_k": 0.8350002679963349,
+      "precision_at_k": 0.18400000000000002,
+      "citation_precision": 0.7533333333333333,
+      "abstention_accuracy": 1.0,
+      "p50_latency_ms": 255.84189998335205,
+      "p95_latency_ms": 288.87469999608584
+    }
+  },
+  "cases": [
+    {
+      "case_id": "exact_python",
+      "category": "exact",
+      "requirement": "熟悉 Python",
+      "expected_chunk_ids": [
+        119
+      ],
+      "strategies": {
+        "keyword": [
+          119
+        ],
+        "vector": [
+          128,
+          119,
+          121,
+          127,
+          126
+        ],
+        "hybrid": [
+          119,
+          128,
+          121,
+          127,
+          126
+        ],
+        "rerank": [
+          119,
+          128,
+          127,
+          129,
+          124
+        ],
+        "rerank_prod": [
+          119
+        ]
+      },
+      "rerank_scores": [
+        0.0783282,
+        -4.24461126,
+        -4.42768764,
+        -5.7671299,
+        -6.10441399
+      ]
+    },
+    {
+      "case_id": "exact_fastapi",
+      "category": "exact",
+      "requirement": "熟悉 FastAPI",
+      "expected_chunk_ids": [
+        119,
+        120
+      ],
+      "strategies": {
+        "keyword": [
+          119,
+          120
+        ],
+        "vector": [
+          128,
+          119,
+          121,
+          127,
+          126
+        ],
+        "hybrid": [
+          119,
+          120,
+          128,
+          121,
+          127
+        ],
+        "rerank": [
+          119,
+          120,
+          129,
+          132,
+          128
+        ],
+        "rerank_prod": [
+          119,
+          120
+        ]
+      },
+      "rerank_scores": [
+        1.10059655,
+        0.31825998,
+        -4.49322557,
+        -4.84984303,
+        -4.94230413
+      ]
+    },
+    {
+      "case_id": "exact_postgresql17",
+      "category": "exact",
+      "requirement": "熟悉 PostgreSQL 17",
+      "expected_chunk_ids": [
+        121
+      ],
+      "strategies": {
+        "keyword": [
+          121
+        ],
+        "vector": [
+          121,
+          128,
+          119,
+          126,
+          124
+        ],
+        "hybrid": [
+          121,
+          128,
+          119,
+          126,
+          124
+        ],
+        "rerank": [
+          121,
+          127,
+          128,
+          124,
+          119
+        ],
+        "rerank_prod": [
+          121
+        ]
+      },
+      "rerank_scores": [
+        -2.04011559,
+        -4.3322258,
+        -4.67582798,
+        -5.25175238,
+        -5.52266884
+      ]
+    },
+    {
+      "case_id": "exact_redis",
+      "category": "exact",
+      "requirement": "熟悉 Redis",
+      "expected_chunk_ids": [
+        122
+      ],
+      "strategies": {
+        "keyword": [
+          122
+        ],
+        "vector": [
+          128,
+          119,
+          121,
+          127,
+          126
+        ],
+        "hybrid": [
+          122,
+          128,
+          119,
+          121,
+          127
+        ],
+        "rerank": [
+          122,
+          119,
+          127,
+          129,
+          128
+        ],
+        "rerank_prod": [
+          122
+        ]
+      },
+      "rerank_scores": [
+        -1.47390997,
+        -6.32156467,
+        -6.85587502,
+        -6.96357012,
+        -7.45242453
+      ]
+    },
+    {
+      "case_id": "exact_chroma",
+      "category": "exact",
+      "requirement": "使用过 Chroma",
+      "expected_chunk_ids": [
+        123
+      ],
+      "strategies": {
+        "keyword": [
+          123,
+          127,
+          126,
+          120,
+          125
+        ],
+        "vector": [
+          126,
+          127,
+          119,
+          124,
+          128
+        ],
+        "hybrid": [
+          126,
+          127,
+          123,
+          120,
+          122
+        ],
+        "rerank": [
+          123,
+          127,
+          124,
+          122,
+          121
+        ],
+        "rerank_prod": []
+      },
+      "rerank_scores": [
+        -7.15275812,
+        -8.95138073,
+        -10.14929771,
+        -10.18733311,
+        -10.19456196
+      ]
+    },
+    {
+      "case_id": "exact_rrf",
+      "category": "exact",
+      "requirement": "了解 RRF 排名融合",
+      "expected_chunk_ids": [
+        123
+      ],
+      "strategies": {
+        "keyword": [
+          123
+        ],
+        "vector": [
+          119,
+          128,
+          123,
+          121,
+          130
+        ],
+        "hybrid": [
+          123,
+          119,
+          128,
+          121,
+          130
+        ],
+        "rerank": [
+          123,
+          129,
+          130,
+          128,
+          124
+        ],
+        "rerank_prod": [
+          123
+        ]
+      },
+      "rerank_scores": [
+        -2.75714922,
+        -4.49447107,
+        -6.59013891,
+        -7.24904442,
+        -8.63777733
+      ]
+    },
+    {
+      "case_id": "exact_react_agent",
+      "category": "exact",
+      "requirement": "有 ReAct Agent 开发经验",
+      "expected_chunk_ids": [
+        124
+      ],
+      "strategies": {
+        "keyword": [
+          119,
+          124,
+          127,
+          132
+        ],
+        "vector": [
+          119,
+          120,
+          128,
+          127,
+          124
+        ],
+        "hybrid": [
+          119,
+          124,
+          127,
+          132,
+          120
+        ],
+        "rerank": [
+          124,
+          132,
+          119,
+          127,
+          128
+        ],
+        "rerank_prod": [
+          124
+        ]
+      },
+      "rerank_scores": [
+        -1.31298804,
+        -3.41035581,
+        -3.92878842,
+        -5.33720207,
+        -7.22426701
+      ]
+    },
+    {
+      "case_id": "exact_function_calling",
+      "category": "exact",
+      "requirement": "实现过 Function Calling",
+      "expected_chunk_ids": [
+        124
+      ],
+      "strategies": {
+        "keyword": [
+          124,
+          123,
+          130,
+          122
+        ],
+        "vector": [
+          124,
+          120,
+          128,
+          123,
+          119
+        ],
+        "hybrid": [
+          124,
+          123,
+          122,
+          130,
+          120
+        ],
+        "rerank": [
+          124,
+          127,
+          122,
+          130,
+          119
+        ],
+        "rerank_prod": [
+          124
+        ]
+      },
+      "rerank_scores": [
+        -2.56041622,
+        -5.60249186,
+        -7.4019537,
+        -7.98591423,
+        -9.25393391
+      ]
+    },
+    {
+      "case_id": "exact_pytest",
+      "category": "exact",
+      "requirement": "熟悉 pytest",
+      "expected_chunk_ids": [
+        125
+      ],
+      "strategies": {
+        "keyword": [
+          125
+        ],
+        "vector": [
+          128,
+          125,
+          119,
+          123,
+          124
+        ],
+        "hybrid": [
+          125,
+          128,
+          119,
+          123,
+          124
+        ],
+        "rerank": [
+          119,
+          125,
+          128,
+          132,
+          131
+        ],
+        "rerank_prod": [
+          119,
+          125
+        ]
+      },
+      "rerank_scores": [
+        -1.10049021,
+        -2.67466021,
+        -4.93177032,
+        -5.30344486,
+        -7.69611502
+      ]
+    },
+    {
+      "case_id": "exact_docker_compose",
+      "category": "exact",
+      "requirement": "使用过 Docker Compose",
+      "expected_chunk_ids": [
+        126
+      ],
+      "strategies": {
+        "keyword": [
+          126,
+          127,
+          120,
+          125,
+          122
+        ],
+        "vector": [
+          124,
+          120,
+          126,
+          127,
+          119
+        ],
+        "hybrid": [
+          126,
+          120,
+          127,
+          122,
+          125
+        ],
+        "rerank": [
+          126,
+          127,
+          119,
+          125,
+          122
+        ],
+        "rerank_prod": [
+          126
+        ]
+      },
+      "rerank_scores": [
+        -0.4789297,
+        -8.44059849,
+        -9.88448811,
+        -10.03264236,
+        -10.12817955
+      ]
+    },
+    {
+      "case_id": "exact_react_typescript",
+      "category": "exact",
+      "requirement": "熟悉 React 和 TypeScript",
+      "expected_chunk_ids": [
+        127
+      ],
+      "strategies": {
+        "keyword": [
+          127,
+          124
+        ],
+        "vector": [
+          119,
+          121,
+          128,
+          126,
+          127
+        ],
+        "hybrid": [
+          127,
+          124,
+          119,
+          121,
+          128
+        ],
+        "rerank": [
+          127,
+          119,
+          124,
+          128,
+          126
+        ],
+        "rerank_prod": [
+          127
+        ]
+      },
+      "rerank_scores": [
+        0.46028492,
+        -4.52851725,
+        -5.8676405,
+        -6.45717239,
+        -7.58210373
+      ]
+    },
+    {
+      "case_id": "exact_cicd",
+      "category": "exact",
+      "requirement": "了解 CI/CD",
+      "expected_chunk_ids": [
+        126
+      ],
+      "strategies": {
+        "keyword": [
+          126
+        ],
+        "vector": [
+          119,
+          128,
+          121,
+          127,
+          120
+        ],
+        "hybrid": [
+          126,
+          119,
+          128,
+          121,
+          127
+        ],
+        "rerank": [
+          129,
+          126,
+          132,
+          127,
+          131
+        ],
+        "rerank_prod": [
+          129,
+          126,
+          132
+        ]
+      },
+      "rerank_scores": [
+        -2.3186512,
+        -2.70867085,
+        -2.73040462,
+        -4.57112122,
+        -5.9219408
+      ]
+    },
+    {
+      "case_id": "semantic_python_web",
+      "category": "semantic",
+      "requirement": "能够开发 Python Web 服务",
+      "expected_chunk_ids": [
+        119,
+        120
+      ],
+      "strategies": {
+        "keyword": [
+          119,
+          132
+        ],
+        "vector": [
+          119,
+          120,
+          127,
+          126,
+          124
+        ],
+        "hybrid": [
+          119,
+          120,
+          132,
+          127,
+          126
+        ],
+        "rerank": [
+          119,
+          127,
+          129,
+          132,
+          126
+        ],
+        "rerank_prod": [
+          119
+        ]
+      },
+      "rerank_scores": [
+        -0.4910602,
+        -5.85198498,
+        -5.91034937,
+        -6.08430767,
+        -6.19499016
+      ]
+    },
+    {
+      "case_id": "semantic_api_docs",
+      "category": "semantic",
+      "requirement": "能够设计 HTTP 接口并维护接口文档",
+      "expected_chunk_ids": [
+        120
+      ],
+      "strategies": {
+        "keyword": [
+          120,
+          129,
+          121,
+          127,
+          125
+        ],
+        "vector": [
+          120,
+          127,
+          119,
+          129,
+          126
+        ],
+        "hybrid": [
+          120,
+          127,
+          129,
+          121,
+          125
+        ],
+        "rerank": [
+          120,
+          129,
+          127,
+          125,
+          119
+        ],
+        "rerank_prod": []
+      },
+      "rerank_scores": [
+        -3.26230288,
+        -3.58136082,
+        -5.49691629,
+        -5.69128132,
+        -5.89925289
+      ]
+    },
+    {
+      "case_id": "semantic_database_change",
+      "category": "semantic",
+      "requirement": "能够设计数据表、索引和版本迁移",
+      "expected_chunk_ids": [
+        121
+      ],
+      "strategies": {
+        "keyword": [
+          121,
+          120,
+          128,
+          132
+        ],
+        "vector": [
+          121,
+          123,
+          120,
+          128,
+          124
+        ],
+        "hybrid": [
+          121,
+          120,
+          128,
+          132,
+          123
+        ],
+        "rerank": [
+          121,
+          132,
+          119,
+          120,
+          128
+        ],
+        "rerank_prod": [
+          121,
+          132
+        ]
+      },
+      "rerank_scores": [
+        0.75697625,
+        -2.58513594,
+        -2.91084623,
+        -4.7184701,
+        -4.86670732
+      ]
+    },
+    {
+      "case_id": "semantic_cache_lock",
+      "category": "semantic",
+      "requirement": "有缓存、并发锁和异步处理经验",
+      "expected_chunk_ids": [
+        122
+      ],
+      "strategies": {
+        "keyword": [
+          122,
+          119
+        ],
+        "vector": [
+          122,
+          126,
+          129,
+          130,
+          119
+        ],
+        "hybrid": [
+          122,
+          119,
+          126,
+          129,
+          130
+        ],
+        "rerank": [
+          122,
+          119,
+          129,
+          130,
+          128
+        ],
+        "rerank_prod": [
+          122,
+          119
+        ]
+      },
+      "rerank_scores": [
+        3.28312349,
+        -2.69426489,
+        -2.95274043,
+        -3.51914525,
+        -3.84429979
+      ]
+    },
+    {
+      "case_id": "semantic_resume_retrieval",
+      "category": "semantic",
+      "requirement": "能从简历中检索证据并给出引用",
+      "expected_chunk_ids": [
+        123
+      ],
+      "strategies": {
+        "keyword": [
+          123
+        ],
+        "vector": [
+          123,
+          132,
+          128,
+          119,
+          131
+        ],
+        "hybrid": [
+          123,
+          132,
+          128,
+          119,
+          131
+        ],
+        "rerank": [
+          123,
+          129,
+          121,
+          131,
+          119
+        ],
+        "rerank_prod": [
+          123
+        ]
+      },
+      "rerank_scores": [
+        -2.8358016,
+        -8.41404819,
+        -9.28588581,
+        -9.58715439,
+        -10.1945076
+      ]
+    },
+    {
+      "case_id": "semantic_agent_tools",
+      "category": "semantic",
+      "requirement": "让模型多轮选择工具并完成任务",
+      "expected_chunk_ids": [
+        124
+      ],
+      "strategies": {
+        "keyword": [
+          124,
+          122,
+          127,
+          126,
+          130
+        ],
+        "vector": [
+          124,
+          122,
+          120,
+          126,
+          128
+        ],
+        "hybrid": [
+          124,
+          122,
+          126,
+          127,
+          128
+        ],
+        "rerank": [
+          124,
+          122,
+          128,
+          126,
+          119
+        ],
+        "rerank_prod": [
+          124
+        ]
+      },
+      "rerank_scores": [
+        -1.48251081,
+        -6.58215618,
+        -7.45299244,
+        -7.62303925,
+        -8.64571953
+      ]
+    },
+    {
+      "case_id": "semantic_automated_tests",
+      "category": "semantic",
+      "requirement": "编写自动化测试覆盖接口和数据库流程",
+      "expected_chunk_ids": [
+        125
+      ],
+      "strategies": {
+        "keyword": [
+          125,
+          132,
+          120,
+          128,
+          127
+        ],
+        "vector": [
+          125,
+          120,
+          131,
+          128,
+          132
+        ],
+        "hybrid": [
+          125,
+          120,
+          132,
+          128,
+          127
+        ],
+        "rerank": [
+          125,
+          129,
+          127,
+          120,
+          131
+        ],
+        "rerank_prod": [
+          125,
+          129
+        ]
+      },
+      "rerank_scores": [
+        1.66977382,
+        -1.73347867,
+        -3.97552681,
+        -4.52050972,
+        -4.71545935
+      ]
+    },
+    {
+      "case_id": "semantic_linux_deploy",
+      "category": "semantic",
+      "requirement": "把服务部署到 Linux 环境",
+      "expected_chunk_ids": [
+        126
+      ],
+      "strategies": {
+        "keyword": [
+          126
+        ],
+        "vector": [
+          126,
+          127,
+          119,
+          122,
+          128
+        ],
+        "hybrid": [
+          126,
+          127,
+          119,
+          122,
+          128
+        ],
+        "rerank": [
+          126,
+          127,
+          119,
+          129,
+          120
+        ],
+        "rerank_prod": [
+          126
+        ]
+      },
+      "rerank_scores": [
+        -2.69634843,
+        -6.33348894,
+        -7.08437634,
+        -7.89497089,
+        -8.51203156
+      ]
+    },
+    {
+      "case_id": "semantic_frontend_api",
+      "category": "semantic",
+      "requirement": "前端能够调用后端接口",
+      "expected_chunk_ids": [
+        127
+      ],
+      "strategies": {
+        "keyword": [
+          119,
+          127,
+          124,
+          129,
+          120
+        ],
+        "vector": [
+          127,
+          119,
+          129,
+          120,
+          124
+        ],
+        "hybrid": [
+          119,
+          127,
+          129,
+          124,
+          120
+        ],
+        "rerank": [
+          127,
+          119,
+          129,
+          126,
+          124
+        ],
+        "rerank_prod": [
+          127,
+          119
+        ]
+      },
+      "rerank_scores": [
+        4.45701981,
+        -0.55365098,
+        -3.27156734,
+        -4.63119459,
+        -5.86506748
+      ]
+    },
+    {
+      "case_id": "semantic_team_requirements",
+      "category": "semantic",
+      "requirement": "能和团队沟通需求并完成联调",
+      "expected_chunk_ids": [
+        129
+      ],
+      "strategies": {
+        "keyword": [
+          129,
+          127,
+          126,
+          128
+        ],
+        "vector": [
+          129,
+          127,
+          119,
+          126,
+          122
+        ],
+        "hybrid": [
+          129,
+          127,
+          126,
+          128,
+          119
+        ],
+        "rerank": [
+          129,
+          127,
+          124,
+          119,
+          126
+        ],
+        "rerank_prod": [
+          129
+        ]
+      },
+      "rerank_scores": [
+        1.95130742,
+        -3.06961942,
+        -4.59042788,
+        -7.61933327,
+        -8.8127079
+      ]
+    },
+    {
+      "case_id": "semantic_user_isolation",
+      "category": "semantic",
+      "requirement": "防止用户读取其他人的数据",
+      "expected_chunk_ids": [
+        130
+      ],
+      "strategies": {
+        "keyword": [
+          130,
+          128,
+          132
+        ],
+        "vector": [
+          130,
+          123,
+          125,
+          128,
+          131
+        ],
+        "hybrid": [
+          130,
+          128,
+          132,
+          123,
+          125
+        ],
+        "rerank": [
+          130,
+          129,
+          124,
+          128,
+          120
+        ],
+        "rerank_prod": []
+      },
+      "rerank_scores": [
+        -6.12943363,
+        -6.14765882,
+        -6.75384331,
+        -7.15575314,
+        -7.8078146
+      ]
+    },
+    {
+      "case_id": "semantic_observability",
+      "category": "semantic",
+      "requirement": "记录工具耗时和错误状态",
+      "expected_chunk_ids": [
+        131
+      ],
+      "strategies": {
+        "keyword": [
+          131,
+          124,
+          130
+        ],
+        "vector": [
+          131,
+          124,
+          125,
+          120,
+          122
+        ],
+        "hybrid": [
+          131,
+          124,
+          130,
+          125,
+          120
+        ],
+        "rerank": [
+          131,
+          130,
+          124,
+          128,
+          125
+        ],
+        "rerank_prod": [
+          131
+        ]
+      },
+      "rerank_scores": [
+        1.3782692,
+        -4.70948505,
+        -5.86947632,
+        -6.34230137,
+        -7.64229202
+      ]
+    },
+    {
+      "case_id": "semantic_algorithm_sql",
+      "category": "semantic",
+      "requirement": "具备算法和 SQL 性能优化能力",
+      "expected_chunk_ids": [
+        128
+      ],
+      "strategies": {
+        "keyword": [
+          128,
+          119
+        ],
+        "vector": [
+          128,
+          119,
+          132,
+          126,
+          131
+        ],
+        "hybrid": [
+          128,
+          119,
+          132,
+          126,
+          131
+        ],
+        "rerank": [
+          128,
+          132,
+          119,
+          127,
+          124
+        ],
+        "rerank_prod": [
+          128
+        ]
+      },
+      "rerank_scores": [
+        3.36638355,
+        -4.05485964,
+        -6.03625965,
+        -6.11682701,
+        -7.44692898
+      ]
+    },
+    {
+      "case_id": "negative_rust_distributed",
+      "category": "negative",
+      "requirement": "有 Rust 大规模分布式系统经验",
+      "expected_chunk_ids": [],
+      "strategies": {
+        "keyword": [
+          123,
+          119,
+          132
+        ],
+        "vector": [
+          128,
+          119,
+          126,
+          124,
+          123
+        ],
+        "hybrid": [
+          119,
+          123,
+          132,
+          128,
+          126
+        ],
+        "rerank": [
+          119,
+          132,
+          128,
+          126,
+          120
+        ],
+        "rerank_prod": []
+      },
+      "rerank_scores": [
+        -5.33978701,
+        -5.83587599,
+        -7.56939077,
+        -7.61837387,
+        -8.82048988
+      ]
+    },
+    {
+      "case_id": "negative_flutter",
+      "category": "negative",
+      "requirement": "熟悉 Flutter 移动端开发",
+      "expected_chunk_ids": [],
+      "strategies": {
+        "keyword": [
+          119,
+          132
+        ],
+        "vector": [
+          119,
+          127,
+          121,
+          128,
+          126
+        ],
+        "hybrid": [
+          119,
+          127,
+          132,
+          121,
+          128
+        ],
+        "rerank": [
+          119,
+          132,
+          129,
+          126,
+          128
+        ],
+        "rerank_prod": []
+      },
+      "rerank_scores": [
+        -4.08673286,
+        -4.83083439,
+        -6.89137077,
+        -6.90633965,
+        -6.93537998
+      ]
+    },
+    {
+      "case_id": "negative_kubernetes",
+      "category": "negative",
+      "requirement": "负责 Kubernetes 生产集群运维",
+      "expected_chunk_ids": [],
+      "strategies": {
+        "keyword": [
+          126
+        ],
+        "vector": [
+          126,
+          119,
+          129,
+          122,
+          121
+        ],
+        "hybrid": [
+          126,
+          119,
+          129,
+          122,
+          121
+        ],
+        "rerank": [
+          126,
+          129,
+          119,
+          131,
+          128
+        ],
+        "rerank_prod": []
+      },
+      "rerank_scores": [
+        -6.87246227,
+        -6.91774845,
+        -7.27080154,
+        -7.4060216,
+        -9.24740124
+      ]
+    },
+    {
+      "case_id": "negative_spanish_support",
+      "category": "negative",
+      "requirement": "能够使用西班牙语提供客户支持",
+      "expected_chunk_ids": [],
+      "strategies": {
+        "keyword": [
+          124,
+          127,
+          126,
+          120,
+          125
+        ],
+        "vector": [
+          129,
+          119,
+          127,
+          126,
+          124
+        ],
+        "hybrid": [
+          127,
+          124,
+          126,
+          120,
+          125
+        ],
+        "rerank": [
+          129,
+          124,
+          125,
+          128,
+          121
+        ],
+        "rerank_prod": []
+      },
+      "rerank_scores": [
+        -6.36691475,
+        -8.429389,
+        -10.19304848,
+        -10.19311428,
+        -10.19326687
+      ]
+    },
+    {
+      "case_id": "negative_embedded_c",
+      "category": "negative",
+      "requirement": "有嵌入式 C 驱动开发经验",
+      "expected_chunk_ids": [],
+      "strategies": {
+        "keyword": [
+          119,
+          132
+        ],
+        "vector": [
+          119,
+          128,
+          127,
+          126,
+          121
+        ],
+        "hybrid": [
+          119,
+          132,
+          128,
+          127,
+          126
+        ],
+        "rerank": [
+          119,
+          132,
+          128,
+          126,
+          127
+        ],
+        "rerank_prod": []
+      },
+      "rerank_scores": [
+        -2.93956161,
+        -3.96096921,
+        -5.58063126,
+        -6.62230253,
+        -6.62512827
+      ]
+    }
+  ]
+}

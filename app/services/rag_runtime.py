@@ -1,6 +1,6 @@
 # 创建进程级复用的 Embedding、Reranker 和向量索引实例。
 
-from threading import Lock
+from threading import RLock
 
 from app.core.config import settings
 from app.services.embeddings import (
@@ -14,7 +14,7 @@ from app.services.vector_index import ChromaVectorIndex, VectorIndex
 _embedding_provider: EmbeddingProvider | None = None
 _vector_index: VectorIndex | None = None
 _reranker: Reranker | None = None
-_runtime_lock = Lock()
+_runtime_lock = RLock()
 
 
 def get_embedding_provider() -> EmbeddingProvider:

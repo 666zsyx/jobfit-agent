@@ -2,7 +2,11 @@
 
 import pytest
 
-from app.schemas.knowledge import EvidencePack, HybridSearchHit
+from app.schemas.knowledge import (
+    EvidencePack,
+    HybridSearchHit,
+    RerankedSearchHit,
+)
 from app.services.citation_validation import validate_evidence_citations
 from app.services.evidence_pipeline import (
     build_evidence_pack_from_hybrid,
@@ -107,6 +111,24 @@ def test_build_evidence_pack_from_reranked_marks_applied():
 
     assert pack.rerank_applied is True
     assert pack.items[0].relevance_score == 0.8
+
+
+def test_evidence_pack_filters_below_production_threshold():
+    hit_data = make_hybrid_hit(
+        1,
+        rank=1,
+        fusion_score=0.03,
+    ).model_dump()
+    hit_data["rerank_score"] = -3.5
+    hit_data["rerank_rank"] = 1
+
+    pack = build_evidence_pack_from_reranked(
+        requirement="Rust 经验",
+        reranked_hits=[RerankedSearchHit.model_validate(hit_data)],
+        top_n=5,
+    )
+
+    assert pack.items == []
 
 
 def test_citation_validation_accepts_known_ids():
