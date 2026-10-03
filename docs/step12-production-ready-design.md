@@ -425,7 +425,7 @@ Graph run / resume
 
 ```text
 [x] PART 0：设计与基线
-[ ] PART 1：Agent 评估
+[x] PART 1：Agent 评估
 [ ] PART 2：可观测性
 [ ] PART 3：Token 成本
 [ ] PART 4：安全加固
@@ -433,4 +433,64 @@ Graph run / resume
 [ ] PART 6：部署资产
 [ ] PART 7：演示与面试材料
 [ ] PART 8：质量门禁与 Git 闭环
+```
+
+---
+
+## 15. PART 1 验证记录
+
+新增 Agent 评估模块：
+
+```text
+app/services/agent_evaluation.py
+scripts/evaluate_agent.py
+data/evaluation/agent_cases.json
+tests/test_agent_evaluation.py
+```
+
+评估维度：
+
+```text
+任务完成率
+工具顺序准确率
+工具 Precision / Recall / F1
+工具成功率
+匹配状态 F1
+引用 Precision / Recall / F1
+引用有效性
+拒答准确率
+人工确认恢复率
+无依据建议比例
+步数、Token Usage、p50 / p95 延迟
+```
+
+评估结果：
+
+```text
+case_count=15
+task_completion_rate=1.0000
+tool_sequence_accuracy=0.9333
+tool_f1=0.9926
+tool_success_rate=0.9778
+match_status_f1=1.0000
+citation_f1=0.9778
+citation_validity_rate=0.9333
+abstention_accuracy=1.0000
+confirmation_recovery_rate=1.0000
+unsupported_suggestion_rate=0.0667
+strict_passed=true
+```
+
+生成报告：
+
+```text
+docs/agent_evaluation_results.json
+docs/AGENT_EVALUATION.md
+```
+
+质量门禁：
+
+```text
+Agent 评估测试：8 passed
+完整测试：287 passed
 ```
