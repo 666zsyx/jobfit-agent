@@ -24,6 +24,7 @@ SSE
 cd "D:\agentstudy\jobfit_agent"
 .\.venv\Scripts\python.exe -m alembic upgrade head
 .\.venv\Scripts\python.exe .\scripts\setup_langgraph_checkpoint.py
+.\.venv\Scripts\python.exe .\scripts\seed_demo_data.py
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 

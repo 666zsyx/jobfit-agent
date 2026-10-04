@@ -152,17 +152,17 @@ RERANKER_MODEL_NAME=BAAI/bge-reranker-base
 & "D:\agentstudy\runtime\start-redis.ps1"
 ```
 
-初始化演示用户：
-
-```powershell
-.\.venv\Scripts\python.exe .\scripts\seed_dev_user.py
-```
-
 数据库结构由 Alembic 管理：
 
 ```powershell
 .\.venv\Scripts\python.exe -m alembic upgrade head
 .\.venv\Scripts\python.exe .\scripts\setup_langgraph_checkpoint.py
+```
+
+初始化演示用户、示例简历和示例岗位：
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\seed_demo_data.py
 ```
 
 ## 本地启动
