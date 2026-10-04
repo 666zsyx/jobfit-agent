@@ -31,6 +31,11 @@ Redis
 
 ```dotenv
 APP_ENV=production
+AUTH_JWT_SECRET=至少32位强随机值
+AUTH_JWT_EXPIRE_MINUTES=1440
+DEMO_USERNAME=demo_user
+DEMO_PASSWORD=至少12位强密码
+ALLOW_DEMO_TOKEN=false
 LLM_API_KEY=真实Key
 LLM_BASE_URL=https://api.deepseek.com
 LLM_MODEL=deepseek-flash
@@ -125,6 +130,22 @@ docker-compose.prod.yml
 postgres
 redis
 jobfit-agent
+```
+
+持久化与并发约束：
+
+```text
+Chroma 挂载 chroma_prod_data 到 /app/.cache/chroma
+FastEmbed 挂载 fastembed_prod_data 到 /app/.cache/fastembed
+Uvicorn 显式使用 --workers 1
+```
+
+原因：当前 Chroma 和 FastEmbed 都是进程内本地实例。staging 阶段固定单 Worker，避免多个进程同时访问本地索引造成一致性风险。
+
+本机可先检查生产 Compose 资产：
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\check_prod_compose.py
 ```
 
 启动：
