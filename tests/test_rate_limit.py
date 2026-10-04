@@ -158,6 +158,7 @@ def test_read_rate_limit_can_skip_token_quota(monkeypatch) -> None:
     dependency = rate_limit_dependency.make_rate_limit_dependency(
         "test_read",
         enforce_token_quota=False,
+        enforce_request_quota=False,
     )
 
     asyncio.run(
@@ -171,6 +172,7 @@ def test_read_rate_limit_can_skip_token_quota(monkeypatch) -> None:
             "user_id": 101,
             "scope": "test_read",
             "enforce_token_quota": False,
+            "enforce_request_quota": False,
         }
     ]
 

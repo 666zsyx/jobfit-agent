@@ -206,6 +206,7 @@ async def list_analysis_tasks_endpoint(
         make_rate_limit_dependency(
             "tasks_list",
             enforce_token_quota=False,
+            enforce_request_quota=False,
         )
     ),
 ) -> dict:
@@ -229,6 +230,7 @@ async def get_analysis_task_endpoint(
         make_rate_limit_dependency(
             "tasks_read",
             enforce_token_quota=False,
+            enforce_request_quota=False,
         )
     ),
 ) -> dict:
@@ -304,6 +306,7 @@ async def get_analysis_task_report_endpoint(
         make_rate_limit_dependency(
             "task_report_read",
             enforce_token_quota=False,
+            enforce_request_quota=False,
         )
     ),
 ) -> dict:
@@ -495,6 +498,7 @@ async def resume_graph_task_endpoint(
         make_rate_limit_dependency(
             "graph_resume",
             enforce_token_quota=False,
+            enforce_request_quota=False,
         )
     ),
 ) -> dict:
@@ -536,6 +540,7 @@ async def get_graph_task_confirmation_endpoint(
         make_rate_limit_dependency(
             "graph_confirmation",
             enforce_token_quota=False,
+            enforce_request_quota=False,
         )
     ),
 ) -> dict:
