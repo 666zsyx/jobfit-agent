@@ -28,6 +28,7 @@ STEP 14 新增能力：
 - [安全设计](docs/SECURITY.md)
 - [限流设计](docs/RATE_LIMIT.md)
 - [部署说明](docs/DEPLOYMENT.md)
+- [私有 Linux staging](docs/STAGING_DEPLOYMENT.md)
 - [简历文件接入](docs/RESUME_INGESTION.md)
 
 ## 当前阶段
