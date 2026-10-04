@@ -13,12 +13,19 @@
       <p class="muted">简历证据检索 · 岗位匹配 · 人工确认 · 可恢复执行</p>
     </div>
     <div class="token-box">
-      <label for="token-input">演示访问令牌</label>
-      <div class="inline-form">
-        <input id="token-input" type="password" value="demo-token" autocomplete="off">
-        <button id="connect-button" class="button primary">连接</button>
+      <div class="auth-header">
+        <strong id="user-display">未登录</strong>
+        <button id="logout-button" class="button ghost hidden">退出</button>
       </div>
-      <p id="connection-status" class="status-text">未连接</p>
+      <div class="auth-fields">
+        <input id="username-input" value="demo_user" placeholder="用户名" autocomplete="username">
+        <input id="password-input" type="password" placeholder="密码" autocomplete="current-password">
+      </div>
+      <div class="inline-form auth-actions">
+        <button id="login-button" class="button primary">登录</button>
+        <span class="muted">仅使用演示账号，不开放注册</span>
+      </div>
+      <p id="connection-status" class="status-text">未登录</p>
     </div>
   </header>
 

@@ -1,5 +1,6 @@
 const state = {
-  token: localStorage.getItem("jobfit_token") || "demo-token",
+  token: localStorage.getItem("jobfit_token") || "",
+  currentUser: null,
   jobs: [],
   resumes: [],
   tasks: [],
@@ -32,7 +33,9 @@ function setConnectionStatus(text, kind = "") {
 
 function authHeaders(headers = {}) {
   const result = new Headers(headers);
-  result.set("Authorization", `Bearer ${state.token}`);
+  if (state.token) {
+    result.set("Authorization", `Bearer ${state.token}`);
+  }
   return result;
 }
 
@@ -50,6 +53,9 @@ async function api(path, options = {}) {
     payload = null;
   }
   if (!response.ok) {
+    if (response.status === 401) {
+      logout(false, "登录已过期，请重新登录");
+    }
     throw new Error(payload?.message || `请求失败：HTTP ${response.status}`);
   }
   return payload?.data ?? payload;
@@ -342,17 +348,102 @@ async function loadResumeDetail(resumeId, chooseLatest = true) {
   updateSelectionSummary();
 }
 
-async function connect() {
-  state.token = $("token-input").value.trim() || "demo-token";
-  localStorage.setItem("jobfit_token", state.token);
+function showLoggedIn() {
+  document.body.classList.remove("logged-out");
+  const user = state.currentUser || { username: "当前用户", role: "user" };
+  $("user-display").textContent = `${user.username} · ${user.role}`;
+  $("logout-button").classList.remove("hidden");
+  setConnectionStatus("已登录，JWT 有效期 24 小时", "success");
+}
+
+function showLoggedOut(message = "未登录") {
+  document.body.classList.add("logged-out");
+  $("user-display").textContent = "未登录";
+  $("logout-button").classList.add("hidden");
+  setConnectionStatus(message, message === "未登录" ? "" : "error");
+}
+
+function clearWorkspace() {
+  state.currentUser = null;
+  state.jobs = [];
+  state.resumes = [];
+  state.tasks = [];
+  state.selectedJobId = null;
+  state.selectedResumeId = null;
+  state.selectedResumeVersionId = null;
+  state.selectedTaskId = null;
+  state.selectedTaskStatus = null;
+  state.pendingConfirmation = null;
+  renderJobs();
+  renderResumes();
+  renderTasks();
+  $("resume-versions").classList.add("hidden");
+  clearReport();
+  updateTaskControls(null);
+  $("event-log").textContent = "执行事件将显示在这里。";
+}
+
+async function login() {
+  const username = $("username-input").value.trim();
+  const password = $("password-input").value;
+  if (!username || !password) {
+    showLoggedOut("请输入用户名和密码");
+    return;
+  }
+
+  const button = $("login-button");
+  button.disabled = true;
+  button.textContent = "登录中...";
   try {
-    const user = await api("/api/users/me");
-    setConnectionStatus(`已连接：${user?.username || "当前用户"}`, "success");
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(payload?.message || "登录失败");
+    }
+    state.token = payload.data.access_token;
+    state.currentUser = payload.data.user;
+    localStorage.setItem("jobfit_token", state.token);
+    $("password-input").value = "";
+    showLoggedIn();
     await loadAll();
-    showToast("已连接后端");
+    showToast("登录成功");
   } catch (error) {
-    setConnectionStatus(`连接失败：${error.message}`, "error");
+    state.token = "";
+    localStorage.removeItem("jobfit_token");
+    clearWorkspace();
+    showLoggedOut(error.message);
     showToast(error.message, "error");
+  } finally {
+    button.disabled = false;
+    button.textContent = "登录";
+  }
+}
+
+async function restoreSession() {
+  if (!state.token) {
+    showLoggedOut();
+    return;
+  }
+  try {
+    state.currentUser = await api("/api/auth/me");
+    showLoggedIn();
+    await loadAll();
+  } catch (_) {
+    logout(false, "登录已过期，请重新登录");
+  }
+}
+
+function logout(showMessage = true, message = "已退出") {
+  state.token = "";
+  localStorage.removeItem("jobfit_token");
+  clearWorkspace();
+  showLoggedOut(message);
+  if (showMessage && message === "已退出") {
+    showToast("已退出登录");
   }
 }
 
@@ -667,7 +758,11 @@ async function resumeInterrupted() {
 }
 
 function bindEvents() {
-  $("connect-button").addEventListener("click", connect);
+  $("login-button").addEventListener("click", login);
+  $("logout-button").addEventListener("click", () => logout());
+  $("password-input").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") login();
+  });
   $("upload-resume").addEventListener("click", uploadResume);
   $("create-job").addEventListener("click", createJob);
   $("start-analysis").addEventListener("click", createAndRunTask);
@@ -681,10 +776,13 @@ function bindEvents() {
 }
 
 function initialize() {
-  $("token-input").value = state.token;
+  if (!$("username-input").value) {
+    $("username-input").value = "demo_user";
+  }
   bindEvents();
   clearReport();
-  connect();
+  showLoggedOut();
+  restoreSession();
 }
 
 document.addEventListener("DOMContentLoaded", initialize);
