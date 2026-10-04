@@ -2,8 +2,9 @@
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from app.db.models import AnalysisTask
+from app.db.models import AnalysisTask, ResumeVersion
 
 
 class AnalysisTaskRepository:
@@ -32,6 +33,7 @@ class AnalysisTaskRepository:
     async def list_for_user(
         self,
         user_id: int,
+        with_relations: bool = False,
     ) -> list[AnalysisTask]:
         statement = (
             select(AnalysisTask)
@@ -44,6 +46,15 @@ class AnalysisTaskRepository:
                 AnalysisTask.task_id.desc(),
             )
         )
+        if with_relations:
+            statement = statement.options(
+                selectinload(AnalysisTask.job),
+                selectinload(AnalysisTask.resume_version).selectinload(
+                    ResumeVersion.resume
+                ),
+                selectinload(AnalysisTask.reports),
+            )
+
         result = await self.session.scalars(statement)
         return list(result.all())
 

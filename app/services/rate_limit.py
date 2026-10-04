@@ -264,6 +264,7 @@ async def enforce_api_limits(
     *,
     user_id: int,
     scope: str,
+    enforce_token_quota: bool = True,
 ) -> None:
     await enforce_rate_limit(
         redis,
@@ -271,7 +272,8 @@ async def enforce_api_limits(
         scope=scope,
     )
     await enforce_daily_request_quota(redis, user_id=user_id)
-    await enforce_daily_token_quota(redis, user_id=user_id)
+    if enforce_token_quota:
+        await enforce_daily_token_quota(redis, user_id=user_id)
 
 
 __all__ = [

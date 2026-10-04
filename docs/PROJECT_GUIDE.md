@@ -1,6 +1,6 @@
 # JobFit Agent 项目全景与维护文档
 
-> 最后更新：2026-10-03
+> 最后更新：2026-10-04
 >
 > 适用对象：未来的项目维护者、面试准备者、协作者和几周后重新阅读代码的自己。
 >
@@ -46,6 +46,7 @@ STEP 09～10：Agent 架构复盘、边界校准和 STEP 11 重构指导完成�
 STEP 11：LangGraph 重构、PostgreSQL Checkpoint、人工确认、中断恢复、节点重试、SSE 和双引擎对比全部完成。
 STEP 12：Agent 评估、可观测性、Token 成本、安全、限流、就绪检查和生产部署资产完成；远程 staging 待 Linux。
 STEP 13：PDF / DOCX / TXT 简历上传、解析、版本保存、结构提取和重试完成。
+STEP 14：岗位持久化 API、任务/报告查询、静态工作台、JWT 登录、部署持久化和演示数据完成。
 ```
 
 当前代码分支：
@@ -126,19 +127,24 @@ GET /health
 - Docker healthcheck。
 - 部署平台可用性检查。
 
-## 2. 当前用户接口
+## 2. 认证与当前用户接口
 
 ```http
-GET /api/users/me
-Authorization: Bearer demo-token
+POST /api/auth/login
+GET  /api/auth/me
+GET  /api/users/me
+Authorization: Bearer <JWT 或开发 demo-token>
 ```
 
-用途：
+登录接口使用环境变量中的单个演示账号，校验成功后签发 HS256 JWT。JWT 包含 `sub`、`username`、`role`、`iat` 和 `exp`，默认有效期为 24 小时。
 
-- 验证 Bearer 鉴权依赖。
-- 为后续真实用户系统保留接口位置。
+开发环境继续兼容 `demo-token`，生产环境通过 `ALLOW_DEMO_TOKEN=false` 禁用，并要求配置强 `AUTH_JWT_SECRET` 与 `DEMO_PASSWORD`。
 
-当前为演示鉴权，不是生产级认证。
+前端工作台地址：
+
+```text
+GET /app
+```
 
 ## 3. 非流式聊天
 
@@ -1749,6 +1755,37 @@ RAG 评估：30 cases
 - 没有前端上传页面，当前使用 Swagger。
 - 原始文件不长期保存。
 
+# 十四点十、STEP 14：可演示产品化
+
+完成：
+
+- 新增岗位持久化 API：创建、列表、详情、编辑和软删除。
+- 新增任务历史列表与当前报告查询 API。
+- 新增同源静态工作台 `/app`，覆盖简历上传、岗位管理、任务执行、SSE、人工确认、报告和历史。
+- 新增演示账号 JWT 登录，前端支持会话恢复、退出和 401 自动清理。
+- 新增 `PyJWT` 依赖与生产认证配置校验。
+- Chroma 和 FastEmbed 使用命名 Volume 持久化。
+- 生产 Uvicorn 固定 `--workers 1`，符合本地 Chroma 单进程约束。
+- 新增幂等演示数据脚本，创建演示用户、示例简历和示例岗位。
+- 修复 Token 配额耗尽后读取任务和报告仍被 429 拦截的问题：只有真实消耗 LLM 的请求检查 Token 配额，读接口允许继续查看历史结果。
+
+验证结果：
+
+```text
+自动化测试：379 passed
+真实端到端：登录 → 创建任务 → SSE → 人工确认 → 报告 → 历史查询通过
+演示数据幂等执行：连续两次返回相同 resume_id / job_id
+生产 Compose 资产检查：通过
+```
+
+当前限制：
+
+- 远程 Linux staging 仍需在云服务器执行。
+- 当前只支持一个环境变量演示账号，不提供注册和多用户管理。
+- 本地 Chroma/FastEmbed 采用单 Worker，后续多实例需要外置向量服务或共享索引方案。
+- 扫描 PDF OCR、旧版 `.doc` 和原始文件长期保存仍未实现。
+
+
 # 十五、每个大 STEP 完成后的维护清单
 
 每完成一个大 STEP，必须更新本文档：
@@ -1838,7 +1875,7 @@ RAG 评估：30 cases
 启动服务：
 
 ```powershell
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
+.\.venv\Scripts\python.exe .\scripts\run_dev_server.py
 ```
 
 运行测试：

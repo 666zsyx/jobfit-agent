@@ -24,6 +24,12 @@ REQUIRED_KEYS = [
     "REDIS_URL",
 ]
 
+PRODUCTION_AUTH_KEYS = [
+    "AUTH_JWT_SECRET",
+    "DEMO_USERNAME",
+    "DEMO_PASSWORD",
+]
+
 
 def check_config() -> tuple[list[str], list[str]]:
     errors: list[str] = []
@@ -46,6 +52,32 @@ def check_config() -> tuple[list[str], list[str]]:
     if app_env == "production":
         if "CHANGE_ME" in database_url or "CHANGE_ME" in api_key:
             errors.append("生产环境仍包含 CHANGE_ME 占位符")
+
+        for key in PRODUCTION_AUTH_KEYS:
+            if not os.getenv(key, "").strip():
+                errors.append(f"生产环境缺少认证配置：{key}")
+
+        jwt_secret = os.getenv("AUTH_JWT_SECRET", "").strip()
+        demo_password = os.getenv("DEMO_PASSWORD", "").strip()
+        allow_demo_token = os.getenv(
+            "ALLOW_DEMO_TOKEN",
+            "false",
+        ).strip().lower() in {"1", "true", "yes", "on"}
+
+        if jwt_secret and (
+            len(jwt_secret) < 32
+            or "CHANGE_ME" in jwt_secret
+            or jwt_secret.startswith("dev-only")
+        ):
+            errors.append("AUTH_JWT_SECRET 必须使用至少 32 位强随机值")
+        if demo_password and (
+            len(demo_password) < 12
+            or demo_password == "demo-password"
+            or "CHANGE_ME" in demo_password
+        ):
+            errors.append("DEMO_PASSWORD 必须使用强密码")
+        if allow_demo_token:
+            errors.append("生产环境必须设置 ALLOW_DEMO_TOKEN=false")
         if not rate_limit_enabled:
             errors.append("生产环境必须启用限流")
         if log_format != "json":

@@ -24,6 +24,7 @@ SSE
 cd "D:\agentstudy\jobfit_agent"
 .\.venv\Scripts\python.exe -m alembic upgrade head
 .\.venv\Scripts\python.exe .\scripts\setup_langgraph_checkpoint.py
+.\.venv\Scripts\python.exe .\scripts\seed_demo_data.py
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
@@ -31,13 +32,38 @@ cd "D:\agentstudy\jobfit_agent"
 
 ```powershell
 & "D:\agentstudy\runtime\start-redis.ps1"
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
+.\.venv\Scripts\python.exe .\scripts\run_dev_server.py
 ```
 
 打开展示页：
 
 ```text
+http://127.0.0.1:8000/app
+```
+
+Swagger：
+
+```text
 http://127.0.0.1:8000/docs
+```
+
+演示账号：
+
+```text
+用户名：demo_user
+密码：demo-password
+```
+
+前端默认流程：
+
+```text
+登录
+→ 选择“演示简历：Python Agent 开发”
+→ 选择“Python AI Agent 开发工程师（演示）”
+→ 开始分析
+→ SSE 展示执行过程
+→ 人工确认
+→ 查看报告、引用、Token 和成本
 ```
 
 ---

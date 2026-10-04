@@ -38,10 +38,16 @@ services:
       APP_ENV: production
       DATABASE_URL: "postgresql+asyncpg://jobfit_app:${JOBFIT_DB_PASSWORD:?JOBFIT_DB_PASSWORD is required}@postgres:5432/jobfit_prod"
       REDIS_URL: redis://redis:6379/0
+      VECTOR_INDEX_PATH: /app/.cache/chroma
+      EMBEDDING_CACHE_PATH: /app/.cache/fastembed
+      ALLOW_DEMO_TOKEN: "false"
       RATE_LIMIT_ENABLED: "true"
       LOG_FORMAT: json
     ports:
       - "8000:8000"
+    volumes:
+      - chroma_prod_data:/app/.cache/chroma
+      - fastembed_prod_data:/app/.cache/fastembed
     depends_on:
       postgres:
         condition: service_healthy
@@ -54,7 +60,7 @@ services:
         python scripts/check_deployment_config.py
         && alembic upgrade head
         && python scripts/setup_langgraph_checkpoint.py
-        && uvicorn app.main:app --host 0.0.0.0 --port 8000
+        && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1
     healthcheck:
       test:
         - CMD
@@ -72,3 +78,5 @@ services:
 volumes:
   postgres_prod_data:
   redis_prod_data:
+  chroma_prod_data:
+  fastembed_prod_data:
