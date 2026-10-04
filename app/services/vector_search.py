@@ -40,7 +40,7 @@ async def search_resume_chunks_by_vector(
         user_id=user_id,
         resume_version_id=resume_version_id,
         query_vector=query_vector,
-        top_k=top_k,
+        top_k=max(top_k * 4, top_k),
     )
 
     if not vector_hits:
@@ -63,6 +63,9 @@ async def search_resume_chunks_by_vector(
     results: list[VectorSearchHit] = []
 
     for vector_hit in vector_hits:
+        if len(results) >= top_k:
+            break
+
         chunk = chunks_by_id.get(vector_hit.chunk_id)
 
         if chunk is None:

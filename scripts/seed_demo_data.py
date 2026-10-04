@@ -134,19 +134,27 @@ def build_demo_job_requirements() -> dict:
 def find_demo_resume(
     resumes: list[Resume],
 ) -> Resume | None:
+    demo_text = build_demo_resume_text()
     return next(
-        (resume for resume in resumes if resume.title == DEMO_RESUME_TITLE),
+        (
+            resume
+            for resume in resumes
+            if any(
+                version.raw_text == demo_text
+                for version in resume.versions
+            )
+        ),
         None,
     )
 
 
 def find_demo_job(jobs: list) -> object | None:
+    demo_description = build_demo_job_description()
     return next(
         (
             job
             for job in jobs
-            if job.title == DEMO_JOB_TITLE
-            and job.company_name == DEMO_JOB_COMPANY
+            if job.raw_description == demo_description
         ),
         None,
     )

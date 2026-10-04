@@ -147,6 +147,67 @@ async def enforce_rate_limit(
     return decision
 
 
+_TASK_USAGE_RECORDED: dict[tuple[int, int], int] = {}
+
+
+_TASK_USAGE_DELTA_LUA = """
+local previous = tonumber(redis.call("get", KEYS[1]) or "0")
+local current = tonumber(ARGV[1])
+if current <= previous then
+    return 0
+end
+redis.call("set", KEYS[1], current, "EX", 604800)
+return current - previous
+"""
+
+
+async def record_task_token_usage(
+    redis: Redis,
+    *,
+    user_id: int,
+    task_id: int,
+    total_tokens: int,
+) -> int:
+    """按任务的累计 Usage 只记录新增 Token。"""
+
+    if not settings.rate_limit_enabled or total_tokens <= 0:
+        return 0
+
+    key = f"jobfit:quota:task:{user_id}:{task_id}:tokens"
+    if redis is None:
+        local_key = (user_id, task_id)
+        previous = _TASK_USAGE_RECORDED.get(local_key, 0)
+        if total_tokens <= previous:
+            return 0
+        _TASK_USAGE_RECORDED[local_key] = total_tokens
+        delta = total_tokens - previous
+    else:
+        try:
+            delta = int(
+                await redis.eval(
+                    _TASK_USAGE_DELTA_LUA,
+                    1,
+                    key,
+                    total_tokens,
+                )
+            )
+        except RedisError:
+            local_key = (user_id, task_id)
+            previous = _TASK_USAGE_RECORDED.get(local_key, 0)
+            if total_tokens <= previous:
+                return 0
+            _TASK_USAGE_RECORDED[local_key] = total_tokens
+            delta = total_tokens - previous
+
+    if delta <= 0:
+        return 0
+    return await record_daily_token_usage(
+        redis,
+        user_id=user_id,
+        total_tokens=delta,
+    )
+
+
 async def enforce_login_rate_limit(
     redis: Redis,
     *,
@@ -329,6 +390,7 @@ async def enforce_api_limits(
 __all__ = [
     "RateLimitDecision",
     "enforce_login_rate_limit",
+    "record_task_token_usage",
     "enforce_api_limits",
     "enforce_daily_request_quota",
     "enforce_daily_token_quota",

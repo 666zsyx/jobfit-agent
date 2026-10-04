@@ -1,6 +1,5 @@
 # 实现关键词与向量召回的 RRF 混合排序。
 
-import asyncio
 from dataclasses import dataclass
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -170,28 +169,26 @@ async def search_resume_chunks_hybrid(
     keyword_weight: float = DEFAULT_KEYWORD_WEIGHT,
     vector_weight: float = DEFAULT_VECTOR_WEIGHT,
 ) -> list[HybridSearchHit]:
-    """并行执行关键词和向量召回，再使用 RRF 融合。"""
+    """依次执行关键词和向量召回，再使用 RRF 融合。"""
 
     if top_k < 1:
         raise ValueError("top_k 必须大于等于 1")
 
-    keyword_hits, vector_hits = await asyncio.gather(
-        search_resume_chunks_by_keyword(
-            session,
-            user_id=user_id,
-            resume_version_id=resume_version_id,
-            requirement=requirement,
-            top_k=top_k,
-        ),
-        search_resume_chunks_by_vector(
-            session,
-            user_id=user_id,
-            resume_version_id=resume_version_id,
-            requirement=requirement,
-            top_k=top_k,
-            embedding_provider=embedding_provider,
-            vector_index=vector_index,
-        ),
+    keyword_hits = await search_resume_chunks_by_keyword(
+        session,
+        user_id=user_id,
+        resume_version_id=resume_version_id,
+        requirement=requirement,
+        top_k=top_k,
+    )
+    vector_hits = await search_resume_chunks_by_vector(
+        session,
+        user_id=user_id,
+        resume_version_id=resume_version_id,
+        requirement=requirement,
+        top_k=top_k,
+        embedding_provider=embedding_provider,
+        vector_index=vector_index,
     )
 
     return fuse_retrieval_hits(

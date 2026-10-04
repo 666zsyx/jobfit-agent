@@ -254,10 +254,11 @@ async def get_analysis_task_endpoint(
         data = AnalysisTaskResponse.model_validate(cached)
         return success_response(data=data)
 
-    task = await AnalysisTaskRepository(session).get_for_user(
-        task_id=task_id,
-        user_id=current_user.id,
-    )
+    async with async_session_factory() as session:
+        task = await AnalysisTaskRepository(session).get_for_user(
+            task_id=task_id,
+            user_id=current_user.id,
+        )
     if task is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -324,17 +325,17 @@ async def get_analysis_task_report_endpoint(
 async def stream_analysis_task_endpoint(
     task_id: int,
     current_user: CurrentUser = Depends(get_current_user),
-    session: AsyncSession = Depends(get_db_session),
     _rate_limit: None = Depends(
         make_rate_limit_dependency("agent_stream")
     ),
 ) -> StreamingResponse:
     """以 SSE 流式返回任务执行过程。"""
 
-    task = await AnalysisTaskRepository(session).get_for_user(
-        task_id=task_id,
-        user_id=current_user.id,
-    )
+    async with async_session_factory() as session:
+        task = await AnalysisTaskRepository(session).get_for_user(
+            task_id=task_id,
+            user_id=current_user.id,
+        )
     if task is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -482,12 +483,6 @@ async def run_graph_task_endpoint(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         ) from exc
-    usage = result.usage or {}
-    await record_daily_token_usage(
-        get_redis_client(),
-        user_id=current_user.id,
-        total_tokens=int(usage.get("total_tokens", 0)),
-    )
     return success_response(data=result)
 
 
@@ -525,12 +520,11 @@ async def resume_graph_task_endpoint(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         ) from exc
-    usage = result.usage or {}
-    await record_daily_token_usage(
-        get_redis_client(),
-        user_id=current_user.id,
-        total_tokens=int(usage.get("total_tokens", 0)),
-    )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
     return success_response(data=result)
 
 
@@ -565,17 +559,17 @@ async def get_graph_task_confirmation_endpoint(
 async def stream_graph_task_endpoint(
     task_id: int,
     current_user: CurrentUser = Depends(get_current_user),
-    session: AsyncSession = Depends(get_db_session),
     _rate_limit: None = Depends(
         make_rate_limit_dependency("graph_stream")
     ),
 ) -> StreamingResponse:
     """以 SSE 流式执行 LangGraph 持久化任务。"""
 
-    task = await AnalysisTaskRepository(session).get_for_user(
-        task_id=task_id,
-        user_id=current_user.id,
-    )
+    async with async_session_factory() as session:
+        task = await AnalysisTaskRepository(session).get_for_user(
+            task_id=task_id,
+            user_id=current_user.id,
+        )
     if task is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -596,13 +590,6 @@ async def stream_graph_task_endpoint(
                 "waiting_confirmation",
             }:
                 terminal_event_sent = True
-            if event.type == "task_completed":
-                usage = event.data.get("usage") or {}
-                await record_daily_token_usage(
-                    get_redis_client(),
-                    user_id=current_user.id,
-                    total_tokens=int(usage.get("total_tokens", 0)),
-                )
             await queue.put(event)
 
         async def run_task() -> None:

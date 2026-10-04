@@ -204,10 +204,15 @@ async def _prepare_run_snapshot(
                 )
 
             previous_current_step = task.current_step
+            previous_status = task.status
+            if (
+                previous_status == "pending"
+                or task.started_at is None
+            ):
+                task.started_at = datetime.now(timezone.utc)
             task.status = "running"
             if increment_attempt:
                 task.attempt += 1
-            task.started_at = datetime.now(timezone.utc)
             task.finished_at = None
             task.error_code = None
             task.error_message_safe = None
@@ -237,6 +242,7 @@ async def _prepare_run_snapshot(
                 max_steps=task.max_steps,
                 previous_current_step=previous_current_step,
                 attempt=task.attempt,
+                started_at=task.started_at,
             )
 
 

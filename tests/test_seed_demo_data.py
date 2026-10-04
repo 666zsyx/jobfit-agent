@@ -4,9 +4,6 @@ from types import SimpleNamespace
 
 from app.schemas.resume import ResumeExtraction
 from scripts.seed_demo_data import (
-    DEMO_JOB_COMPANY,
-    DEMO_JOB_TITLE,
-    DEMO_RESUME_TITLE,
     build_demo_extracted_sections,
     build_demo_job_description,
     build_demo_job_requirements,
@@ -52,13 +49,19 @@ def test_demo_job_description_and_requirements_are_useful():
 def test_demo_resume_and_job_are_found_by_stable_markers():
     resume = SimpleNamespace(
         resume_id=11,
-        title=DEMO_RESUME_TITLE,
-        versions=[SimpleNamespace(resume_version_id=22)],
+        title="已修改标题",
+        versions=[
+            SimpleNamespace(
+                resume_version_id=22,
+                raw_text=build_demo_resume_text(),
+            )
+        ],
     )
     job = SimpleNamespace(
         job_id=33,
-        title=DEMO_JOB_TITLE,
-        company_name=DEMO_JOB_COMPANY,
+        title="已修改标题",
+        company_name="已修改公司",
+        raw_description=build_demo_job_description(),
     )
 
     assert find_demo_resume([resume]) is resume

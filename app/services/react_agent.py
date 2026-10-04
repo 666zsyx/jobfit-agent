@@ -4,6 +4,11 @@ import json
 from time import perf_counter
 from typing import Any
 
+from app.core.cost_tracking import (
+    append_usage_records,
+    finish_usage_collection,
+    start_usage_collection,
+)
 from app.schemas.agent_events import AgentEvent, AgentEventSink
 from app.schemas.chat import LLMWithToolsResult, TokenUsage
 from app.schemas.react_agent import (
@@ -209,14 +214,30 @@ async def run_react_loop(
                 if isinstance(raw_arguments, dict):
                     parsed_arguments = raw_arguments
 
-                execution_result = await execute_tool(
-                    registry=registry,
-                    tool_name=tool_call.name,
-                    arguments=raw_arguments,
-                    context=context,
-                    step_no=step,
-                    tool_call_id=tool_call.id,
-                )
+                usage_token = start_usage_collection()
+                try:
+                    execution_result = await execute_tool(
+                        registry=registry,
+                        tool_name=tool_call.name,
+                        arguments=raw_arguments,
+                        context=context,
+                        step_no=step,
+                        tool_call_id=tool_call.id,
+                    )
+                finally:
+                    tool_usage_records = finish_usage_collection(
+                        usage_token
+                    )
+                    append_usage_records(tool_usage_records)
+                    for record in tool_usage_records:
+                        total_usage = _merge_usage(
+                            total_usage,
+                            TokenUsage(
+                                prompt_tokens=record.prompt_tokens,
+                                completion_tokens=record.completion_tokens,
+                                total_tokens=record.total_tokens,
+                            ),
+                        )
 
             await _emit_event(
                 event_sink,
