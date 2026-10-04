@@ -69,7 +69,10 @@ async def create_job_endpoint(
     current_user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
     _rate_limit: None = Depends(
-        make_rate_limit_dependency("jobs_create")
+        make_rate_limit_dependency(
+            "jobs_create",
+            enforce_token_quota=False,
+        )
     ),
 ) -> JSONResponse:
     """创建当前用户的岗位记录。"""
@@ -101,7 +104,10 @@ async def list_jobs_endpoint(
     current_user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
     _rate_limit: None = Depends(
-        make_rate_limit_dependency("jobs_list")
+        make_rate_limit_dependency(
+            "jobs_list",
+            enforce_token_quota=False,
+        )
     ),
 ) -> dict:
     """查询当前用户的岗位列表。"""
@@ -120,7 +126,10 @@ async def get_job_endpoint(
     current_user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
     _rate_limit: None = Depends(
-        make_rate_limit_dependency("jobs_read")
+        make_rate_limit_dependency(
+            "jobs_read",
+            enforce_token_quota=False,
+        )
     ),
 ) -> dict:
     """查询当前用户的一个岗位。"""
@@ -145,7 +154,10 @@ async def update_job_endpoint(
     current_user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
     _rate_limit: None = Depends(
-        make_rate_limit_dependency("jobs_update")
+        make_rate_limit_dependency(
+            "jobs_update",
+            enforce_token_quota=False,
+        )
     ),
 ) -> dict:
     """编辑当前用户的岗位字段。"""
@@ -178,7 +190,10 @@ async def delete_job_endpoint(
     current_user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
     _rate_limit: None = Depends(
-        make_rate_limit_dependency("jobs_delete")
+        make_rate_limit_dependency(
+            "jobs_delete",
+            enforce_token_quota=False,
+        )
     ),
 ) -> dict:
     """软删除当前用户的岗位。"""

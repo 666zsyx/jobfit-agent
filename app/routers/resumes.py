@@ -154,7 +154,10 @@ async def list_resumes_endpoint(
     current_user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
     _rate_limit: None = Depends(
-        make_rate_limit_dependency("resume_list")
+        make_rate_limit_dependency(
+            "resume_list",
+            enforce_token_quota=False,
+        )
     ),
 ) -> dict:
     """查询当前用户的简历列表。"""
@@ -174,7 +177,10 @@ async def get_resume_endpoint(
     current_user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
     _rate_limit: None = Depends(
-        make_rate_limit_dependency("resume_read")
+        make_rate_limit_dependency(
+            "resume_read",
+            enforce_token_quota=False,
+        )
     ),
 ) -> dict:
     """查询当前用户的一份简历及版本。"""

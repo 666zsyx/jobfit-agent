@@ -139,3 +139,36 @@ def test_rate_limit_error_returns_429(
     assert response.status_code == 429
     assert response.headers["Retry-After"] == "7"
     assert response.json()["data"]["limit_type"] == "rate:chat"
+
+def test_read_rate_limit_can_skip_token_quota(monkeypatch) -> None:
+    import asyncio
+    from types import SimpleNamespace
+
+    calls = []
+
+    async def fake_enforce_api_limits(redis, **kwargs):
+        calls.append(kwargs)
+
+    monkeypatch.setattr(
+        rate_limit_dependency,
+        "enforce_api_limits",
+        fake_enforce_api_limits,
+    )
+    dependency = rate_limit_dependency.make_rate_limit_dependency(
+        "test_read",
+        enforce_token_quota=False,
+    )
+
+    asyncio.run(
+        dependency(
+            current_user=SimpleNamespace(id=101),
+        )
+    )
+
+    assert calls == [
+        {
+            "user_id": 101,
+            "scope": "test_read",
+            "enforce_token_quota": False,
+        }
+    ]

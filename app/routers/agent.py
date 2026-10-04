@@ -203,7 +203,10 @@ async def list_analysis_tasks_endpoint(
     current_user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
     _rate_limit: None = Depends(
-        make_rate_limit_dependency("tasks_list")
+        make_rate_limit_dependency(
+            "tasks_list",
+            enforce_token_quota=False,
+        )
     ),
 ) -> dict:
     """查询当前用户的历史分析任务。"""
@@ -223,7 +226,10 @@ async def get_analysis_task_endpoint(
     current_user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
     _rate_limit: None = Depends(
-        make_rate_limit_dependency("tasks_read")
+        make_rate_limit_dependency(
+            "tasks_read",
+            enforce_token_quota=False,
+        )
     ),
 ) -> dict:
     """优先从 Redis 获取当前用户的任务状态。"""
@@ -294,7 +300,10 @@ async def get_analysis_task_report_endpoint(
     current_user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
     _rate_limit: None = Depends(
-        make_rate_limit_dependency("task_report_read")
+        make_rate_limit_dependency(
+            "task_report_read",
+            enforce_token_quota=False,
+        )
     ),
 ) -> dict:
     """查询当前用户任务的当前版本报告。"""
@@ -488,7 +497,10 @@ async def resume_graph_task_endpoint(
     request: GraphTaskConfirmationRequest,
     current_user: CurrentUser = Depends(get_current_user),
     _rate_limit: None = Depends(
-        make_rate_limit_dependency("graph_resume")
+        make_rate_limit_dependency(
+            "graph_resume",
+            enforce_token_quota=False,
+        )
     ),
 ) -> dict:
     """提交人工确认并恢复 LangGraph 任务。"""
@@ -527,7 +539,10 @@ async def get_graph_task_confirmation_endpoint(
     task_id: int,
     current_user: CurrentUser = Depends(get_current_user),
     _rate_limit: None = Depends(
-        make_rate_limit_dependency("graph_confirmation")
+        make_rate_limit_dependency(
+            "graph_confirmation",
+            enforce_token_quota=False,
+        )
     ),
 ) -> dict:
     """读取当前任务的待确认报告。"""

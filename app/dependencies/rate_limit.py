@@ -12,7 +12,11 @@ from app.schemas.auth import CurrentUser
 from app.services.rate_limit import enforce_api_limits
 
 
-def make_rate_limit_dependency(scope: str) -> Callable:
+def make_rate_limit_dependency(
+    scope: str,
+    *,
+    enforce_token_quota: bool = True,
+) -> Callable:
     async def dependency(
         current_user: CurrentUser = Depends(get_current_user),
     ) -> None:
@@ -20,6 +24,7 @@ def make_rate_limit_dependency(scope: str) -> Callable:
             get_redis_client(),
             user_id=current_user.id,
             scope=scope,
+            enforce_token_quota=enforce_token_quota,
         )
 
     return dependency
