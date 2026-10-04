@@ -170,13 +170,13 @@ RERANKER_MODEL_NAME=BAAI/bge-reranker-base
 ```powershell
 cd "D:\agentstudy\jobfit_agent"
 
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
+.\.venv\Scripts\python.exe .\scripts\run_dev_server.py
 ```
 
 服务地址：
 
 ```text
-http://127.0.0.1:8000
+http://127.0.0.1:8000/app
 ```
 
 Swagger：

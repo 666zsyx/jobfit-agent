@@ -31,10 +31,16 @@ cd "D:\agentstudy\jobfit_agent"
 
 ```powershell
 & "D:\agentstudy\runtime\start-redis.ps1"
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
+.\.venv\Scripts\python.exe .\scripts\run_dev_server.py
 ```
 
 打开展示页：
+
+```text
+http://127.0.0.1:8000/app
+```
+
+Swagger：
 
 ```text
 http://127.0.0.1:8000/docs

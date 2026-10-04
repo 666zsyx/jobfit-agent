@@ -1838,7 +1838,7 @@ RAG 评估：30 cases
 启动服务：
 
 ```powershell
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
+.\.venv\Scripts\python.exe .\scripts\run_dev_server.py
 ```
 
 运行测试：
