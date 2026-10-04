@@ -1,5 +1,7 @@
 # 提供按用户隔离的岗位数据访问。
 
+from datetime import datetime, timezone
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -64,4 +66,24 @@ class JobRepository:
         )
         self.session.add(job)
         await self.session.flush()
+        await self.session.refresh(job)
+        return job
+
+    async def update(
+        self,
+        job: Job,
+        **values: object,
+    ) -> Job:
+        for field, value in values.items():
+            setattr(job, field, value)
+
+        await self.session.flush()
+        await self.session.refresh(job)
+        return job
+
+    async def soft_delete(self, job: Job) -> Job:
+        job.status = "archived"
+        job.deleted_at = datetime.now(timezone.utc)
+        await self.session.flush()
+        await self.session.refresh(job)
         return job
