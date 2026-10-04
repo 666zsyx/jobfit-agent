@@ -249,3 +249,69 @@ def test_default_evidence_limit_is_three():
         len(result.matches[0].evidence)
         == DEFAULT_MAX_EVIDENCE_PER_REQUIREMENT
     )
+
+
+def test_negated_mention_is_not_evidence():
+    # "没有 MongoDB 经验" 不能算作 "熟悉 MongoDB" 的支持证据。
+    sections = [
+        make_section(
+            "other",
+            "补充说明",
+            "简历中没有 MongoDB 项目经验。",
+        )
+    ]
+
+    result = search_resume_evidence(
+        requirements=["熟悉 MongoDB"],
+        sections=sections,
+    )
+
+    assert result.matches[0].evidence == []
+
+
+def test_negation_does_not_suppress_positive_mention():
+    sections = [
+        make_section("other", "补充说明", "没有 MongoDB 经验。"),
+        make_section("skills", "技能", "熟悉 Python 和 MongoDB"),
+    ]
+
+    result = search_resume_evidence(
+        requirements=["熟悉 MongoDB"],
+        sections=sections,
+    )
+
+    assert [item.content for item in result.matches[0].evidence] == [
+        "熟悉 Python 和 MongoDB"
+    ]
+
+
+def test_english_negation_is_detected():
+    sections = [
+        make_section(
+            "other",
+            "说明",
+            "No Rust experience, not familiar with Go.",
+        )
+    ]
+
+    result = search_resume_evidence(
+        requirements=["Rust", "Go"],
+        sections=sections,
+    )
+
+    assert result.matches[0].evidence == []
+    assert result.matches[1].evidence == []
+
+
+def test_negation_scope_stays_inside_the_clause():
+    # 否定作用域只在本子句内，逗号后的"熟悉 Python"仍是有效证据。
+    sections = [
+        make_section("skills", "技能", "没有用过 Java，但熟悉 Python")
+    ]
+
+    result = search_resume_evidence(
+        requirements=["Python"],
+        sections=sections,
+    )
+
+    assert result.matches[0].evidence != []

@@ -3,13 +3,12 @@
 import re
 
 from app.schemas.evidence import (
+    MAX_EVIDENCE_PER_REQUIREMENT,
     EvidenceItem,
     EvidenceSearchResult,
-    MAX_EVIDENCE_PER_REQUIREMENT,
     RequirementEvidence,
 )
 from app.schemas.resume import ResumeSection
-
 
 #单条岗位要求默认返回3条证据
 DEFAULT_MAX_EVIDENCE_PER_REQUIREMENT = 3
@@ -25,6 +24,44 @@ ENGLISH_TOKEN_PATTERN = re.compile(
 CHINESE_RUN_PATTERN = re.compile(
     r"[\u4e00-\u9fff]+"
 )
+
+
+# 否定词标记：命中词只出现在否定语境时，不能算作支持证据。
+# 说明：这里是关键词基线，宁可保守，只收录语义明确的否定词。
+NEGATION_PATTERN = re.compile(
+    r"(没有|缺乏|缺少|从未|未曾|不具备|不含|没做过"
+    r"|\bnot\b|\bno\b|\bwithout\b|\bnever\b)"
+)
+
+# 子句边界：否定作用域限定在当前子句内，避免跨句误判。
+CLAUSE_BOUNDARY_PATTERN = re.compile(r"[。！？；;，,\n.!?]")
+
+
+# 判断某个命中位置是否处于否定语境，只看同一子句内且位于它之前的部分。
+def is_negated_occurrence(text: str, index: int) -> bool:
+    clause_start = 0
+
+    for boundary in CLAUSE_BOUNDARY_PATTERN.finditer(text):
+        if boundary.end() > index:
+            break
+        clause_start = boundary.end()
+
+    return bool(NEGATION_PATTERN.search(text[clause_start:index]))
+
+
+# 命中词只要有任意一次非否定语境的出现，就仍然算有效证据。
+def has_positive_occurrence(text: str, token: str) -> bool:
+    start = 0
+
+    while True:
+        index = text.find(token, start)
+        if index < 0:
+            return False
+
+        if not is_negated_occurrence(text, index):
+            return True
+
+        start = index + 1
 
 
 # 把中英文文本切成可比较的英文词项、中文整串和双字 n-gram。
@@ -61,17 +98,23 @@ def calculate_score(
 ) -> float:
     #对岗位要求分词
     requirement_tokens = tokenize(requirement)
-    #对简历段落的标题+正文分词
-    section_tokens = tokenize(
+    #对简历段落的标题+正文分词（统一小写，便于定位英文命中词）
+    normalized_section_text = (
         f"{section.title} {section.content}"
-    )
+    ).lower()
+    section_tokens = tokenize(normalized_section_text)
 
     #防御：requirements没有token时避免除零
     if not requirement_tokens:
         return 0.0
 
     #取交集：既在要求里出现、又在简历段落里出现的token
-    matched_tokens = requirement_tokens & section_tokens
+    #再排除只出现在否定语境里的命中词，例如"没有 MongoDB 经验"。
+    matched_tokens = {
+        token
+        for token in (requirement_tokens & section_tokens)
+        if has_positive_occurrence(normalized_section_text, token)
+    }
 
     #得分 = 命中token数 / 要求token总数，保留3位小数
     return round(
