@@ -1,5 +1,7 @@
 # STEP 12 Deployment
 
+私有 staging 的完整操作见 [STAGING_DEPLOYMENT.md](STAGING_DEPLOYMENT.md)。
+
 ## 0. 当前缺口
 
 ```text
