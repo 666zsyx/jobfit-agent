@@ -5,6 +5,8 @@
     "case_count": 15,
     "task_completion_rate": 1.0,
     "tool_sequence_accuracy": 0.9333333333333333,
+    "tool_precision": 0.9866666666666667,
+    "tool_recall": 1.0,
     "tool_f1": 0.9925925925925926,
     "tool_success_rate": 0.9777777777777777,
     "match_status_f1": 1.0,

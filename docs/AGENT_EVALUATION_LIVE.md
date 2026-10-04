@@ -47,6 +47,8 @@
 |---|---:|---:|
 | task_completion_rate | 1.0000 | 1.0000 |
 | tool_sequence_accuracy | 0.9333 | 0.0000 |
+| tool_precision | 0.9867 | 0.7667 |
+| tool_recall | 1.0000 | 1.0000 |
 | tool_f1 | 0.9926 | 0.8657 |
 | tool_success_rate | 0.9778 | 1.0000 |
 | match_status_f1 | 1.0000 | 0.5278 |
