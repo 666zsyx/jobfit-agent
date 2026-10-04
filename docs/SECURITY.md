@@ -235,3 +235,17 @@ JWT 包含 user_id、username、role、iat、exp
 一个账号对应一个租户
 所有 Repository 仍按 user_id 隔离
 ```
+
+---
+
+## 10. 预部署安全修复
+
+```text
+APP_ENV 规范化，未知值拒绝启动
+staging/production 必须使用强 JWT Secret 和 Demo Password
+生产禁用 demo-token
+登录按 IP + 用户名限流
+非 ASCII 用户名/密码安全返回 401
+参数校验错误不回显 input
+应用只绑定 127.0.0.1，由 HTTPS 反向代理对外提供服务
+```

@@ -793,7 +793,7 @@ async function submitConfirmation(decision) {
   }
 }
 
-async function resumeInterrupted() {
+async function retryInterrupted() {
   if (!state.selectedTaskId) return;
   if (state.selectedTaskStatus?.status === "waiting_confirmation") {
     await loadConfirmation(state.selectedTaskId);
@@ -811,7 +811,7 @@ function bindEvents() {
   $("upload-resume").addEventListener("click", uploadResume);
   $("create-job").addEventListener("click", createJob);
   $("start-analysis").addEventListener("click", createAndRunTask);
-  $("resume-interrupted").addEventListener("click", resumeInterrupted);
+  $("resume-interrupted").addEventListener("click", retryInterrupted);
   $("refresh-all").addEventListener("click", () => {
     loadAll().then(() => showToast("数据已刷新")).catch((error) => showToast(error.message, "error"));
   });

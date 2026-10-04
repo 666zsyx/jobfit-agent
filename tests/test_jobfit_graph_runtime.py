@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+from types import SimpleNamespace
 from typing import Any
 
 from langgraph.checkpoint.memory import InMemorySaver
@@ -9,7 +10,11 @@ from langgraph.types import Command
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.graphs.jobfit import JobFitGraphContext, build_jobfit_graph
+from app.graphs.jobfit import (
+    JobFitGraphContext,
+    build_jobfit_graph,
+    nodes as graph_nodes,
+)
 from app.schemas.agent_events import AgentEvent
 from app.schemas.auth import CurrentUser
 from app.schemas.chat import LLMWithToolsResult, TokenUsage, ToolCall
@@ -713,3 +718,18 @@ def test_graph_collects_inner_tool_model_usage() -> None:
     assert len(result["usage_records"]) == 1
     assert result["usage_records"][0]["model"] == "inner-test-model"
     assert result["usage_records"][0]["total_tokens"] == 30
+
+def test_save_report_uses_persist_callback() -> None:
+    async def fake_persist(state):
+        assert state["task_id"] == 7
+        return {"report_id": 123, "report_version": 2}
+
+    runtime = SimpleNamespace(
+        context={"persist_report": fake_persist}
+    )
+    result = asyncio.run(
+        graph_nodes.save_report({"task_id": 7}, runtime)
+    )
+
+    assert result["report_id"] == 123
+    assert result["status"] == "report_saved"
