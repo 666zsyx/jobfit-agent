@@ -1,8 +1,9 @@
 # 提供最小演示账号登录和 JWT 用户接口。
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.cache.client import get_redis_client
 from app.core.config import settings
 from app.core.response import success_response
 from app.dependencies.auth import get_current_user
@@ -17,6 +18,7 @@ from app.services.auth import (
     create_access_token,
     verify_demo_credentials,
 )
+from app.services.rate_limit import enforce_login_rate_limit
 
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -33,9 +35,21 @@ def _invalid_credentials() -> HTTPException:
 @router.post("/login")
 async def login_endpoint(
     request: LoginRequest,
+    http_request: Request,
     session: AsyncSession = Depends(get_db_session),
 ) -> dict:
     """校验演示账号并签发 JWT。"""
+
+    client_ip = (
+        http_request.client.host
+        if http_request.client is not None
+        else "unknown"
+    )
+    await enforce_login_rate_limit(
+        get_redis_client(),
+        client_ip=client_ip,
+        username=request.username,
+    )
 
     if not verify_demo_credentials(
         request.username,

@@ -219,3 +219,12 @@ def test_demo_token_can_be_disabled(
 
     assert response.status_code == 401
     assert response.json()["message"] == "无效或已过期的 Token"
+
+def test_login_rejects_non_ascii_credentials(client):
+    response = client.post(
+        "/api/auth/login",
+        json={"username": "中文", "password": "中文"},
+    )
+
+    assert response.status_code == 401
+    assert response.json()["message"] == "用户名或密码错误"

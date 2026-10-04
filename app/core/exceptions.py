@@ -132,6 +132,15 @@ async def validation_exception_handler(
         content={
             "code": 422,
             "message": "请求参数校验失败",
-            "data": jsonable_encoder(exc.errors()),
+            "data": jsonable_encoder(
+                [
+                    {
+                        key: value
+                        for key, value in error.items()
+                        if key not in {"input", "url"}
+                    }
+                    for error in exc.errors()
+                ]
+            ),
         },
     )

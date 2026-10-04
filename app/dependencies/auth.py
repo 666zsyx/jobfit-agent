@@ -1,13 +1,14 @@
 # 校验 Bearer Token，并解析当前用户。
 
-import hmac
-
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.config import settings
 from app.schemas.auth import CurrentUser
-from app.services.auth import decode_access_token
+from app.services.auth import (
+    constant_time_text_equal,
+    decode_access_token,
+)
 
 security = HTTPBearer(auto_error=False)
 
@@ -29,7 +30,7 @@ async def get_current_user(
         raise _unauthorized("未提供身份验证凭证")
 
     token = credentials.credentials
-    if settings.allow_demo_token and hmac.compare_digest(
+    if settings.allow_demo_token and constant_time_text_equal(
         token,
         settings.demo_access_token,
     ):

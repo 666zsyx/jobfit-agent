@@ -147,6 +147,56 @@ async def enforce_rate_limit(
     return decision
 
 
+async def enforce_login_rate_limit(
+    redis: Redis,
+    *,
+    client_ip: str,
+    username: str,
+    limit: int = 10,
+    window_seconds: int = 60,
+) -> RateLimitDecision:
+    """按来源 IP 和用户名限制登录尝试。"""
+
+    if not settings.rate_limit_enabled:
+        return RateLimitDecision(
+            allowed=True,
+            scope="login",
+            limit=max(limit, 1),
+            remaining=0,
+            retry_after_seconds=0,
+            reset_at_epoch=0,
+        )
+
+    now = int(time.time())
+    window = now // window_seconds
+    key = (
+        f"jobfit:login:{client_ip}:{username}:{window}"
+    )
+    reset_at = (window + 1) * window_seconds
+    try:
+        decision = await _consume_redis_window(
+            redis,
+            key=key,
+            limit=limit,
+            window_seconds=window_seconds,
+            reset_at=reset_at,
+        )
+    except RedisError:
+        decision = await _local_consume(
+            key=key,
+            limit=limit,
+            window_seconds=window_seconds,
+        )
+
+    if not decision.allowed:
+        raise RateLimitExceededError(
+            message="登录尝试过于频繁，请稍后重试",
+            retry_after_seconds=decision.retry_after_seconds,
+            limit_type="login",
+        )
+    return decision
+
+
 async def enforce_daily_request_quota(
     redis: Redis,
     *,
@@ -278,6 +328,7 @@ async def enforce_api_limits(
 
 __all__ = [
     "RateLimitDecision",
+    "enforce_login_rate_limit",
     "enforce_api_limits",
     "enforce_daily_request_quota",
     "enforce_daily_token_quota",

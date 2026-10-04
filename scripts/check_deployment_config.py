@@ -39,7 +39,7 @@ def check_config() -> tuple[list[str], list[str]]:
         if not os.getenv(key, "").strip():
             errors.append(f"缺少配置：{key}")
 
-    app_env = os.getenv("APP_ENV", "development").strip()
+    app_env = os.getenv("APP_ENV", "development").strip().lower()
     api_key = os.getenv("LLM_API_KEY", "")
     database_url = os.getenv("DATABASE_URL", "")
     redis_url = os.getenv("REDIS_URL", "")
@@ -49,7 +49,10 @@ def check_config() -> tuple[list[str], list[str]]:
     ).strip().lower() in {"1", "true", "yes", "on"}
     log_format = os.getenv("LOG_FORMAT", "text").strip().lower()
 
-    if app_env == "production":
+    if app_env not in {"development", "test", "staging", "production"}:
+        errors.append("APP_ENV 必须是 development、test、staging 或 production")
+
+    if app_env in {"staging", "production"}:
         if "CHANGE_ME" in database_url or "CHANGE_ME" in api_key:
             errors.append("生产环境仍包含 CHANGE_ME 占位符")
 
@@ -120,8 +123,12 @@ def main() -> None:
         import asyncio
 
         configure_event_loop_policy()
-        report["dependencies"] = asyncio.run(check_dependencies())
+        dependencies = asyncio.run(check_dependencies())
+        report["dependencies"] = dependencies
+        if dependencies.get("status") != "ready":
+            errors.append("依赖检查未就绪")
 
+    report["ready"] = not errors
     print(json.dumps(report, ensure_ascii=False, indent=2))
     if errors or (args.strict and warnings):
         raise SystemExit(1)

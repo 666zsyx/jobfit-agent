@@ -44,7 +44,7 @@ services:
       RATE_LIMIT_ENABLED: "true"
       LOG_FORMAT: json
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - chroma_prod_data:/app/.cache/chroma
       - fastembed_prod_data:/app/.cache/fastembed
