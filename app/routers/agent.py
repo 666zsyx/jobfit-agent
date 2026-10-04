@@ -20,12 +20,14 @@ from app.dependencies.auth import get_current_user
 from app.dependencies.rate_limit import make_rate_limit_dependency
 from app.dependencies.database import get_db_session
 from app.db.session import async_session_factory
-from app.repositories import AnalysisTaskRepository
+from app.repositories import AnalysisTaskRepository, ReportRepository
 from app.schemas.agent_events import AgentEvent, format_sse_event
 from app.schemas.analysis_task_api import (
     AnalysisTaskCreateRequest,
     AnalysisTaskResponse,
+    AnalysisTaskSummary,
     GraphTaskConfirmationRequest,
+    ReportResponse,
 )
 from app.schemas.auth import CurrentUser
 from app.schemas.react_agent import JobFitAgentRequest
@@ -45,6 +47,59 @@ from app.tools import ToolContext
 
 router = APIRouter(prefix="/api/agent", tags=["agent"])
 logger = logging.getLogger(__name__)
+
+
+def _preview(text: str, limit: int = 200) -> str:
+    compact = " ".join(text.split())
+    return compact[:limit]
+
+
+def _current_report(task):
+    reports = getattr(task, "reports", None) or []
+    for report in reversed(reports):
+        if report.deleted_at is None:
+            return report
+    return None
+
+
+def _task_summary(task) -> AnalysisTaskSummary:
+    report = _current_report(task)
+    job = task.job
+    resume_version = task.resume_version
+    return AnalysisTaskSummary(
+        task_id=task.task_id,
+        job_id=task.job_id,
+        resume_version_id=task.resume_version_id,
+        conversation_id=task.conversation_id,
+        job_title=job.title,
+        company_name=job.company_name,
+        job_description_preview=_preview(job.raw_description),
+        resume_title=resume_version.resume.title,
+        status=task.status,
+        current_step=task.current_step,
+        attempt=task.attempt,
+        max_steps=task.max_steps,
+        current_node=task.current_node,
+        report_id=report.report_id if report else None,
+        report_version=report.version_no if report else None,
+        started_at=task.started_at,
+        finished_at=task.finished_at,
+        created_at=task.created_at,
+        updated_at=task.updated_at,
+    )
+
+
+def _report_response(report) -> ReportResponse:
+    return ReportResponse(
+        report_id=report.report_id,
+        task_id=report.task_id,
+        version_no=report.version_no,
+        is_current=report.is_current,
+        summary=report.summary,
+        result_json=report.result_json,
+        created_at=report.created_at,
+        updated_at=report.updated_at,
+    )
 
 
 @router.post("/tasks", status_code=status.HTTP_201_CREATED)
@@ -142,6 +197,25 @@ async def run_analysis_task_endpoint(
     return success_response(data=result)
 
 
+@router.get("/tasks")
+async def list_analysis_tasks_endpoint(
+    current_user: CurrentUser = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_session),
+    _rate_limit: None = Depends(
+        make_rate_limit_dependency("tasks_list")
+    ),
+) -> dict:
+    """查询当前用户的历史分析任务。"""
+
+    tasks = await AnalysisTaskRepository(session).list_for_user(
+        current_user.id,
+        with_relations=True,
+    )
+    return success_response(
+        data=[_task_summary(task) for task in tasks]
+    )
+
+
 @router.get("/tasks/{task_id}")
 async def get_analysis_task_endpoint(
     task_id: int,
@@ -211,6 +285,29 @@ async def get_analysis_task_endpoint(
         )
 
     return success_response(data=data)
+
+
+@router.get("/tasks/{task_id}/report")
+async def get_analysis_task_report_endpoint(
+    task_id: int,
+    current_user: CurrentUser = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db_session),
+    _rate_limit: None = Depends(
+        make_rate_limit_dependency("task_report_read")
+    ),
+) -> dict:
+    """查询当前用户任务的当前版本报告。"""
+
+    report = await ReportRepository(session).get_current_for_user(
+        task_id=task_id,
+        user_id=current_user.id,
+    )
+    if report is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="报告不存在或尚未生成",
+        )
+    return success_response(data=_report_response(report))
 
 
 @router.get("/tasks/{task_id}/stream")

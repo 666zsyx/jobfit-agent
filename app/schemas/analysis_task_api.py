@@ -1,6 +1,7 @@
 # 定义持久化分析任务的 API 请求和响应契约。
 
-from typing import Literal
+from datetime import datetime
+from typing import Any, Literal
 
 from pydantic import (
     BaseModel,
@@ -34,6 +35,43 @@ class AnalysisTaskResponse(BaseModel):
     attempt: int
     max_steps: int
     current_node: str | None = None
+
+
+class AnalysisTaskSummary(BaseModel):
+    """任务列表项及其展示所需上下文。"""
+
+    task_id: int = Field(gt=0)
+    job_id: int = Field(gt=0)
+    resume_version_id: int = Field(gt=0)
+    conversation_id: int | None = None
+    job_title: str | None = None
+    company_name: str | None = None
+    job_description_preview: str
+    resume_title: str
+    status: str
+    current_step: int = Field(ge=0)
+    attempt: int = Field(ge=0)
+    max_steps: int = Field(gt=0)
+    current_node: str | None = None
+    report_id: int | None = None
+    report_version: int | None = None
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class ReportResponse(BaseModel):
+    """当前任务报告详情。"""
+
+    report_id: int = Field(gt=0)
+    task_id: int = Field(gt=0)
+    version_no: int = Field(gt=0)
+    is_current: bool
+    summary: str
+    result_json: dict[str, Any]
+    created_at: datetime
+    updated_at: datetime
 
 
 ConfirmationDecision = Literal["approve", "revise", "reject"]
@@ -92,6 +130,8 @@ class PersistedAgentExecutionResult(BaseModel):
 __all__ = [
     "AnalysisTaskCreateRequest",
     "AnalysisTaskResponse",
+    "AnalysisTaskSummary",
+    "ReportResponse",
     "ConfirmationDecision",
     "GraphTaskConfirmationRequest",
     "GraphTaskExecutionResult",
