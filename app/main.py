@@ -20,6 +20,7 @@ from app.db.session import dispose_engine
 from app.middleware.request_context import RequestContextMiddleware
 from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.routers.agent import router as agent_router
+from app.routers.auth import router as auth_router
 from app.routers.chat import router as chat_router
 from app.routers.health import router as health_router
 from app.routers.jobs import router as jobs_router
@@ -56,6 +57,7 @@ app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
 app.include_router(pages_router)
 app.include_router(health_router)
+app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(chat_router)
 app.include_router(jobs_router)

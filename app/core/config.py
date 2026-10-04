@@ -27,6 +27,12 @@ class Settings(BaseModel):
     rate_limit_requests_per_minute: int
     daily_request_quota: int
     daily_token_quota: int
+    auth_jwt_secret: str
+    auth_jwt_expire_minutes: int
+    demo_username: str
+    demo_password: str
+    demo_access_token: str
+    allow_demo_token: bool
 
 
 def _env_bool(name: str, default: bool) -> bool:
@@ -83,6 +89,36 @@ def get_settings() -> Settings:
     )
     daily_request_quota = _env_int("DAILY_REQUEST_QUOTA", 200)
     daily_token_quota = _env_int("DAILY_TOKEN_QUOTA", 200_000)
+    auth_jwt_secret = os.getenv("AUTH_JWT_SECRET", "").strip()
+    if not auth_jwt_secret:
+        if app_env == "production":
+            raise RuntimeError("生产环境必须配置 AUTH_JWT_SECRET")
+        auth_jwt_secret = "dev-only-jobfit-jwt-secret-change-me"
+    auth_jwt_expire_minutes = _env_int(
+        "AUTH_JWT_EXPIRE_MINUTES",
+        1440,
+    )
+    demo_username = (
+        os.getenv("DEMO_USERNAME", "demo_user").strip()
+        or "demo_user"
+    )
+    demo_password = os.getenv("DEMO_PASSWORD", "demo-password")
+    demo_access_token = os.getenv(
+        "DEMO_ACCESS_TOKEN",
+        "demo-token",
+    )
+    allow_demo_token = _env_bool(
+        "ALLOW_DEMO_TOKEN",
+        app_env != "production",
+    )
+
+    if app_env == "production":
+        if len(auth_jwt_secret) < 32:
+            raise RuntimeError("AUTH_JWT_SECRET 至少需要 32 个字符")
+        if demo_password == "demo-password" or len(demo_password) < 12:
+            raise RuntimeError("生产环境必须配置强 DEMO_PASSWORD")
+        if allow_demo_token:
+            raise RuntimeError("生产环境必须禁用 ALLOW_DEMO_TOKEN")
 
     if not api_key or not base_url or not model:
         raise RuntimeError("LLM 配置不完整，请检查 .env")
@@ -109,6 +145,12 @@ def get_settings() -> Settings:
         rate_limit_requests_per_minute=rate_limit_requests_per_minute,
         daily_request_quota=daily_request_quota,
         daily_token_quota=daily_token_quota,
+        auth_jwt_secret=auth_jwt_secret,
+        auth_jwt_expire_minutes=auth_jwt_expire_minutes,
+        demo_username=demo_username,
+        demo_password=demo_password,
+        demo_access_token=demo_access_token,
+        allow_demo_token=allow_demo_token,
     )
 
 
