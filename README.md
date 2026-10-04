@@ -23,6 +23,7 @@ STEP 14 新增能力：
 - [简历项目描述](docs/RESUME_PROJECT.md)
 - [RAG 评估](docs/RAG_EVALUATION.md)
 - [Agent 评估](docs/AGENT_EVALUATION.md)
+- [Agent 真实执行评估](docs/AGENT_EVALUATION_LIVE.md)
 - [可观测性](docs/OBSERVABILITY.md)
 - [成本统计](docs/COST_TRACKING.md)
 - [安全设计](docs/SECURITY.md)

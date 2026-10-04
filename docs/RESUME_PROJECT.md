@@ -69,9 +69,10 @@ Docker / Docker Compose 配置
 ## 4. 可量化亮点
 
 ```text
-自动化测试：387 passed
+自动化测试：407 passed
 RAG 评估集：30 条
-Agent 评估集：15 条
+Agent 评估集：15 条（回放回归）
+真实执行评估：12 条 case 真调 LLM，必要工具覆盖率 1.0、证据支撑率 1.0
 双引擎对比：answer/status/steps/usage/tool_trace/core_events 全部一致
 Checkpoint 中断恢复：通过
 人工确认修改后追加简历版本：通过
@@ -126,7 +127,7 @@ Checkpoint 中断恢复：通过
 
 ```text
 形成可测试、可演示、可继续部署的 Agent 后端原型。
-379 条自动化测试通过，Agent/RAG 评估通过，Checkpoint 恢复和人工确认验证通过。
+407 条自动化测试通过，Agent/RAG 评估通过，Checkpoint 恢复和人工确认验证通过。
 远程 staging 和公网部署保留到 Linux 云服务器阶段。
 ```
 
