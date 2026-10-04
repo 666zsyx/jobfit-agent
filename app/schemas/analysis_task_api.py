@@ -55,6 +55,7 @@ class AnalysisTaskSummary(BaseModel):
     current_node: str | None = None
     report_id: int | None = None
     report_version: int | None = None
+    metrics_json: dict[str, Any] | None = None
     started_at: datetime | None = None
     finished_at: datetime | None = None
     created_at: datetime
@@ -110,6 +111,7 @@ class GraphTaskExecutionResult(BaseModel):
     final_answer: str | None = None
     report_id: int | None = None
     report_version: int | None = None
+    metrics_json: dict[str, Any] | None = None
     new_resume_version_id: int | None = None
     pending_confirmation: dict | None = None
     usage: dict[str, int] | None = None

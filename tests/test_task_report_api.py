@@ -53,6 +53,12 @@ def make_task(
         max_steps=8,
         current_node="finalize",
         reports=reports if reports is not None else [make_report()],
+        metrics_json={
+            "usage": {"total_tokens": 120},
+            "estimated_cost": 0.0012,
+            "currency": "CNY",
+            "total_ms": 860,
+        },
         started_at=now,
         finished_at=now,
         created_at=now,
@@ -121,6 +127,7 @@ def test_list_tasks_returns_context_and_report_summary(
     assert data[0]["status"] == "completed"
     assert data[0]["report_id"] == 99
     assert data[0]["report_version"] == 1
+    assert data[0]["metrics_json"]["estimated_cost"] == 0.0012
 
 
 def test_list_tasks_handles_task_without_report(

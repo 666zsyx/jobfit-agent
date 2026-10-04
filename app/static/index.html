@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JobFit Agent 工作台</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>JobFit Agent</h1>
+      <p class="muted">简历证据检索 · 岗位匹配 · 人工确认 · 可恢复执行</p>
+    </div>
+    <div class="token-box">
+      <label for="token-input">演示访问令牌</label>
+      <div class="inline-form">
+        <input id="token-input" type="password" value="demo-token" autocomplete="off">
+        <button id="connect-button" class="button primary">连接</button>
+      </div>
+      <p id="connection-status" class="status-text">未连接</p>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="column">
+      <article class="card">
+        <div class="card-heading">
+          <div>
+            <h2>1. 简历</h2>
+            <p class="muted">支持 PDF、DOCX、TXT</p>
+          </div>
+          <span id="resume-count" class="badge">0</span>
+        </div>
+        <div class="form-grid">
+          <input id="resume-title" type="text" placeholder="简历标题（可选）">
+          <input id="resume-file" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+          <label class="check-row">
+            <input id="resume-extract" type="checkbox" checked>
+            <span>上传后执行结构化提取</span>
+          </label>
+          <button id="upload-resume" class="button">上传并解析</button>
+        </div>
+        <div id="resume-list" class="item-list empty">暂无简历</div>
+        <div id="resume-versions" class="version-box hidden">
+          <div class="section-label">选择简历版本</div>
+          <div id="resume-version-list" class="chip-list"></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-heading">
+          <div>
+            <h2>2. 岗位 JD</h2>
+            <p class="muted">保存后生成任务所需的 job_id</p>
+          </div>
+          <span id="job-count" class="badge">0</span>
+        </div>
+        <div class="form-stack">
+          <input id="job-title" type="text" placeholder="岗位名称，例如 Python 后端开发">
+          <input id="job-company" type="text" placeholder="公司名称（可选）">
+          <textarea id="job-description" rows="8" placeholder="粘贴完整岗位 JD"></textarea>
+          <button id="create-job" class="button">保存岗位</button>
+        </div>
+        <div id="job-list" class="item-list empty">暂无岗位</div>
+      </article>
+    </section>
+
+    <section class="column">
+      <article class="card accent-card">
+        <div class="card-heading">
+          <div>
+            <h2>3. 创建并执行分析</h2>
+            <p id="selection-summary" class="muted">请选择一份简历版本和一个岗位</p>
+          </div>
+          <span id="task-state" class="badge">idle</span>
+        </div>
+        <div class="action-row">
+          <button id="start-analysis" class="button primary">开始分析</button>
+          <button id="resume-interrupted" class="button ghost" disabled>继续中断任务</button>
+          <button id="refresh-all" class="button ghost">刷新数据</button>
+        </div>
+        <div class="progress-strip">
+          <div class="progress-meta">
+            <span id="progress-node">等待开始</span>
+            <span id="progress-step">step 0</span>
+          </div>
+          <div class="progress-track"><div id="progress-bar"></div></div>
+        </div>
+        <pre id="event-log" class="event-log">执行事件将显示在这里。</pre>
+      </article>
+
+      <article id="confirmation-card" class="card hidden">
+        <div class="card-heading">
+          <div>
+            <h2>4. 人工确认</h2>
+            <p class="muted">审批、修改报告或拒绝结果</p>
+          </div>
+          <span class="badge warning">pending</span>
+        </div>
+        <div class="section-label">待确认报告 JSON</div>
+        <textarea id="confirmation-json" rows="10" spellcheck="false"></textarea>
+        <div class="section-label">简历修改文本（选择“修改”时可填）</div>
+        <textarea id="resume-revision" rows="4" placeholder="例如：补充一个项目中的性能优化结果"></textarea>
+        <div class="action-row">
+          <button id="approve-confirmation" class="button primary">批准</button>
+          <button id="revise-confirmation" class="button">修改后继续</button>
+          <button id="reject-confirmation" class="button danger">拒绝</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-heading">
+          <div>
+            <h2>5. 最终报告</h2>
+            <p id="report-meta" class="muted">等待任务完成</p>
+          </div>
+          <span id="report-version" class="badge">-</span>
+        </div>
+        <div class="metric-grid">
+          <div class="metric"><span class="muted">Token</span><strong id="metric-tokens">-</strong></div>
+          <div class="metric"><span class="muted">成本</span><strong id="metric-cost">-</strong></div>
+          <div class="metric"><span class="muted">引用</span><strong id="metric-citations">-</strong></div>
+          <div class="metric"><span class="muted">耗时</span><strong id="metric-duration">-</strong></div>
+        </div>
+        <div class="section-label">报告摘要</div>
+        <p id="report-summary" class="report-summary empty">暂无报告</p>
+        <div class="section-label">引用证据 chunk_id</div>
+        <div id="citation-list" class="chip-list"><span class="muted">暂无引用</span></div>
+        <details>
+          <summary>查看完整 result_json</summary>
+          <pre id="report-json" class="json-view">暂无报告</pre>
+        </details>
+      </article>
+    </section>
+
+    <section class="card history-card">
+      <div class="card-heading">
+        <div>
+          <h2>6. 历史任务</h2>
+          <p class="muted">刷新页面后仍可恢复状态和报告</p>
+        </div>
+        <span id="task-count" class="badge">0</span>
+      </div>
+      <div id="task-list" class="item-list task-list empty">暂无任务</div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

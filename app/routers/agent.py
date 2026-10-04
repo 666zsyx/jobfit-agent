@@ -82,6 +82,7 @@ def _task_summary(task) -> AnalysisTaskSummary:
         current_node=task.current_node,
         report_id=report.report_id if report else None,
         report_version=report.version_no if report else None,
+        metrics_json=task.metrics_json,
         started_at=task.started_at,
         finished_at=task.finished_at,
         created_at=task.created_at,
