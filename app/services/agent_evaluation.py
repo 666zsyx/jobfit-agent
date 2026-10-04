@@ -8,7 +8,6 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-
 MatchStatus = Literal[
     "strong_match",
     "partial_match",
@@ -69,8 +68,10 @@ class AgentEvaluationCase(BaseModel):
 
 class AgentCaseMetrics(BaseModel):
     task_completed: bool
+    # 严格全等：工具名、顺序、数量都必须与期望完全一致。
     tool_sequence_accuracy: float = Field(ge=0, le=1)
     tool_precision: float = Field(ge=0, le=1)
+    # 必要工具覆盖率：期望工具被真实调用的比例，容忍多调用的额外工具。
     tool_recall: float = Field(ge=0, le=1)
     tool_f1: float = Field(ge=0, le=1)
     tool_success_rate: float = Field(ge=0, le=1)
@@ -95,6 +96,8 @@ class AgentEvaluationSummary(BaseModel):
     case_count: int = Field(ge=1)
     task_completion_rate: float = Field(ge=0, le=1)
     tool_sequence_accuracy: float = Field(ge=0, le=1)
+    tool_precision: float = Field(ge=0, le=1)
+    tool_recall: float = Field(ge=0, le=1)
     tool_f1: float = Field(ge=0, le=1)
     tool_success_rate: float = Field(ge=0, le=1)
     match_status_f1: float = Field(ge=0, le=1)
@@ -192,6 +195,7 @@ def evaluate_agent_case(case: AgentEvaluationCase) -> AgentCaseResult:
 
     metrics = AgentCaseMetrics(
         task_completed=observed.task_status == expected.task_status,
+        # 严格全等：多调一个工具就会被判为 0。
         tool_sequence_accuracy=(
             1.0 if observed.tools == expected.tools else 0.0
         ),
@@ -249,6 +253,10 @@ def summarize_agent_results(
         tool_sequence_accuracy=_mean(
             [metric.tool_sequence_accuracy for metric in metrics]
         ),
+        tool_precision=_mean(
+            [metric.tool_precision for metric in metrics]
+        ),
+        tool_recall=_mean([metric.tool_recall for metric in metrics]),
         tool_f1=_mean([metric.tool_f1 for metric in metrics]),
         tool_success_rate=_mean(
             [metric.tool_success_rate for metric in metrics]

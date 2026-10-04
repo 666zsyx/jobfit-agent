@@ -11,7 +11,6 @@ from app.services.agent_evaluation import (
     summarize_agent_results,
 )
 
-
 DATASET_PATH = Path(__file__).resolve().parents[1] / (
     "data/evaluation/agent_cases.json"
 )
@@ -173,3 +172,32 @@ def test_interrupted_case_does_not_require_citation() -> None:
 
     assert result.metrics.task_completed is True
     assert result.metrics.citation_valid is True
+
+
+def test_summary_exposes_tool_precision_and_recall() -> None:
+    case = make_case()
+    result = evaluate_agent_case(case)
+    summary = summarize_agent_results(
+        [result],
+        observed_outcomes=[case.observed],
+    )
+
+    assert summary.tool_precision == 1.0
+    assert summary.tool_recall == 1.0
+
+
+def test_extra_tool_only_reduces_precision_not_recall() -> None:
+    case = make_case(
+        expected={"tools": ["a", "b"]},
+        observed={"tools": ["a", "x", "b"]},
+    )
+    result = evaluate_agent_case(case)
+    summary = summarize_agent_results(
+        [result],
+        observed_outcomes=[case.observed],
+    )
+
+    # 严格全等为 0，但必要工具都调到了。
+    assert summary.tool_sequence_accuracy == 0.0
+    assert summary.tool_recall == 1.0
+    assert summary.tool_precision < 1.0
