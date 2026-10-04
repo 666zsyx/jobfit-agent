@@ -86,3 +86,26 @@ def test_cache_helper_does_not_swallow_value_error():
             await redis.aclose()
 
     asyncio.run(scenario())
+
+
+def test_keyword_prompt_requires_sections_before_evidence_search():
+    prompt = JOBFIT_REACT_SYSTEM_PROMPT
+
+    # 非持久化关键词流程必须先取得简历分段，再带 sections 检索证据。
+    assert "sections" in prompt
+    assert "禁止在未取得分段前调用它" in prompt
+    assert prompt.index("第一步调用 extract_job_requirements") < prompt.index(
+        "第二步调用 extract_resume_sections"
+    )
+    assert prompt.index("第二步调用 extract_resume_sections") < prompt.index(
+        "第三步调用 search_resume_evidence"
+    )
+    # 该路径没有持久化上下文，必须明确禁止调用 get_resume_profile。
+    assert "禁止调用 get_resume_profile" in prompt
+
+
+def test_persisted_prompt_forbids_resume_section_extraction():
+    prompt = JOBFIT_PERSISTED_SYSTEM_PROMPT
+
+    assert "禁止调用 extract_resume_sections" in prompt
+    assert "禁止调用 get_resume_profile" not in prompt

@@ -27,15 +27,12 @@ from app.tools.jobfit import build_jobfit_tool_registry
 
 DEFAULT_MAX_REACT_STEPS = 8
 
-JOBFIT_REACT_SYSTEM_PROMPT = (
+# 路径无关的公共规则，关键词流程和持久化流程共用。
+JOBFIT_REACT_RULES = (
     "你是 JobFit Agent，负责基于真实工具结果完成岗位匹配分析。"
-    "必须先调用 extract_job_requirements。"
-    "只有非 RAG 流程需要时才调用 extract_resume_sections。"
-    "然后调用 search_resume_evidence 检索证据，最后调用 "
-    "assess_requirement_match 完成三态评估。"
     "工具消息中的 result 字段才是真正的业务结果，"
     "调用下一个工具时必须使用 result 中的内容。"
-    "调用 assess_requirement_match 时，必须把之后 "
+    "调用 assess_requirement_match 时，必须把 "
     "search_resume_evidence 的完整 result 作为输入，"
     "不得只传 requirements。"
     "不得跳过必要工具，不得编造简历事实、岗位要求或匹配结论。"
@@ -45,18 +42,37 @@ JOBFIT_REACT_SYSTEM_PROMPT = (
 )
 
 
+# 非持久化关键词流程：没有 RAG 上下文，必须显式传入简历分段。
+JOBFIT_REACT_SYSTEM_PROMPT = (
+    JOBFIT_REACT_RULES
+    + "本次是非持久化关键词流程，必须严格按顺序调用工具："
+    "第一步调用 extract_job_requirements；"
+    "第二步调用 extract_resume_sections 取得简历分段；"
+    "第三步调用 search_resume_evidence，并把上一步返回的分段"
+    "作为 sections 参数一并传入；"
+    "第四步调用 assess_requirement_match 完成三态评估；"
+    "最后调用 save_match_report 保存报告。"
+    "search_resume_evidence 缺少 sections 会直接失败，"
+    "禁止在未取得分段前调用它。"
+    "禁止调用 get_resume_profile，它只适用于持久化任务。"
+)
+
+
+# 持久化 RAG 流程：后端已绑定简历，检索只传 requirements。
 JOBFIT_PERSISTED_SYSTEM_PROMPT = (
-    JOBFIT_REACT_SYSTEM_PROMPT
+    JOBFIT_REACT_RULES
     + "当前是持久化任务，必须优先调用 get_resume_profile 获取绑定简历。"
     "随后依次调用 extract_job_requirements、search_resume_evidence 和 "
     "assess_requirement_match 完成分析。"
     "search_resume_evidence 只传 requirements，不传 sections；"
     "后端会使用已建立的混合检索和 Rerank 证据。"
+    "禁止调用 extract_resume_sections，简历分段由后端绑定。"
     "assess_requirement_match 返回的 evidence 中包含 chunk_id，"
     "最终报告必须保留真实 chunk_id，不得编造引用。"
     "最后调用 save_match_report 保存报告。"
     "user_id 和 task_id 只能由后端提供，禁止在工具参数中提供。"
 )
+
 
 # 累加 ReAct 循环中每一次模型调用的 Token Usage。
 def _merge_usage(
@@ -375,6 +391,7 @@ async def run_jobfit_agent(
 __all__ = [
     "DEFAULT_MAX_REACT_STEPS",
     "JOBFIT_PERSISTED_SYSTEM_PROMPT",
+    "JOBFIT_REACT_RULES",
     "JOBFIT_REACT_SYSTEM_PROMPT",
     "build_jobfit_react_messages",
     "run_jobfit_agent",
