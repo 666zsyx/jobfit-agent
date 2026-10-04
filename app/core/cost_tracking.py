@@ -75,6 +75,14 @@ def finish_usage_collection(token: Token) -> list[UsageRecord]:
     return list(records)
 
 
+def append_usage_records(records: list[UsageRecord]) -> None:
+    """把嵌套调用已收集的记录追加到当前外层收集器。"""
+
+    current = _USAGE_RECORDS.get()
+    if current is not None:
+        current.extend(records)
+
+
 def record_usage(
     *,
     model: str,
@@ -194,6 +202,7 @@ def summarize_usage_cost(
 
 __all__ = [
     "CostSummary",
+    "append_usage_records",
     "ModelUsageAggregate",
     "UsageCallType",
     "UsageRecord",

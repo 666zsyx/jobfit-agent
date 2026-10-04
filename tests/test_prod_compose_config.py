@@ -22,11 +22,13 @@ def test_prod_compose_persists_rag_runtime_data():
     assert "fastembed_prod_data:" in compose
 
 
-def test_prod_compose_uses_single_worker():
+def test_prod_compose_uses_single_worker_and_loopback_port():
     compose = COMPOSE_FILE.read_text(encoding="utf-8")
 
     assert "--workers 1" in compose
     assert "--workers 2" not in compose
+    assert "127.0.0.1:8000:8000" in compose
+    assert "      - \"8000:8000\"" not in compose
 
 
 def test_dockerfile_creates_writable_cache_directories():

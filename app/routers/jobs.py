@@ -107,6 +107,7 @@ async def list_jobs_endpoint(
         make_rate_limit_dependency(
             "jobs_list",
             enforce_token_quota=False,
+            enforce_request_quota=False,
         )
     ),
 ) -> dict:
@@ -129,6 +130,7 @@ async def get_job_endpoint(
         make_rate_limit_dependency(
             "jobs_read",
             enforce_token_quota=False,
+            enforce_request_quota=False,
         )
     ),
 ) -> dict:

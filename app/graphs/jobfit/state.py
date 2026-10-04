@@ -18,6 +18,7 @@ class JobFitGraphState(TypedDict, total=False):
     """
 
     task_id: int
+    user_id: int
     job_id: int
     resume_version_id: int
 

@@ -18,6 +18,7 @@ from app.repositories import (
     ResumeRepository,
     ResumeVersionRepository,
 )
+from app.services.citation_validation import validate_report_citations
 from app.services.evidence_search import search_resume_evidence
 from app.services.extraction import extract_job
 from app.services.matching import assess_requirement_match
@@ -311,58 +312,27 @@ async def get_resume_profile_handler(
     }
 
 
-def _collect_chunk_ids(
-    value,
-    output: set[int],
-) -> None:
-    if isinstance(value, dict):
-        for key, child in value.items():
-            if key in {
-                "chunk_id",
-                "chunk_ids",
-                "evidence_ids",
-                "cited_chunk_ids",
-            }:
-                candidates = (
-                    child if isinstance(child, list) else [child]
-                )
-                for candidate in candidates:
-                    if isinstance(candidate, int):
-                        output.add(candidate)
-                    elif isinstance(candidate, str) and candidate.isdigit():
-                        output.add(int(candidate))
-
-            _collect_chunk_ids(child, output)
-    elif isinstance(value, list):
-        for child in value:
-            _collect_chunk_ids(child, output)
-
-
 def _validate_report_citations(
     result_json: dict,
     context: ToolContext,
 ) -> str | None:
-    allowed_chunk_ids = {
-        item.chunk_id
-        for pack in context.retrieved_evidence_packs
-        for item in pack.items
-    }
-
-    if not allowed_chunk_ids:
+    if not context.rag_enabled:
         return None
 
-    cited_chunk_ids: set[int] = set()
-    _collect_chunk_ids(result_json, cited_chunk_ids)
+    if not context.retrieved_evidence_packs:
+        return "报告没有可用证据"
 
-    if not cited_chunk_ids:
-        return "报告缺少证据引用"
-
-    unknown_chunk_ids = sorted(
-        cited_chunk_ids - allowed_chunk_ids
+    validation = validate_report_citations(
+        result_json=result_json,
+        evidence_packs=context.retrieved_evidence_packs,
+        require_at_least_one=True,
     )
-    if unknown_chunk_ids:
-        return f"报告引用了未知证据: {unknown_chunk_ids}"
-
+    if validation.missing_citation:
+        return "报告缺少证据引用"
+    if validation.unknown_chunk_ids:
+        return f"报告引用了未知证据: {validation.unknown_chunk_ids}"
+    if validation.duplicate_chunk_ids:
+        return f"报告包含重复证据: {validation.duplicate_chunk_ids}"
     return None
 
 # 把模型生成的分析结果保存为当前任务的新报告版本。

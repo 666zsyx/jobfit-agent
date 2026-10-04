@@ -1,5 +1,7 @@
 # 定义 ReAct 执行前需要的无数据库快照。
 
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -18,6 +20,7 @@ class AnalysisTaskRunSnapshot(BaseModel):
     max_steps: int = Field(gt=0)
     previous_current_step: int = Field(ge=0)
     attempt: int = Field(gt=0)
+    started_at: datetime
 
 
 __all__ = ["AnalysisTaskRunSnapshot"]

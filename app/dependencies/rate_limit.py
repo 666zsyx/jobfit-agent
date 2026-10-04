@@ -16,6 +16,7 @@ def make_rate_limit_dependency(
     scope: str,
     *,
     enforce_token_quota: bool = True,
+    enforce_request_quota: bool = True,
 ) -> Callable:
     async def dependency(
         current_user: CurrentUser = Depends(get_current_user),
@@ -25,6 +26,7 @@ def make_rate_limit_dependency(
             user_id=current_user.id,
             scope=scope,
             enforce_token_quota=enforce_token_quota,
+            enforce_request_quota=enforce_request_quota,
         )
 
     return dependency

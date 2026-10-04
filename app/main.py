@@ -1,5 +1,6 @@
 # 创建 FastAPI 应用并注册路由与全局异常处理。
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -16,7 +17,7 @@ from app.core.exceptions import (
     http_exception_handler,
     validation_exception_handler,
 )
-from app.db.session import dispose_engine
+from app.db.session import async_session_factory, dispose_engine
 from app.middleware.request_context import RequestContextMiddleware
 from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.routers.agent import router as agent_router
@@ -27,15 +28,31 @@ from app.routers.jobs import router as jobs_router
 from app.routers.pages import STATIC_DIRECTORY, router as pages_router
 from app.routers.resumes import router as resumes_router
 from app.routers.users import router as users_router
+from app.services.analysis_results import recover_stale_running_tasks
 
 
 configure_event_loop_policy()
 configure_logging()
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
+        try:
+            async with async_session_factory() as session:
+                async with session.begin():
+                    recovered = await recover_stale_running_tasks(
+                        session
+                    )
+            if recovered:
+                logger.warning(
+                    "启动时恢复遗留 running 任务数量=%s",
+                    recovered,
+                )
+        except Exception:
+            logger.warning("启动时清理遗留任务失败", exc_info=True)
+
         yield
     finally:
         await dispose_redis()

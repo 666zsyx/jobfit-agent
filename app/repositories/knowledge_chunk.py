@@ -185,7 +185,7 @@ class KnowledgeChunkRepository:
             chunk.start_offset = start_offset
             chunk.end_offset = end_offset
 
-            if content_changed:
+            if content_changed or chunk.index_status == "stale":
                 chunk.index_status = "pending"
                 chunk.embedding_model = None
                 chunk.embedding_dimension = None

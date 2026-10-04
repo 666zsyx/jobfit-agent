@@ -1,6 +1,6 @@
 # 保存分析结果和工具调用审计记录。
 
-from sqlalchemy import func
+from sqlalchemy import func, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import AnalysisTask, Report, ToolCallRecord
@@ -120,6 +120,27 @@ async def finish_tool_call(
         duration_ms=duration_ms,
         error_code=error_code,
     )
+
+
+async def recover_stale_running_tasks(
+    session: AsyncSession,
+) -> int:
+    """把上次进程遗留的 running 任务转为可恢复中断。"""
+
+    statement = (
+        update(AnalysisTask)
+        .where(AnalysisTask.status == "running")
+        .values(
+            status="interrupted",
+            error_code="server_restarted",
+            error_message_safe="server_restarted",
+            finished_at=func.now(),
+            updated_at=func.now(),
+        )
+        .returning(AnalysisTask.task_id)
+    )
+    result = await session.scalars(statement)
+    return len(result.all())
 
 
 async def complete_analysis_task(

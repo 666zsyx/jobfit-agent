@@ -11,6 +11,8 @@ const state = {
   selectedTaskStatus: null,
   pendingConfirmation: null,
   streaming: false,
+  streamController: null,
+  activeStreamTaskId: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -409,8 +411,12 @@ async function login() {
     localStorage.setItem("jobfit_token", state.token);
     $("password-input").value = "";
     showLoggedIn();
-    await loadAll();
-    showToast("登录成功");
+    try {
+      await loadAll();
+      showToast("登录成功");
+    } catch (error) {
+      showToast(`登录成功，但数据加载失败：${error.message}`, "error");
+    }
   } catch (error) {
     state.token = "";
     localStorage.removeItem("jobfit_token");
@@ -432,12 +438,23 @@ async function restoreSession() {
     state.currentUser = await api("/api/auth/me");
     showLoggedIn();
     await loadAll();
-  } catch (_) {
-    logout(false, "登录已过期，请重新登录");
+  } catch (error) {
+    if (!state.token) {
+      return;
+    }
+    showLoggedIn();
+    setConnectionStatus(`已登录，但数据加载失败：${error.message}`, "error");
+    showToast(error.message, "error");
   }
 }
 
 function logout(showMessage = true, message = "已退出") {
+  if (state.streamController) {
+    state.streamController.abort();
+    state.streamController = null;
+  }
+  state.streaming = false;
+  state.activeStreamTaskId = null;
   state.token = "";
   localStorage.removeItem("jobfit_token");
   clearWorkspace();
@@ -555,7 +572,7 @@ function appendEvent(eventName, payload) {
   log.scrollTop = log.scrollHeight;
 }
 
-async function handleAgentEvent(eventName, payload) {
+async function handleAgentEvent(eventName, payload, taskId) {
   appendEvent(eventName, payload);
   const step = Number(payload?.step || payload?.data?.step || 0);
   const maxSteps = Number(state.selectedTaskStatus?.max_steps || 8);
@@ -569,14 +586,14 @@ async function handleAgentEvent(eventName, payload) {
   if (eventName === "waiting_confirmation") {
     $("progress-node").textContent = "等待人工确认";
     $("progress-bar").style.width = "85%";
-    await loadConfirmation(state.selectedTaskId);
+    await loadConfirmation(taskId);
   }
   if (eventName === "task_completed") {
     $("progress-node").textContent = "completed";
     $("progress-bar").style.width = "100%";
     applyTaskMetrics(null, payload?.data?.usage);
     await loadTasks();
-    await loadReport(state.selectedTaskId);
+    await loadReport(taskId);
   }
   if (eventName === "task_failed" || eventName === "task_interrupted") {
     $("progress-node").textContent = eventName === "task_failed" ? "failed" : "interrupted";
@@ -603,19 +620,29 @@ function parseSseFrame(frame) {
 }
 
 async function streamGraphTask(taskId) {
-  if (state.streaming) return;
+  if (state.streamController) {
+    state.streamController.abort();
+  }
+  const controller = new AbortController();
+  state.streamController = controller;
   state.streaming = true;
+  state.activeStreamTaskId = taskId;
   state.selectedTaskId = taskId;
+  clearReport();
   $("event-log").textContent = "执行事件将显示在这里。";
   updateTaskControls({ ...(state.selectedTaskStatus || {}), task_id: taskId, status: "running" });
 
   try {
     const response = await fetch(`/api/agent/tasks/${taskId}/graph/stream`, {
       headers: authHeaders({ Accept: "text/event-stream" }),
+      signal: controller.signal,
     });
     if (!response.ok) {
       let payload = null;
       try { payload = await response.json(); } catch (_) {}
+      if (response.status === 401) {
+        logout(false, "登录已过期，请重新登录");
+      }
       throw new Error(payload?.message || `SSE 请求失败：HTTP ${response.status}`);
     }
     if (!response.body) throw new Error("浏览器不支持流式响应");
@@ -634,21 +661,37 @@ async function streamGraphTask(taskId) {
         const parsed = parseSseFrame(frame);
         if (parsed?.eventName === "done") break;
         if (parsed && parsed.eventName !== "heartbeat") {
-          await handleAgentEvent(parsed.eventName, parsed.payload);
+          if (
+            state.activeStreamTaskId === taskId
+            && state.streamController === controller
+          ) {
+            await handleAgentEvent(
+              parsed.eventName,
+              parsed.payload,
+              taskId,
+            );
+          }
         }
         boundary = buffer.indexOf("\n\n");
       }
     }
   } catch (error) {
+    if (error.name === "AbortError") {
+      return;
+    }
     appendEvent("error", { content: error.message });
     showToast(error.message, "error");
     $("progress-node").textContent = "error";
   } finally {
-    state.streaming = false;
-    await loadTasks().catch(() => {});
-    const current = state.tasks.find((item) => item.task_id === taskId);
-    state.selectedTaskStatus = current || state.selectedTaskStatus;
-    updateTaskControls(state.selectedTaskStatus);
+    if (state.streamController === controller) {
+      state.streamController = null;
+      state.streaming = false;
+      state.activeStreamTaskId = null;
+      await loadTasks().catch(() => {});
+      const current = state.tasks.find((item) => item.task_id === taskId);
+      state.selectedTaskStatus = current || state.selectedTaskStatus;
+      updateTaskControls(state.selectedTaskStatus);
+    }
   }
 }
 
@@ -659,6 +702,7 @@ async function loadTaskStatus(taskId) {
   if (task.status === "completed") {
     await loadReport(taskId);
   } else if (task.status === "waiting_confirmation") {
+    clearReport();
     await loadConfirmation(taskId);
   } else {
     $("confirmation-card").classList.add("hidden");
@@ -669,6 +713,7 @@ async function loadTaskStatus(taskId) {
 async function selectTask(taskId) {
   state.selectedTaskId = taskId;
   renderTasks();
+  clearReport();
   try {
     await loadTaskStatus(taskId);
   } catch (error) {
@@ -748,7 +793,7 @@ async function submitConfirmation(decision) {
   }
 }
 
-async function resumeInterrupted() {
+async function retryInterrupted() {
   if (!state.selectedTaskId) return;
   if (state.selectedTaskStatus?.status === "waiting_confirmation") {
     await loadConfirmation(state.selectedTaskId);
@@ -766,7 +811,7 @@ function bindEvents() {
   $("upload-resume").addEventListener("click", uploadResume);
   $("create-job").addEventListener("click", createJob);
   $("start-analysis").addEventListener("click", createAndRunTask);
-  $("resume-interrupted").addEventListener("click", resumeInterrupted);
+  $("resume-interrupted").addEventListener("click", retryInterrupted);
   $("refresh-all").addEventListener("click", () => {
     loadAll().then(() => showToast("数据已刷新")).catch((error) => showToast(error.message, "error"));
   });

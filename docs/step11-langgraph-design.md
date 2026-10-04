@@ -264,15 +264,15 @@ Chroma 只保存可重建的向量索引
 线程标识：
 
 ```text
-thread_id = jobfit-task-{task_id}
+thread_id = jobfit-task-{task_id}-attempt-{attempt}
 ```
 
 恢复规则：
 
 ```text
-同一任务使用同一 thread_id
+waiting_confirmation 使用原 attempt/thread_id，从 interrupt 点继续
+执行中断但未进入人工确认时，重新执行会产生新 attempt
 恢复前必须重新验证 current_user 对 task_id 的归属
-恢复时从最近成功的 Checkpoint 继续
 中断期间不长期持有 Redis 运行锁
 恢复执行时重新获取运行锁
 ```

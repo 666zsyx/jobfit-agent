@@ -147,6 +147,117 @@ async def enforce_rate_limit(
     return decision
 
 
+_TASK_USAGE_RECORDED: dict[tuple[int, int], int] = {}
+
+
+_TASK_USAGE_DELTA_LUA = """
+local previous = tonumber(redis.call("get", KEYS[1]) or "0")
+local current = tonumber(ARGV[1])
+if current <= previous then
+    return 0
+end
+redis.call("set", KEYS[1], current, "EX", 604800)
+return current - previous
+"""
+
+
+async def record_task_token_usage(
+    redis: Redis,
+    *,
+    user_id: int,
+    task_id: int,
+    total_tokens: int,
+) -> int:
+    """按任务的累计 Usage 只记录新增 Token。"""
+
+    if not settings.rate_limit_enabled or total_tokens <= 0:
+        return 0
+
+    key = f"jobfit:quota:task:{user_id}:{task_id}:tokens"
+    if redis is None:
+        local_key = (user_id, task_id)
+        previous = _TASK_USAGE_RECORDED.get(local_key, 0)
+        if total_tokens <= previous:
+            return 0
+        _TASK_USAGE_RECORDED[local_key] = total_tokens
+        delta = total_tokens - previous
+    else:
+        try:
+            delta = int(
+                await redis.eval(
+                    _TASK_USAGE_DELTA_LUA,
+                    1,
+                    key,
+                    total_tokens,
+                )
+            )
+        except RedisError:
+            local_key = (user_id, task_id)
+            previous = _TASK_USAGE_RECORDED.get(local_key, 0)
+            if total_tokens <= previous:
+                return 0
+            _TASK_USAGE_RECORDED[local_key] = total_tokens
+            delta = total_tokens - previous
+
+    if delta <= 0:
+        return 0
+    return await record_daily_token_usage(
+        redis,
+        user_id=user_id,
+        total_tokens=delta,
+    )
+
+
+async def enforce_login_rate_limit(
+    redis: Redis,
+    *,
+    client_ip: str,
+    username: str,
+    limit: int = 10,
+    window_seconds: int = 60,
+) -> RateLimitDecision:
+    """按来源 IP 和用户名限制登录尝试。"""
+
+    if not settings.rate_limit_enabled:
+        return RateLimitDecision(
+            allowed=True,
+            scope="login",
+            limit=max(limit, 1),
+            remaining=0,
+            retry_after_seconds=0,
+            reset_at_epoch=0,
+        )
+
+    now = int(time.time())
+    window = now // window_seconds
+    key = (
+        f"jobfit:login:{client_ip}:{username}:{window}"
+    )
+    reset_at = (window + 1) * window_seconds
+    try:
+        decision = await _consume_redis_window(
+            redis,
+            key=key,
+            limit=limit,
+            window_seconds=window_seconds,
+            reset_at=reset_at,
+        )
+    except RedisError:
+        decision = await _local_consume(
+            key=key,
+            limit=limit,
+            window_seconds=window_seconds,
+        )
+
+    if not decision.allowed:
+        raise RateLimitExceededError(
+            message="登录尝试过于频繁，请稍后重试",
+            retry_after_seconds=decision.retry_after_seconds,
+            limit_type="login",
+        )
+    return decision
+
+
 async def enforce_daily_request_quota(
     redis: Redis,
     *,
@@ -265,19 +376,23 @@ async def enforce_api_limits(
     user_id: int,
     scope: str,
     enforce_token_quota: bool = True,
+    enforce_request_quota: bool = True,
 ) -> None:
     await enforce_rate_limit(
         redis,
         user_id=user_id,
         scope=scope,
     )
-    await enforce_daily_request_quota(redis, user_id=user_id)
+    if enforce_request_quota:
+        await enforce_daily_request_quota(redis, user_id=user_id)
     if enforce_token_quota:
         await enforce_daily_token_quota(redis, user_id=user_id)
 
 
 __all__ = [
     "RateLimitDecision",
+    "enforce_login_rate_limit",
+    "record_task_token_usage",
     "enforce_api_limits",
     "enforce_daily_request_quota",
     "enforce_daily_token_quota",

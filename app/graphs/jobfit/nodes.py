@@ -481,12 +481,20 @@ def human_confirmation(state: JobFitGraphState) -> dict:
     }
 
 
-def save_report(state: JobFitGraphState) -> dict:
-    """阶段三仍然使用假报告 ID，数据库写入留待后续阶段。"""
+async def save_report(
+    state: JobFitGraphState,
+    runtime: Runtime[JobFitGraphContext],
+) -> dict:
+    """在 Graph 内幂等持久化报告。"""
+
+    persist_report = runtime.context.get("persist_report")
+    report_fields: dict[str, Any] = {"report_id": None}
+    if persist_report is not None:
+        report_fields = await persist_report(state)
 
     return {
         **_node_update("save_report"),
-        "report_id": 101,
+        **report_fields,
         "status": "report_saved",
     }
 

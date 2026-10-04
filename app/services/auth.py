@@ -16,17 +16,29 @@ JWT_ALGORITHM = "HS256"
 REQUIRED_CLAIMS = ["sub", "username", "role", "iat", "exp"]
 
 
+def constant_time_text_equal(
+    left: str,
+    right: str,
+) -> bool:
+    """对中文等非 ASCII 文本也安全的常量时间比较。"""
+
+    return hmac.compare_digest(
+        left.encode("utf-8"),
+        right.encode("utf-8"),
+    )
+
+
 def verify_demo_credentials(
     username: str,
     password: str,
 ) -> bool:
     """使用常量时间比较演示账号和密码。"""
 
-    username_ok = hmac.compare_digest(
+    username_ok = constant_time_text_equal(
         username,
         settings.demo_username,
     )
-    password_ok = hmac.compare_digest(
+    password_ok = constant_time_text_equal(
         password,
         settings.demo_password,
     )
@@ -91,6 +103,7 @@ def decode_access_token(token: str) -> CurrentUser:
 
 
 __all__ = [
+    "constant_time_text_equal",
     "create_access_token",
     "decode_access_token",
     "verify_demo_credentials",

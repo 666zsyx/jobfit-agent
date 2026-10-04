@@ -157,6 +157,7 @@ async def list_resumes_endpoint(
         make_rate_limit_dependency(
             "resume_list",
             enforce_token_quota=False,
+            enforce_request_quota=False,
         )
     ),
 ) -> dict:
@@ -180,6 +181,7 @@ async def get_resume_endpoint(
         make_rate_limit_dependency(
             "resume_read",
             enforce_token_quota=False,
+            enforce_request_quota=False,
         )
     ),
 ) -> dict:

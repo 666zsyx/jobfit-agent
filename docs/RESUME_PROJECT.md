@@ -69,7 +69,7 @@ Docker / Docker Compose 配置
 ## 4. 可量化亮点
 
 ```text
-自动化测试：379 passed
+自动化测试：387 passed
 RAG 评估集：30 条
 Agent 评估集：15 条
 双引擎对比：answer/status/steps/usage/tool_trace/core_events 全部一致

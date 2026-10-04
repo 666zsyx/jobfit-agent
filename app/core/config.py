@@ -3,10 +3,14 @@
 import os
 
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 load_dotenv()
+
+
+ALLOWED_APP_ENVS = {"development", "test", "staging", "production"}
+SECURE_APP_ENVS = {"staging", "production"}
 
 
 class Settings(BaseModel):
@@ -56,7 +60,11 @@ def _env_int(name: str, default: int) -> int:
 def get_settings() -> Settings:
     """从环境变量读取配置，缺少关键配置时立即失败。"""
 
-    app_env = os.getenv("APP_ENV", "development")
+    app_env = os.getenv("APP_ENV", "development").strip().lower()
+    if app_env not in ALLOWED_APP_ENVS:
+        raise RuntimeError(
+            "APP_ENV 必须是 development、test、staging 或 production"
+        )
     api_key = os.getenv("LLM_API_KEY")
     base_url = os.getenv("LLM_BASE_URL")
     model = os.getenv("LLM_MODEL")
@@ -91,8 +99,8 @@ def get_settings() -> Settings:
     daily_token_quota = _env_int("DAILY_TOKEN_QUOTA", 200_000)
     auth_jwt_secret = os.getenv("AUTH_JWT_SECRET", "").strip()
     if not auth_jwt_secret:
-        if app_env == "production":
-            raise RuntimeError("生产环境必须配置 AUTH_JWT_SECRET")
+        if app_env in SECURE_APP_ENVS:
+            raise RuntimeError("staging/production 必须配置 AUTH_JWT_SECRET")
         auth_jwt_secret = "dev-only-jobfit-jwt-secret-change-me"
     auth_jwt_expire_minutes = _env_int(
         "AUTH_JWT_EXPIRE_MINUTES",
@@ -109,16 +117,16 @@ def get_settings() -> Settings:
     )
     allow_demo_token = _env_bool(
         "ALLOW_DEMO_TOKEN",
-        app_env != "production",
+        app_env not in SECURE_APP_ENVS,
     )
 
-    if app_env == "production":
+    if app_env in SECURE_APP_ENVS:
         if len(auth_jwt_secret) < 32:
-            raise RuntimeError("AUTH_JWT_SECRET 至少需要 32 个字符")
+            raise RuntimeError("staging/production AUTH_JWT_SECRET 至少需要 32 个字符")
         if demo_password == "demo-password" or len(demo_password) < 12:
-            raise RuntimeError("生产环境必须配置强 DEMO_PASSWORD")
+            raise RuntimeError("staging/production 必须配置强 DEMO_PASSWORD")
         if allow_demo_token:
-            raise RuntimeError("生产环境必须禁用 ALLOW_DEMO_TOKEN")
+            raise RuntimeError("staging/production 必须禁用 ALLOW_DEMO_TOKEN")
 
     if not api_key or not base_url or not model:
         raise RuntimeError("LLM 配置不完整，请检查 .env")

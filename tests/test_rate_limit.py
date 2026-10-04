@@ -11,6 +11,7 @@ from app.services.rate_limit import (
     enforce_daily_token_quota,
     enforce_rate_limit,
     record_daily_token_usage,
+    record_task_token_usage,
 )
 
 
@@ -157,6 +158,7 @@ def test_read_rate_limit_can_skip_token_quota(monkeypatch) -> None:
     dependency = rate_limit_dependency.make_rate_limit_dependency(
         "test_read",
         enforce_token_quota=False,
+        enforce_request_quota=False,
     )
 
     asyncio.run(
@@ -170,5 +172,46 @@ def test_read_rate_limit_can_skip_token_quota(monkeypatch) -> None:
             "user_id": 101,
             "scope": "test_read",
             "enforce_token_quota": False,
+            "enforce_request_quota": False,
         }
     ]
+
+def test_task_token_usage_records_only_cumulative_delta(
+    monkeypatch,
+) -> None:
+    import asyncio
+
+    monkeypatch.setattr(settings, "rate_limit_enabled", True)
+
+    async def scenario():
+        redis = FakeRedis()
+        try:
+            await record_task_token_usage(
+                redis,
+                user_id=104,
+                task_id=9001,
+                total_tokens=100,
+            )
+            await record_task_token_usage(
+                redis,
+                user_id=104,
+                task_id=9001,
+                total_tokens=140,
+            )
+            await record_task_token_usage(
+                redis,
+                user_id=104,
+                task_id=9001,
+                total_tokens=140,
+            )
+
+            from app.services.rate_limit import get_daily_token_usage
+
+            assert await get_daily_token_usage(
+                redis,
+                user_id=104,
+            ) == 140
+        finally:
+            await redis.aclose()
+
+    asyncio.run(scenario())

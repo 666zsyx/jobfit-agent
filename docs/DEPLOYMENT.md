@@ -1,5 +1,15 @@
 # STEP 12 Deployment
 
+## 0. 当前缺口
+
+```text
+当前只有一个共享演示账号，不允许收藏或上传真实个人简历。
+公网 staging 前必须保持 demo 数据为合成数据，并定期清理。
+```
+
+公网访问必须通过 HTTPS 反向代理，应用端口只绑定 127.0.0.1。
+
+
 ## 1. 目标
 
 让 JobFit Agent 具备 Linux 云服务器部署所需的：
@@ -102,6 +112,7 @@ Redis PING
 → uvicorn app.main:app
 → /health
 → /ready
+→ seed_demo_data.py（仅全新 staging）
 ```
 
 `/health` 只表示进程存活。
@@ -161,11 +172,32 @@ docker compose -f docker-compose.prod.yml ps
 docker compose -f docker-compose.prod.yml logs -f jobfit-agent
 ```
 
+首次初始化演示数据：
+
+```bash
+docker compose -f docker-compose.prod.yml exec jobfit-agent   python scripts/seed_demo_data.py
+```
+
 健康检查：
 
 ```bash
 curl -fsS http://127.0.0.1:8000/health
 curl -fsS http://127.0.0.1:8000/ready
+```
+
+数据库备份：
+
+```bash
+mkdir -p backups
+docker compose -f docker-compose.prod.yml exec -T postgres   pg_dump -U jobfit_app -d jobfit_prod -Fc   > "backups/jobfit_$(date +%Y%m%d_%H%M%S).dump"
+```
+
+恢复前先停止应用写入：
+
+```bash
+docker compose -f docker-compose.prod.yml stop jobfit-agent
+docker compose -f docker-compose.prod.yml exec -T postgres   pg_restore -U jobfit_app -d jobfit_prod --clean --if-exists   < backups/jobfit_YYYYMMDD_HHMMSS.dump
+docker compose -f docker-compose.prod.yml start jobfit-agent
 ```
 
 ---

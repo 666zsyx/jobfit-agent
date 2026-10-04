@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from datetime import datetime, timezone
 from time import perf_counter
 from uuid import uuid4
 
@@ -40,7 +41,9 @@ from app.repositories import (
 from app.schemas.agent_events import AgentEvent, AgentEventSink
 from app.schemas.analysis_task_api import GraphTaskExecutionResult
 from app.schemas.auth import CurrentUser
+from app.schemas.knowledge import EvidencePack
 from app.schemas.tool_audit import ToolAuditEvent
+from app.services.citation_validation import validate_report_citations
 from app.services.analysis_results import (
     complete_analysis_task,
     mark_analysis_task_waiting_confirmation,
@@ -53,6 +56,7 @@ from app.services.persisted_agent import (
     _prepare_rag_safely,
     _prepare_run_snapshot,
 )
+from app.services.rate_limit import record_task_token_usage
 from app.services.react_agent import (
     JOBFIT_PERSISTED_SYSTEM_PROMPT,
     chat_with_tools,
@@ -71,6 +75,7 @@ def _build_initial_state(snapshot) -> dict:
 
     return {
         "task_id": snapshot.task_id,
+        "user_id": snapshot.user_id,
         "job_id": snapshot.job_id,
         "resume_version_id": snapshot.resume_profile["resume_version_id"],
         "job_description": snapshot.job_description,
@@ -113,11 +118,77 @@ def _build_runtime_context(
             collect_tool_audit=True,
         )
 
+    async def persist_report(state: dict) -> dict[str, Any]:
+        task_id = int(state["task_id"])
+        user_id = int(state["user_id"])
+        report_payload = (
+            state.get("reviewed_report")
+            or state.get("pending_report")
+        )
+        if not isinstance(report_payload, dict):
+            raise ValueError("Graph 报告结构不合法")
+
+        summary = str(report_payload.get("summary") or "").strip()
+        result_json = report_payload.get("result_json")
+        if not summary or not isinstance(result_json, dict):
+            raise ValueError("Graph 报告结构不合法")
+
+        evidence_packs = [
+            EvidencePack.model_validate(item)
+            for item in (state.get("retrieved_evidence_packs") or [])
+        ]
+        if evidence_packs:
+            validation = validate_report_citations(
+                result_json=result_json,
+                evidence_packs=evidence_packs,
+                require_at_least_one=True,
+            )
+            if not validation.valid:
+                raise ValueError("报告引用校验失败")
+
+        async with session_factory() as session:
+            async with session.begin():
+                task = await AnalysisTaskRepository(
+                    session
+                ).get_for_user(
+                    task_id=task_id,
+                    user_id=user_id,
+                    for_update=True,
+                )
+                if task is None:
+                    raise LookupError("任务不存在或无权访问")
+
+                repository = ReportRepository(session)
+                current = await repository.get_current_for_user(
+                    task_id=task_id,
+                    user_id=user_id,
+                )
+                if (
+                    current is not None
+                    and current.summary == summary
+                    and current.result_json == result_json
+                ):
+                    report = current
+                else:
+                    report = await repository.create_for_user(
+                        task_id=task_id,
+                        user_id=user_id,
+                        summary=summary,
+                        result_json=result_json,
+                        make_current=True,
+                    )
+
+                return {
+                    "report_id": report.report_id,
+                    "report_version": report.version_no,
+                }
+
     return JobFitGraphContext(
         chat_with_tools=chat_with_tools,
         tool_registry=registry,
         tool_context_factory=tool_context_factory,
         event_sink=event_sink,
+        persist_report=persist_report,
     )
 
 
@@ -258,6 +329,7 @@ async def _persist_graph_completion(
             status=task.status,
             current_node=task.current_node,
             current_step=current_step,
+            usage=graph_result.get("usage"),
         )
 
     report_payload = (
@@ -271,6 +343,22 @@ async def _persist_graph_completion(
     result_json = report_payload.get("result_json")
     if not summary or not isinstance(result_json, dict):
         raise ValueError("Graph 报告结构不合法")
+
+    evidence_pack_payloads = (
+        graph_result.get("retrieved_evidence_packs") or []
+    )
+    if evidence_pack_payloads:
+        evidence_packs = [
+            EvidencePack.model_validate(item)
+            for item in evidence_pack_payloads
+        ]
+        validation = validate_report_citations(
+            result_json=result_json,
+            evidence_packs=evidence_packs,
+            require_at_least_one=True,
+        )
+        if not validation.valid:
+            raise ValueError("人工修改后的报告引用校验失败")
 
     resume_revision_text = graph_result.get("resume_revision_text")
     new_resume_version_id = None
@@ -298,13 +386,35 @@ async def _persist_graph_completion(
                     events=events,
                 )
 
-            report = await ReportRepository(session).create_for_user(
-                task_id=snapshot.task_id,
-                user_id=snapshot.user_id,
-                summary=summary,
-                result_json=result_json,
-                make_current=True,
-            )
+            report_repository = ReportRepository(session)
+            report = None
+            report_id = graph_result.get("report_id")
+            if isinstance(report_id, int):
+                report = await report_repository.get_for_user(
+                    report_id=report_id,
+                    user_id=snapshot.user_id,
+                )
+            if report is None:
+                current = (
+                    await report_repository.get_current_for_user(
+                        task_id=snapshot.task_id,
+                        user_id=snapshot.user_id,
+                    )
+                )
+                if (
+                    current is not None
+                    and current.summary == summary
+                    and current.result_json == result_json
+                ):
+                    report = current
+                else:
+                    report = await report_repository.create_for_user(
+                        task_id=snapshot.task_id,
+                        user_id=snapshot.user_id,
+                        summary=summary,
+                        result_json=result_json,
+                        make_current=True,
+                    )
 
             if (
                 decision == "revise"
@@ -483,7 +593,17 @@ async def _execute_graph_task(
                     context=runtime_context,
                 )
 
-        total_ms = round((perf_counter() - started_at) * 1000)
+        invocation_ms = round((perf_counter() - started_at) * 1000)
+        total_ms = max(
+            invocation_ms,
+            round(
+                (
+                    datetime.now(timezone.utc)
+                    - snapshot.started_at
+                ).total_seconds()
+                * 1000
+            ),
+        )
         request_id = get_request_id()
         metrics_json = _build_graph_metrics(
             graph_result,
@@ -521,6 +641,13 @@ async def _execute_graph_task(
             attempt=snapshot.attempt,
             max_steps=snapshot.max_steps,
             current_node=result.current_node,
+        )
+        usage = result.usage or {}
+        await record_task_token_usage(
+            redis_client,
+            user_id=user_id,
+            task_id=task_id,
+            total_tokens=int(usage.get("total_tokens", 0)),
         )
 
         if result.status == "completed":
