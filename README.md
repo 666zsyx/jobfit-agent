@@ -4,15 +4,14 @@
 
 基于 RAG 和工具调用的可解释岗位匹配与差距分析 Agent。
 
-STEP 13 新增能力：
+STEP 14 新增能力：
 
-- `POST /api/resumes/upload`：上传 PDF、DOCX 和 TXT 简历。
-- PDF 使用 pdfplumber + pypdf 回退解析，DOCX 解析段落和表格。
-- 增加文件大小、页数、ZIP Bomb、加密 PDF 和扫描 PDF 检测。
-- 支持创建新简历或追加新简历版本。
-- 可选调用现有简历结构提取。
-- 结构提取失败不丢 raw_text，可通过接口重试。
-- 新增最小简历列表和详情 API。
+- 新增岗位持久化 CRUD API，Agent 任务可直接使用数据库 `job_id`。
+- 新增任务历史列表和当前报告查询 API，刷新页面后可恢复结果。
+- 新增同源静态工作台 `/app`，覆盖简历、岗位、任务、SSE、人工确认和报告。
+- 新增演示账号登录和 HS256 JWT；开发环境兼容 `demo-token`，生产环境禁用。
+- 新增 Chroma 与 FastEmbed 持久化 Volume，生产服务固定单 Uvicorn Worker。
+- 新增幂等演示数据脚本，创建示例用户、简历和岗位。
 
 
 ## 项目文档
@@ -33,12 +32,19 @@ STEP 13 新增能力：
 
 ## 当前阶段
 
-STEP 13：PDF / DOCX / TXT 简历上传、解析、版本保存和结构提取重试。
+STEP 14：岗位 API、任务/报告查询、最小前端、JWT 登录、部署持久化和演示数据。
 
 当前已经支持：
 
+- `GET /`：跳转到同源工作台
+- `GET /app`：静态前端工作台
 - `GET /health`：健康检查
-- `GET /api/users/me`：演示鉴权与当前用户
+- `POST /api/auth/login`：演示账号登录并签发 JWT
+- `GET /api/auth/me`：解析 JWT 或开发 Token
+- `GET /api/users/me`：当前用户
+- `POST /api/jobs`、`GET /api/jobs`、`GET /api/jobs/{job_id}`：岗位持久化 CRUD
+- `GET /api/agent/tasks`：任务历史
+- `GET /api/agent/tasks/{task_id}/report`：当前报告
 - `POST /api/chat`：非流式聊天，返回答案、Token Usage 和耗时
 - `POST /api/chat/stream`：SSE 流式聊天，返回内容事件、Usage 事件和结束标记
 - `POST /api/jobs/extract`：从岗位 JD 中结构化提取岗位职责、必备技能和加分项

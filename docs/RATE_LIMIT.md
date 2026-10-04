@@ -34,6 +34,16 @@ DAILY_REQUEST_QUOTA=200
 DAILY_TOKEN_QUOTA=200000
 ```
 
+Token 配额只限制真正可能消耗模型的接口：
+
+```text
+聊天、Agent 执行、岗位提取和简历结构提取：检查 Token 配额
+岗位 CRUD、简历列表、任务列表、任务状态和报告查询：不检查 Token 配额
+人工确认恢复：不检查 Token 配额
+```
+
+这样 Token 配额耗尽后，用户仍然可以查看已经生成的历史任务和报告。
+
 ---
 
 ## 3. Redis Key

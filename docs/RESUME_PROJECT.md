@@ -31,6 +31,17 @@
 - 为 Agent 增加 request_id、结构化日志、任务耗时分解、Token 成本和敏感字段脱敏。
 - 增加 Prompt Injection 检测、输入长度限制、HTTP 安全头和工具权限边界。
 - 使用 Redis 实现按用户/接口限流、每日请求配额和 Token 配额，统一返回 429 与 Retry-After。
+- 读接口与 LLM 消耗接口分离配额策略，Token 配额耗尽后仍可查看历史任务和报告。
+```
+
+### 版本 D：全链路演示与部署准备
+
+```text
+- 实现岗位 CRUD、任务历史和当前报告查询，打通前端刷新后的状态恢复。
+- 使用同源 HTML/CSS/JS 工作台，支持 SSE、人工确认、报告、引用和成本展示。
+- 增加单演示账号 JWT 登录，支持会话恢复、退出和 401 自动清理。
+- 为 Chroma / FastEmbed 挂载持久化卷，并在 staging 固定单 Uvicorn Worker。
+- 提供幂等演示数据脚本，一键创建示例用户、简历和岗位。
 ```
 
 ## 3. 技术栈
@@ -49,14 +60,16 @@ LangChain Core
 FastEmbed
 Chroma
 BM25 / RRF / Cross-Encoder
+PyJWT
 pytest
+HTML / CSS / JavaScript
 Docker / Docker Compose 配置
 ```
 
 ## 4. 可量化亮点
 
 ```text
-自动化测试：315 passed
+自动化测试：379 passed
 RAG 评估集：30 条
 Agent 评估集：15 条
 双引擎对比：answer/status/steps/usage/tool_trace/core_events 全部一致
@@ -113,7 +126,7 @@ Checkpoint 中断恢复：通过
 
 ```text
 形成可测试、可演示、可继续部署的 Agent 后端原型。
-315 条自动化测试通过，Agent/RAG 评估通过，Checkpoint 恢复和人工确认验证通过。
+379 条自动化测试通过，Agent/RAG 评估通过，Checkpoint 恢复和人工确认验证通过。
 远程 staging 和公网部署保留到 Linux 云服务器阶段。
 ```
 

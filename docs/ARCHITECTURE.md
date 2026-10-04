@@ -225,16 +225,19 @@ metrics_json 保存任务运行指标
 ## 9. 部署形态
 
 ```text
-开发：Windows 本地 FastAPI + 本地 PostgreSQL/Redis
+开发：Windows 本地 FastAPI + 本地 PostgreSQL/Redis + 同源静态工作台
 生产资产：Dockerfile + docker-compose.prod.yml
 运行时：Linux + Docker Engine
+认证：单演示账号 + HS256 JWT
+持久化：PostgreSQL、Redis、Chroma Volume、FastEmbed Cache Volume
+并发：staging 固定 Uvicorn 单 Worker
 就绪检查：PostgreSQL、Checkpoint 表、Redis
 ```
 
 当前状态：
 
 ```text
-本机部署资产验证完成
+本机部署资产和真实端到端验证完成
 私有 staging 和公网部署待 Linux 云服务器
 ```
 
@@ -247,5 +250,6 @@ metrics_json 保存任务运行指标
 固定窗口限流可升级为滑动窗口或令牌桶
 同进程长任务可进一步迁移到消息队列和 Worker
 Checkpoint 表由 LangGraph setup 脚本维护
-生产认证、审计和告警仍需继续完善
+当前只有单演示账号，没有注册、找回密码和 RBAC
+生产审计和告警仍需继续完善
 ```

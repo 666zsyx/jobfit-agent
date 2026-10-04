@@ -213,3 +213,25 @@ instruction override + prompt exfiltration -> high
 编码混淆和复杂多语言注入仍可能绕过
 生产环境应继续增加人工确认、限流、日志审计和模型输出评估
 ```
+
+---
+
+## 9. 最小认证
+
+```text
+单演示账号由环境变量配置
+登录成功后签发 HS256 JWT
+JWT 包含 user_id、username、role、iat、exp
+开发环境兼容 demo-token
+生产环境设置 ALLOW_DEMO_TOKEN=false
+生产环境要求 AUTH_JWT_SECRET 至少 32 位
+生产环境要求 DEMO_PASSWORD 至少 12 位
+```
+
+当前认证边界：
+
+```text
+没有注册、找回密码和 RBAC
+一个账号对应一个租户
+所有 Repository 仍按 user_id 隔离
+```

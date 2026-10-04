@@ -47,6 +47,25 @@ Swagger：
 http://127.0.0.1:8000/docs
 ```
 
+演示账号：
+
+```text
+用户名：demo_user
+密码：demo-password
+```
+
+前端默认流程：
+
+```text
+登录
+→ 选择“演示简历：Python Agent 开发”
+→ 选择“Python AI Agent 开发工程师（演示）”
+→ 开始分析
+→ SSE 展示执行过程
+→ 人工确认
+→ 查看报告、引用、Token 和成本
+```
+
 ---
 
 ## 3. 五分钟版本
