@@ -178,7 +178,18 @@ def test_get_resume_profile_prefers_snapshot():
         )
     )
 
-    assert result == {"ok": True, "result": snapshot}
+    assert result == {
+        "ok": True,
+        "result": {
+            "found": True,
+            "task_id": 7,
+            "resume_id": 8,
+            "resume_version_id": 9,
+            "version_no": 2,
+            "resume_title": "Snapshot Resume",
+            "section_count": 0,
+        },
+    }
 
 
 def test_save_match_report_can_defer_persistence():

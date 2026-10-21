@@ -141,7 +141,7 @@ def test_fixed_dataset_is_valid_and_summarizable() -> None:
         for item in payload["cases"]
     ]
 
-    assert len(cases) == 15
+    assert len(cases) == 30
     assert len({case.case_id for case in cases}) == len(cases)
 
     results = [evaluate_agent_case(case) for case in cases]
@@ -150,7 +150,7 @@ def test_fixed_dataset_is_valid_and_summarizable() -> None:
         observed_outcomes=[case.observed for case in cases],
     )
 
-    assert summary.case_count == 15
+    assert summary.case_count == 30
     assert 0 <= summary.task_completion_rate <= 1
     assert 0 <= summary.tool_f1 <= 1
     assert 0 <= summary.citation_f1 <= 1

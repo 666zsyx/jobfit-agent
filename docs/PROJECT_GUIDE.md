@@ -1,10 +1,10 @@
 # JobFit Agent 项目全景与维护文档
 
-> 最后更新：2026-10-04
+> 最后更增：2026-10-04
 >
-> 适用对象：未来的项目维护者、面试准备者、协作者和几周后重新阅读代码的自己。
+> 适用对象：未来的项目维护者、面试准备者、协作者和几周后重增阅读代码的自己。
 >
-> 维护规则：每完成一个大 STEP，必须更新本文档的状态、功能、架构、数据流、技术选型、限制和变更记录。
+> 维护规则：每完成一个大 STEP，必须更增本文档的状态、功能、架构、数据流、技术选型、限制和变更记录。
 
 ---
 
@@ -27,7 +27,7 @@ JobFit Agent 是一个基于 RAG 和工具调用的可解释岗位匹配与差�
 → 报告保存
 ```
 
-当前项目已完成模型 API、聊天接口、结构化提取、工具注册、ReAct 循环、PostgreSQL/Alembic 持久化、Redis 缓存与运行锁、工具审计、失败恢复、SSE、RAG Chunk 持久化、FastEmbed 向量检索、BM25 + 向量混合召回、RRF、Cross-Encoder Rerank、EvidencePack、引用校验和 30 条检索评估。
+当前项目已完成模型 API、聊天接口、结构化提取、工具注册、ReAct 循环、PostgreSQL/Alembic 持久化、Redis 缓存与运行锁、工具审计、失败恢复、SSE、RAG Chunk 持久化、FastEmbed 向量检索、BM25 + 向量混合召回、RRF、Cross-Encoder Rerank、EvidencePack、引用校验和 100 条检索评估。
 
 ---
 
@@ -36,7 +36,7 @@ JobFit Agent 是一个基于 RAG 和工具调用的可解释岗位匹配与差�
 ```text
 STEP 01：完成
 STEP 02：完成
-STEP 03：完成，部署按下述新节奏延期
+STEP 03：完成，部署按下述增节奏延期
 STEP 04：功能、测试、文档、Git 和 tag 完成
 STEP 05：功能、测试、真实验收、文档、Git、远程 push 和 tag 全部完成
 STEP 06：完成；功能、测试、真实模型、HTTP、部署就绪、文档和本地 Git 闭环均已完成
@@ -576,7 +576,7 @@ requirements-dev.txt
 
 选型原因：
 
-- Python 标准库，无新增依赖。
+- Python 标准库，无增增依赖。
 - 能避免外部服务或数据库长期挂起占满请求资源。
 - 超时与普通业务异常可分别记录和返回。
 
@@ -605,7 +605,7 @@ Embedding：FastEmbed BAAI/bge-small-zh-v1.5，512 维
 重排：FastEmbed BAAI/bge-reranker-base
 证据门控：rerank logit >= -2.9
 引用校验：只允许 EvidencePack 中的 chunk_id
-评估：30 条固定数据，Recall@5、MRR@5、nDCG@5、Citation Precision、Abstention Accuracy
+评估：100 条固定数据（含 20 条负例），Recall@5、MRR@5、nDCG@5、Citation Precision、Abstention Accuracy
 ```
 
 评估结果记录在：
@@ -620,7 +620,7 @@ docs/rag_evaluation_results.json
 ```text
 hybrid Recall@5 = 1.0000，Abstention = 0.0000
 rerank_raw Recall@5 = 0.9800，Abstention = 0.0000
-rerank_prod Recall@5 = 0.8600，Abstention = 1.0000，Citation Precision = 0.7533
+rerank_prod Recall@5 = 0.6625，Abstention = 0.7500，Citation Precision = 0.5921
 ```
 
 说明：
@@ -1408,19 +1408,19 @@ JobFitAgentRequest
 ```text
 STEP 02：建立 Dockerfile、健康检查和环境变量基线
 STEP 03：只做私密 smoke test（可选），公网部署延期
-STEP 04～05：继续维护依赖、镜像和测试，不新增公开环境
+STEP 04～05：继续维护依赖、镜像和测试，不增增公开环境
 STEP 06：只做部署就绪检查和本地 HTTP 验收，不公开部署
 STEP 07：加入数据库和 Redis 后建立第一次私有 staging
-STEP 08：在私有 staging 更新带 RAG 的作品集版本
-STEP 11：LangGraph 工作流完成后更新私有 staging
+STEP 08：在私有 staging 更增带 RAG 的作品集版本
+STEP 11：LangGraph 工作流完成后更增私有 staging
 STEP 12：安全、评估、监控和性能优化完成后正式公网部署
 ```
 
 本阶段 Docker 状态：
 
-- 没有新增第三方依赖。
-- 没有新增端口。
-- 没有新增数据库、Redis、向量库或其他容器。
+- 没有增增第三方依赖。
+- 没有增增端口。
+- 没有增增数据库、Redis、向量库或其他容器。
 - `Dockerfile` 和 `docker-compose.yml` 无需修改。
 - 部署延期；STEP 06 只做部署就绪检查，STEP 07 后建立私有 staging，STEP 12 后正式公网部署。
 
@@ -1505,17 +1505,17 @@ STEP 12：安全、评估、监控和性能优化完成后正式公网部署
 - 学习 Prompt 的角色、数据边界、任务和输出约束。
 - 使用 Pydantic 定义 `JobExtraction` 模型输出契约。
 - 使用 `model_json_schema()` 生成 JSON Schema 并加入 Prompt。
-- 在模型服务层新增 `chat_json()`。
+- 在模型服务层增增 `chat_json()`。
 - 使用 `response_format={"type": "json_object"}` 请求 JSON 对象。
 - 使用 `model_validate_json()` 执行 Pydantic 硬校验。
 - 对空响应和校验失败执行最多两次的结构化输出尝试。
 - 校验失败反馈只包含字段、错误类型和说明。
 - 调用失败保持 `LLMServiceError`，输出失败最终抛出 `StructuredOutputError`。
-- 新增 `POST /api/jobs/extract` 接口。
+- 增增 `POST /api/jobs/extract` 接口。
 - 请求层校验空值、纯空白和 20000 字符上限。
 - `max_attempts` 由服务端控制，不接受客户端输入。
 - 增加服务层、提取层和接口层自动化测试。
-- 更新 README、HTTP 示例和项目指南。
+- 更增 README、HTTP 示例和项目指南。
 
 为什么使用 JSON 模式与 Pydantic 双重边界：
 
@@ -1533,18 +1533,18 @@ STEP 12：安全、评估、监控和性能优化完成后正式公网部署
 完成：
 
 - 学习 OpenAI 兼容 Function Calling 的消息闭环。
-- 新增 `chat_with_tools()`，稳定转换模型文本或 `ToolCall`。
-- 新增 `ToolContext`、`ToolSpec` 和 `ToolRegistry`。
-- 新增统一 `execute_tool()`，负责参数校验、用户注入、超时和异常脱敏。
+- 增增 `chat_with_tools()`，稳定转换模型文本或 `ToolCall`。
+- 增增 `ToolContext`、`ToolSpec` 和 `ToolRegistry`。
+- 增增统一 `execute_tool()`，负责参数校验、用户注入、超时和异常脱敏。
 - 注册四个真实工具：
   - `extract_job_requirements`
   - `extract_resume_sections`
   - `search_resume_evidence`
   - `assess_requirement_match`
-- 新增简历分段提取服务。
-- 新增关键词证据检索基线。
-- 新增三态要求匹配评估。
-- 新增单次 Function Calling 编排，最多调用模型两次。
+- 增增简历分段提取服务。
+- 增增关键词证据检索基线。
+- 增增三态要求匹配评估。
+- 增增单次 Function Calling 编排，最多调用模型两次。
 - 工具调用日志不记录参数值和结果正文。
 - 增加真实 DeepSeek 手工验收脚本。
 - 四个工具均完成真实模型调用验收。
@@ -1570,14 +1570,14 @@ STEP 12：安全、评估、监控和性能优化完成后正式公网部署
 完成：
 
 - 在 study-roads 手写独立订单物流 ReAct Agent，完成真实模型多轮工具调用。
-- 新增 `ReactToolExecution` 和 `ReactAgentResult`。
-- 新增 `run_react_loop()`，实现 assistant/tool 消息闭环、trace、Usage 累计和最大步数终止。
-- 新增 JobFit system prompt、消息构造和 `run_jobfit_agent()` 入口。
-- 新增 `POST /api/agent/match`，使用 Bearer 鉴权和 `ToolContext`。
+- 增增 `ReactToolExecution` 和 `ReactAgentResult`。
+- 增增 `run_react_loop()`，实现 assistant/tool 消息闭环、trace、Usage 累计和最大步数终止。
+- 增增 JobFit system prompt、消息构造和 `run_jobfit_agent()` 入口。
+- 增增 `POST /api/agent/match`，使用 Bearer 鉴权和 `ToolContext`。
 - 拒绝客户端传入 `max_steps`，后端默认最多 8 轮模型决策。
 - 增加服务层测试和接口测试。
-- 新增真实 DeepSeek 手工验收脚本，四个工具均成功调用并生成三态最终回答。
-- 更新 README、PROJECT_GUIDE、HANDOFF 和部署节奏。
+- 增增真实 DeepSeek 手工验收脚本，四个工具均成功调用并生成三态最终回答。
+- 更增 README、PROJECT_GUIDE、HANDOFF 和部署节奏。
 
 为什么这样设计：
 
@@ -1632,7 +1632,7 @@ STEP 12：安全、评估、监控和性能优化完成后正式公网部署
 - Cross-Encoder Rerank、EvidencePack、引用校验和失败回退。
 - 持久化 Agent 自动准备 RAG 索引，`search_resume_evidence` 优先走混合检索和 Rerank。
 - SSE 增加索引和检索事件。
-- 30 条固定评估集、四种策略对比和 Markdown/JSON 报告。
+- 100 条固定评估集、四种策略对比和 Markdown/JSON 报告。
 
 为什么这样设计：
 
@@ -1645,7 +1645,7 @@ STEP 12：安全、评估、监控和性能优化完成后正式公网部署
 
 当前限制：
 
-- 评估集只有 30 条，阈值需要在独立 holdout 上复验。
+- 评估集已扩到 100 条，但阈值仍是在原 30 条子集上标定的，仍需独立 holdout 复验。
 - Chroma 使用本地嵌入模式，尚未做大规模并发和分布式向量服务。
 - 职业能力知识库仍可在后续扩展。
 - 私有 staging 继续延期到 Linux 云服务器。
@@ -1654,15 +1654,15 @@ STEP 12：安全、评估、监控和性能优化完成后正式公网部署
 
 完成：
 
-- 新增 `app/graphs/jobfit/` 显式状态图，保留手写 ReAct 实现。
+- 增增 `app/graphs/jobfit/` 显式状态图，保留手写 ReAct 实现。
 - LangGraph 节点复用现有 LLM、ToolRegistry、ToolExecutor、RAG、Repository、用户隔离和引用校验。
 - PostgreSQL Checkpoint 使用 `jobfit-task-{task_id}-attempt-{attempt}` 作为线程 ID。
 - `human_confirmation` 使用 `interrupt` 暂停，使用 `Command(resume=...)` 恢复。
-- 支持 approve、revise、reject；修改确认可追加新的 `resume_version`。
+- 支持 approve、revise、reject；修改确认可追加增的 `resume_version`。
 - `analysis_tasks` 增加 `waiting_confirmation` 状态和 `current_node` 字段。
 - `agent_decide` 增加节点级重试，仅重试临时 LLM、网络、超时和服务端错误。
 - Graph SSE 增加节点开始、结束、失败、重试、等待确认和恢复事件。
-- 新增手写版与 Graph 版契约对比脚本和对比文档。
+- 增增手写版与 Graph 版契约对比脚本和对比文档。
 
 关键接口：
 
@@ -1700,14 +1700,14 @@ Graph Agent 人工确认和简历版本追加：通过
 
 完成：
 
-- 新增 15 条固定 Agent 评估集和评估脚本。
+- 新增 30 条固定 Agent 评估集和评估脚本。
 - 增加 request_id、结构化日志、任务指标、耗时分解和日志脱敏。
 - 合并外层和内层模型 Usage，计算 Token 成本和模型聚合成本。
 - 增加 Prompt Injection 检测、安全提示、边界转义和 HTTP 安全头。
 - 增加 Redis 限流、每日请求配额、每日 Token 配额和 429 响应。
-- 新增 `/ready` 就绪检查，验证 PostgreSQL、Checkpoint 和 Redis。
-- 新增生产 Compose、非 root Dockerfile 和部署配置检查。
-- 新增架构图、演示指南、面试问答和简历项目描述。
+- 增增 `/ready` 就绪检查，验证 PostgreSQL、Checkpoint 和 Redis。
+- 增增生产 Compose、非 root Dockerfile 和部署配置检查。
+- 增增架构图、演示指南、面试问答和简历项目描述。
 
 关键指标：
 
@@ -1734,9 +1734,9 @@ RAG 评估：30 cases
 - 支持 PDF、DOCX、TXT 文件上传和解析。
 - PDF 使用 pdfplumber + pypdf 回退，DOCX 使用 python-docx。
 - 增加文件大小、PDF 页数、文本长度、ZIP Bomb、加密 PDF 和扫描 PDF 检查。
-- 新增 `POST /api/resumes/upload`。
-- 新增 `GET /api/resumes` 和 `GET /api/resumes/{resume_id}`。
-- 支持创建新简历或追加简历版本。
+- 增增 `POST /api/resumes/upload`。
+- 增增 `GET /api/resumes` 和 `GET /api/resumes/{resume_id}`。
+- 支持创建增简历或追加简历版本。
 - `resume_versions.source_type` 扩展为 `text / pdf / docx / txt`。
 - 上传后可选择调用现有简历结构提取。
 - 结构提取失败保留 raw_text，并支持单独重试。
@@ -1759,14 +1759,14 @@ RAG 评估：30 cases
 
 完成：
 
-- 新增岗位持久化 API：创建、列表、详情、编辑和软删除。
-- 新增任务历史列表与当前报告查询 API。
-- 新增同源静态工作台 `/app`，覆盖简历上传、岗位管理、任务执行、SSE、人工确认、报告和历史。
-- 新增演示账号 JWT 登录，前端支持会话恢复、退出和 401 自动清理。
-- 新增 `PyJWT` 依赖与生产认证配置校验。
+- 增增岗位持久化 API：创建、列表、详情、编辑和软删除。
+- 增增任务历史列表与当前报告查询 API。
+- 增增同源静态工作台 `/app`，覆盖简历上传、岗位管理、任务执行、SSE、人工确认、报告和历史。
+- 增增演示账号 JWT 登录，前端支持会话恢复、退出和 401 自动清理。
+- 增增 `PyJWT` 依赖与生产认证配置校验。
 - Chroma 和 FastEmbed 使用命名 Volume 持久化。
 - 生产 Uvicorn 固定 `--workers 1`，符合本地 Chroma 单进程约束。
-- 新增幂等演示数据脚本，创建演示用户、示例简历和示例岗位。
+- 增增幂等演示数据脚本，创建演示用户、示例简历和示例岗位。
 - 修复 Token 配额耗尽后读取任务和报告仍被 429 拦截的问题：读接口不检查 Token 配额和每日请求配额。
 - Graph 报告在 save_report 节点内幂等落库，任务 Usage 按累计增量记账。
 - 服务启动时把进程崩溃遗留的 running 任务恢复为 interrupted。
@@ -1775,7 +1775,7 @@ RAG 评估：30 cases
 验证结果：
 
 ```text
-自动化测试：407 passed
+自动化测试：409 passed
 真实端到端：登录 → 创建任务 → SSE → 人工确认 → 报告 → 历史查询通过
 演示数据幂等执行：连续两次返回相同 resume_id / job_id
 生产 Compose 资产检查：通过
@@ -1791,23 +1791,23 @@ RAG 评估：30 cases
 
 # 十五、每个大 STEP 完成后的维护清单
 
-每完成一个大 STEP，必须更新本文档：
+每完成一个大 STEP，必须更增本文档：
 
-1. 更新“最后更新”日期。
-2. 更新当前 STEP 状态。
-3. 添加新功能。
-4. 更新接口列表。
-5. 更新目录结构。
-6. 更新模块职责。
-7. 更新请求数据流。
-8. 更新技术栈和选型原因。
-9. 更新错误处理和安全边界。
-10. 更新测试范围。
-11. 更新当前限制。
-12. 更新部署状态。
+1. 更增“最后更增”日期。
+2. 更增当前 STEP 状态。
+3. 添加增功能。
+4. 更增接口列表。
+5. 更增目录结构。
+6. 更增模块职责。
+7. 更增请求数据流。
+8. 更增技术栈和选型原因。
+9. 更增错误处理和安全边界。
+10. 更增测试范围。
+11. 更增当前限制。
+12. 更增部署状态。
 13. 在“STEP 变更记录”中增加本次完成了什么、为什么这样做。
-14. 更新 README 和 HANDOFF 中的当前状态。
-15. 新增功能时必须补充该功能的完整数据链路。
+14. 更增 README 和 HANDOFF 中的当前状态。
+15. 增增功能时必须补充该功能的完整数据链路。
 
 文档原则：
 
@@ -1824,7 +1824,7 @@ RAG 评估：30 cases
 
 # 十六、快速恢复上下文
 
-如果几周后重新进入项目，按以下顺序阅读：
+如果几周后重增进入项目，按以下顺序阅读：
 
 ```text
 1. README.md

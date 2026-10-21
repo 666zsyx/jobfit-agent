@@ -65,7 +65,7 @@ PostgreSQL Checkpoint
 节点级重试
 Graph SSE
 RAG 混合检索和 EvidencePack
-30 条 RAG 评估
+100 条 RAG 评估
 279 条自动化测试
 ```
 

@@ -17,6 +17,7 @@ from app.cache.task_state import (
     acquire_task_run_lock,
     release_task_run_lock,
 )
+from app.core.config import settings
 from app.core.cost_tracking import (
     UsageRecord,
     summarize_usage_cost,
@@ -79,7 +80,6 @@ def _build_initial_state(snapshot) -> dict:
         "job_id": snapshot.job_id,
         "resume_version_id": snapshot.resume_profile["resume_version_id"],
         "job_description": snapshot.job_description,
-        "resume_text": snapshot.resume_profile["raw_text"],
         "conversation_context": snapshot.conversation_context,
         "system_prompt": JOBFIT_PERSISTED_SYSTEM_PROMPT,
         "max_steps": snapshot.max_steps,
@@ -189,6 +189,7 @@ def _build_runtime_context(
         tool_context_factory=tool_context_factory,
         event_sink=event_sink,
         persist_report=persist_report,
+        confirmation_policy=settings.jobfit_confirmation_policy,
     )
 
 

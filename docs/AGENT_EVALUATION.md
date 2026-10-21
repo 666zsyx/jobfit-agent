@@ -1,40 +1,40 @@
 # STEP 12 Agent Evaluation
 
-- Cases: 15
+- Cases: 30
 - Dataset: `data/evaluation/agent_cases.json`
 - Threshold gate: PASS
 
 ## Summary
 
 - Task completion rate: 1.0000
-- Tool sequence accuracy: 0.9333
-- Tool F1: 0.9926
-- Tool success rate: 0.9778
+- Tool sequence accuracy: 0.9667
+- Tool F1: 0.9963
+- Tool success rate: 0.9889
 - Match status F1: 1.0000
-- Citation F1: 0.9778
-- Citation validity rate: 0.9333
+- Citation F1: 0.9889
+- Citation validity rate: 0.9667
 - Abstention accuracy: 1.0000
 - Confirmation recovery rate: 1.0000
-- Unsupported suggestion rate: 0.0667
-- Average steps: 2.73
-- Average total tokens: 1171.33
-- p50 latency ms: 4400.00
-- p95 latency ms: 7000.00
+- Unsupported suggestion rate: 0.0333
+- Average steps: 2.93
+- Average total tokens: 1185.67
+- p50 latency ms: 4200.00
+- p95 latency ms: 6100.00
 
 ## Thresholds
 
 | Metric | Value | Condition | Result |
 |---|---:|---|---|
 | task_completion_rate | 1.0000 | >= 0.8500 | PASS |
-| tool_sequence_accuracy | 0.9333 | >= 0.6000 | PASS |
-| tool_f1 | 0.9926 | >= 0.8500 | PASS |
-| tool_success_rate | 0.9778 | >= 0.9500 | PASS |
+| tool_sequence_accuracy | 0.9667 | >= 0.6000 | PASS |
+| tool_f1 | 0.9963 | >= 0.8500 | PASS |
+| tool_success_rate | 0.9889 | >= 0.9500 | PASS |
 | match_status_f1 | 1.0000 | >= 0.8500 | PASS |
-| citation_f1 | 0.9778 | >= 0.8000 | PASS |
-| citation_validity_rate | 0.9333 | >= 0.8000 | PASS |
+| citation_f1 | 0.9889 | >= 0.8000 | PASS |
+| citation_validity_rate | 0.9667 | >= 0.8000 | PASS |
 | abstention_accuracy | 1.0000 | >= 0.9000 | PASS |
 | confirmation_recovery_rate | 1.0000 | >= 0.9500 | PASS |
-| unsupported_suggestion_rate | 0.0667 | <= 0.1500 | PASS |
+| unsupported_suggestion_rate | 0.0333 | <= 0.1500 | PASS |
 
 ## Failing Cases
 

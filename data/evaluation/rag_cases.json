@@ -90,175 +90,227 @@
     {
       "case_id": "exact_python",
       "requirement": "熟悉 Python",
-      "expected_section_keys": ["python_backend"],
+      "expected_section_keys": [
+        "python_backend"
+      ],
       "should_abstain": false,
       "category": "exact"
     },
     {
       "case_id": "exact_fastapi",
       "requirement": "熟悉 FastAPI",
-      "expected_section_keys": ["python_backend", "fastapi_api"],
+      "expected_section_keys": [
+        "python_backend",
+        "fastapi_api"
+      ],
       "should_abstain": false,
       "category": "exact"
     },
     {
       "case_id": "exact_postgresql17",
       "requirement": "熟悉 PostgreSQL 17",
-      "expected_section_keys": ["postgresql"],
+      "expected_section_keys": [
+        "postgresql"
+      ],
       "should_abstain": false,
       "category": "exact"
     },
     {
       "case_id": "exact_redis",
       "requirement": "熟悉 Redis",
-      "expected_section_keys": ["redis_async"],
+      "expected_section_keys": [
+        "redis_async"
+      ],
       "should_abstain": false,
       "category": "exact"
     },
     {
       "case_id": "exact_chroma",
       "requirement": "使用过 Chroma",
-      "expected_section_keys": ["rag_system"],
+      "expected_section_keys": [
+        "rag_system"
+      ],
       "should_abstain": false,
       "category": "exact"
     },
     {
       "case_id": "exact_rrf",
       "requirement": "了解 RRF 排名融合",
-      "expected_section_keys": ["rag_system"],
+      "expected_section_keys": [
+        "rag_system"
+      ],
       "should_abstain": false,
       "category": "exact"
     },
     {
       "case_id": "exact_react_agent",
       "requirement": "有 ReAct Agent 开发经验",
-      "expected_section_keys": ["agent_loop"],
+      "expected_section_keys": [
+        "agent_loop"
+      ],
       "should_abstain": false,
       "category": "exact"
     },
     {
       "case_id": "exact_function_calling",
       "requirement": "实现过 Function Calling",
-      "expected_section_keys": ["agent_loop"],
+      "expected_section_keys": [
+        "agent_loop"
+      ],
       "should_abstain": false,
       "category": "exact"
     },
     {
       "case_id": "exact_pytest",
       "requirement": "熟悉 pytest",
-      "expected_section_keys": ["testing"],
+      "expected_section_keys": [
+        "testing"
+      ],
       "should_abstain": false,
       "category": "exact"
     },
     {
       "case_id": "exact_docker_compose",
       "requirement": "使用过 Docker Compose",
-      "expected_section_keys": ["docker_deploy"],
+      "expected_section_keys": [
+        "docker_deploy"
+      ],
       "should_abstain": false,
       "category": "exact"
     },
     {
       "case_id": "exact_react_typescript",
       "requirement": "熟悉 React 和 TypeScript",
-      "expected_section_keys": ["react_frontend"],
+      "expected_section_keys": [
+        "react_frontend"
+      ],
       "should_abstain": false,
       "category": "exact"
     },
     {
       "case_id": "exact_cicd",
       "requirement": "了解 CI/CD",
-      "expected_section_keys": ["docker_deploy"],
+      "expected_section_keys": [
+        "docker_deploy"
+      ],
       "should_abstain": false,
       "category": "exact"
     },
     {
       "case_id": "semantic_python_web",
       "requirement": "能够开发 Python Web 服务",
-      "expected_section_keys": ["python_backend", "fastapi_api"],
+      "expected_section_keys": [
+        "python_backend",
+        "fastapi_api"
+      ],
       "should_abstain": false,
       "category": "semantic"
     },
     {
       "case_id": "semantic_api_docs",
       "requirement": "能够设计 HTTP 接口并维护接口文档",
-      "expected_section_keys": ["fastapi_api"],
+      "expected_section_keys": [
+        "fastapi_api"
+      ],
       "should_abstain": false,
       "category": "semantic"
     },
     {
       "case_id": "semantic_database_change",
       "requirement": "能够设计数据表、索引和版本迁移",
-      "expected_section_keys": ["postgresql"],
+      "expected_section_keys": [
+        "postgresql"
+      ],
       "should_abstain": false,
       "category": "semantic"
     },
     {
       "case_id": "semantic_cache_lock",
       "requirement": "有缓存、并发锁和异步处理经验",
-      "expected_section_keys": ["redis_async"],
+      "expected_section_keys": [
+        "redis_async"
+      ],
       "should_abstain": false,
       "category": "semantic"
     },
     {
       "case_id": "semantic_resume_retrieval",
       "requirement": "能从简历中检索证据并给出引用",
-      "expected_section_keys": ["rag_system"],
+      "expected_section_keys": [
+        "rag_system"
+      ],
       "should_abstain": false,
       "category": "semantic"
     },
     {
       "case_id": "semantic_agent_tools",
       "requirement": "让模型多轮选择工具并完成任务",
-      "expected_section_keys": ["agent_loop"],
+      "expected_section_keys": [
+        "agent_loop"
+      ],
       "should_abstain": false,
       "category": "semantic"
     },
     {
       "case_id": "semantic_automated_tests",
       "requirement": "编写自动化测试覆盖接口和数据库流程",
-      "expected_section_keys": ["testing"],
+      "expected_section_keys": [
+        "testing"
+      ],
       "should_abstain": false,
       "category": "semantic"
     },
     {
       "case_id": "semantic_linux_deploy",
       "requirement": "把服务部署到 Linux 环境",
-      "expected_section_keys": ["docker_deploy"],
+      "expected_section_keys": [
+        "docker_deploy"
+      ],
       "should_abstain": false,
       "category": "semantic"
     },
     {
       "case_id": "semantic_frontend_api",
       "requirement": "前端能够调用后端接口",
-      "expected_section_keys": ["react_frontend"],
+      "expected_section_keys": [
+        "react_frontend"
+      ],
       "should_abstain": false,
       "category": "semantic"
     },
     {
       "case_id": "semantic_team_requirements",
       "requirement": "能和团队沟通需求并完成联调",
-      "expected_section_keys": ["communication"],
+      "expected_section_keys": [
+        "communication"
+      ],
       "should_abstain": false,
       "category": "semantic"
     },
     {
       "case_id": "semantic_user_isolation",
       "requirement": "防止用户读取其他人的数据",
-      "expected_section_keys": ["security"],
+      "expected_section_keys": [
+        "security"
+      ],
       "should_abstain": false,
       "category": "semantic"
     },
     {
       "case_id": "semantic_observability",
       "requirement": "记录工具耗时和错误状态",
-      "expected_section_keys": ["observability"],
+      "expected_section_keys": [
+        "observability"
+      ],
       "should_abstain": false,
       "category": "semantic"
     },
     {
       "case_id": "semantic_algorithm_sql",
       "requirement": "具备算法和 SQL 性能优化能力",
-      "expected_section_keys": ["data_algorithm"],
+      "expected_section_keys": [
+        "data_algorithm"
+      ],
       "should_abstain": false,
       "category": "semantic"
     },
@@ -293,6 +345,607 @@
     {
       "case_id": "negative_embedded_c",
       "requirement": "有嵌入式 C 驱动开发经验",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "exact_pydantic",
+      "requirement": "熟悉 Pydantic",
+      "expected_section_keys": [
+        "python_backend"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_sqlalchemy",
+      "requirement": "熟悉 SQLAlchemy",
+      "expected_section_keys": [
+        "postgresql"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_alembic",
+      "requirement": "使用过 Alembic 迁移",
+      "expected_section_keys": [
+        "postgresql"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_transaction",
+      "requirement": "了解数据库事务",
+      "expected_section_keys": [
+        "postgresql"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_index_design",
+      "requirement": "做过索引设计",
+      "expected_section_keys": [
+        "postgresql"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_asyncio",
+      "requirement": "使用过 asyncio",
+      "expected_section_keys": [
+        "redis_async"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_task_queue",
+      "requirement": "用过任务队列",
+      "expected_section_keys": [
+        "redis_async"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_run_lock",
+      "requirement": "实现过运行锁",
+      "expected_section_keys": [
+        "redis_async"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_embedding",
+      "requirement": "了解 Embedding",
+      "expected_section_keys": [
+        "rag_system"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_rerank",
+      "requirement": "做过 Rerank 重排",
+      "expected_section_keys": [
+        "rag_system"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_openapi",
+      "requirement": "写过 OpenAPI 文档",
+      "expected_section_keys": [
+        "fastapi_api"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_rest_api",
+      "requirement": "设计过 REST API",
+      "expected_section_keys": [
+        "fastapi_api"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_request_validation",
+      "requirement": "做过请求参数校验",
+      "expected_section_keys": [
+        "fastapi_api"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_httpx",
+      "requirement": "使用过 httpx",
+      "expected_section_keys": [
+        "testing"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_unit_test",
+      "requirement": "写过单元测试",
+      "expected_section_keys": [
+        "testing"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_api_test",
+      "requirement": "写过接口测试",
+      "expected_section_keys": [
+        "testing"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_nginx",
+      "requirement": "配置过 Nginx",
+      "expected_section_keys": [
+        "docker_deploy"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_linux",
+      "requirement": "熟悉 Linux",
+      "expected_section_keys": [
+        "docker_deploy"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_private_deploy",
+      "requirement": "做过私有部署",
+      "expected_section_keys": [
+        "docker_deploy"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_axios",
+      "requirement": "使用过 Axios",
+      "expected_section_keys": [
+        "react_frontend"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_typescript",
+      "requirement": "熟悉 TypeScript",
+      "expected_section_keys": [
+        "react_frontend"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_leetcode",
+      "requirement": "刷过 LeetCode",
+      "expected_section_keys": [
+        "data_algorithm"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_sql_optimize",
+      "requirement": "做过 SQL 查询优化",
+      "expected_section_keys": [
+        "data_algorithm"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_data_structure",
+      "requirement": "掌握数据结构",
+      "expected_section_keys": [
+        "data_algorithm"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_bearer_auth",
+      "requirement": "用过 Bearer 鉴权",
+      "expected_section_keys": [
+        "security"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_tool_whitelist",
+      "requirement": "实现过工具白名单",
+      "expected_section_keys": [
+        "security"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_structured_log",
+      "requirement": "打过结构化日志",
+      "expected_section_keys": [
+        "observability"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "exact_sse_event",
+      "requirement": "用过 SSE 状态事件",
+      "expected_section_keys": [
+        "observability"
+      ],
+      "should_abstain": false,
+      "category": "exact"
+    },
+    {
+      "case_id": "semantic_python_service",
+      "requirement": "能用 Python 写服务端接口",
+      "expected_section_keys": [
+        "python_backend",
+        "fastapi_api"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_param_type_check",
+      "requirement": "能用类型校验保证入参合法",
+      "expected_section_keys": [
+        "python_backend"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_db_versioning",
+      "requirement": "能设计带版本管理的数据库结构",
+      "expected_section_keys": [
+        "postgresql"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_transaction_consistency",
+      "requirement": "能保证并发事务的一致性",
+      "expected_section_keys": [
+        "postgresql"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_cache_reduce_query",
+      "requirement": "能用缓存减少重复查询",
+      "expected_section_keys": [
+        "redis_async"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_async_heavy_task",
+      "requirement": "能用异步方式处理耗时任务",
+      "expected_section_keys": [
+        "redis_async"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_avoid_duplicate_run",
+      "requirement": "能防止同一任务被重复执行",
+      "expected_section_keys": [
+        "redis_async"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_semantic_search",
+      "requirement": "能按语义相近程度查找资料",
+      "expected_section_keys": [
+        "rag_system"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_fuse_and_rerank",
+      "requirement": "能合并多种检索结果并重新排序",
+      "expected_section_keys": [
+        "rag_system"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_citation_trace",
+      "requirement": "能让答案标明依据来自哪段原文",
+      "expected_section_keys": [
+        "rag_system"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_api_doc_standard",
+      "requirement": "能写出符合规范的接口说明文档",
+      "expected_section_keys": [
+        "fastapi_api"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_validate_input",
+      "requirement": "能对请求参数做合法性检查",
+      "expected_section_keys": [
+        "fastapi_api"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_regression_test",
+      "requirement": "能用测试保证改动不破坏旧功能",
+      "expected_section_keys": [
+        "testing"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_api_error_test",
+      "requirement": "能测试接口在异常情况下的行为",
+      "expected_section_keys": [
+        "testing"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_package_deploy",
+      "requirement": "能把服务打包后部署到服务器",
+      "expected_section_keys": [
+        "docker_deploy"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_reverse_proxy",
+      "requirement": "能配置反向代理转发请求",
+      "expected_section_keys": [
+        "docker_deploy"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_ci_release",
+      "requirement": "能通过自动化流程发布新版本",
+      "expected_section_keys": [
+        "docker_deploy"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_web_ui",
+      "requirement": "能开发带交互的网页界面",
+      "expected_section_keys": [
+        "react_frontend"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_frontend_backend",
+      "requirement": "能对接后端接口完成页面数据展示",
+      "expected_section_keys": [
+        "react_frontend"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_complexity",
+      "requirement": "能分析算法复杂度并选择合适解法",
+      "expected_section_keys": [
+        "data_algorithm"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_efficient_query",
+      "requirement": "能写出高效的数据查询语句",
+      "expected_section_keys": [
+        "data_algorithm"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_cross_team",
+      "requirement": "能和产品、后端、测试一起推进需求",
+      "expected_section_keys": [
+        "communication"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_user_isolation_data",
+      "requirement": "能保证不同用户之间数据互不可见",
+      "expected_section_keys": [
+        "security"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_hide_internal_error",
+      "requirement": "能避免把内部错误细节暴露给调用方",
+      "expected_section_keys": [
+        "security"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_trace_request",
+      "requirement": "能追踪每个请求的执行链路和耗时",
+      "expected_section_keys": [
+        "observability"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_tool_audit",
+      "requirement": "能记录每次工具调用的审计信息",
+      "expected_section_keys": [
+        "observability"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "semantic_cs_degree",
+      "requirement": "有计算机专业的学习背景",
+      "expected_section_keys": [
+        "education"
+      ],
+      "should_abstain": false,
+      "category": "semantic"
+    },
+    {
+      "case_id": "negative_ios_swift",
+      "requirement": "有 iOS Swift 开发经验",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_android_kotlin",
+      "requirement": "有 Android Kotlin 开发经验",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_harmony",
+      "requirement": "熟悉鸿蒙 HarmonyOS 开发",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_unity",
+      "requirement": "做过 Unity 游戏开发",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_blockchain",
+      "requirement": "有区块链智能合约开发经验",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_matlab",
+      "requirement": "熟悉 MATLAB 数值仿真",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_japanese_support",
+      "requirement": "能用日语提供客户支持",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_legal",
+      "requirement": "有法律合规审查经验",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_medical_imaging",
+      "requirement": "做过医学影像分析",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_graphic_design",
+      "requirement": "熟练使用 Photoshop 做平面设计",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_video_edit",
+      "requirement": "会使用 Premiere 剪辑视频",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_accounting",
+      "requirement": "有会计审计工作经验",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_ielts_teach",
+      "requirement": "有雅思托福教学经验",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_ecommerce_ops",
+      "requirement": "做过电商店铺运营",
+      "expected_section_keys": [],
+      "should_abstain": true,
+      "category": "negative"
+    },
+    {
+      "case_id": "negative_3d_modeling",
+      "requirement": "有 3D 建模经验",
       "expected_section_keys": [],
       "should_abstain": true,
       "category": "negative"

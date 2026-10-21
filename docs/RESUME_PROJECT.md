@@ -22,7 +22,7 @@
 ```text
 - 构建 PostgreSQL + FastEmbed + Chroma RAG 链路，实现 section-aware chunking、BM25/向量混合召回、RRF 和 Cross-Encoder Rerank。
 - 通过 EvidencePack 和 chunk_id 引用校验约束模型结论，只允许引用真实检索证据，证据不足时输出 insufficient_evidence。
-- 建立 30 条 RAG 评估集和 Agent 评估集，覆盖召回、引用、任务完成率、工具正确率和无依据建议比例。
+- 建立 100 条 RAG 评估集（含 20 条负例）和 Agent 评估集，覆盖召回、引用、任务完成率、工具正确率和无依据建议比例。
 ```
 
 ### 版本 C：偏生产化
@@ -69,10 +69,10 @@ Docker / Docker Compose 配置
 ## 4. 可量化亮点
 
 ```text
-自动化测试：407 passed
-RAG 评估集：30 条
-Agent 评估集：15 条（回放回归）
-真实执行评估：12 条 case 真调 LLM，必要工具覆盖率 1.0、证据支撑率 1.0
+自动化测试：409 passed
+RAG 评估集：100 条（含 20 条负例）
+Agent 评估集：30 条（回放回归）
+真实执行评估：27 条 case 真调 LLM，必要工具覆盖率 1.0、证据支撑率 1.0
 双引擎对比：answer/status/steps/usage/tool_trace/core_events 全部一致
 Checkpoint 中断恢复：通过
 人工确认修改后追加简历版本：通过
@@ -127,7 +127,7 @@ Checkpoint 中断恢复：通过
 
 ```text
 形成可测试、可演示、可继续部署的 Agent 后端原型。
-407 条自动化测试通过，Agent/RAG 评估通过，Checkpoint 恢复和人工确认验证通过。
+409 条自动化测试通过，Agent/RAG 评估通过，Checkpoint 恢复和人工确认验证通过。
 远程 staging 和公网部署保留到 Linux 云服务器阶段。
 ```
 

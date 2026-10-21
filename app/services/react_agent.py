@@ -61,7 +61,8 @@ JOBFIT_REACT_SYSTEM_PROMPT = (
 # 持久化 RAG 流程：后端已绑定简历，检索只传 requirements。
 JOBFIT_PERSISTED_SYSTEM_PROMPT = (
     JOBFIT_REACT_RULES
-    + "当前是持久化任务，必须优先调用 get_resume_profile 获取绑定简历。"
+    + "当前是持久化任务，必须优先调用 get_resume_profile 获取绑定简历的元信息；"
+    "简历正文不进入上下文，证据由 search_resume_evidence 返回。"
     "随后依次调用 extract_job_requirements、search_resume_evidence 和 "
     "assess_requirement_match 完成分析。"
     "search_resume_evidence 只传 requirements，不传 sections；"
@@ -300,28 +301,34 @@ async def run_react_loop(
 # 构造 JobFit ReAct 所需的初始message消息即 system 和 user 消息。
 def build_jobfit_react_messages(
     job_description: str,
-    resume_text: str,
+    resume_text: str | None = None,
     system_prompt: str = JOBFIT_REACT_SYSTEM_PROMPT,
     conversation_context: str | None = None,
 ) -> list[dict[str, str]]:
     normalized_job = job_description.strip()
-    normalized_resume = resume_text.strip()
+    normalized_resume = (
+        resume_text.strip() if resume_text is not None else None
+    )
 
     if not normalized_job:
         raise ValueError("岗位描述不能为空")
 
-    if not normalized_resume:
+    if normalized_resume == "":
         raise ValueError("简历文本不能为空")
 
     job_scan = ensure_safe_untrusted_text(
         normalized_job,
         source="job_description",
     )
-    resume_scan = ensure_safe_untrusted_text(
-        normalized_resume,
-        source="resume_text",
-    )
-    security_notice = build_security_notice([job_scan, resume_scan])
+    scans = [job_scan]
+    if normalized_resume is not None:
+        scans.append(
+            ensure_safe_untrusted_text(
+                normalized_resume,
+                source="resume_text",
+            )
+        )
+    security_notice = build_security_notice(scans)
 
     normalized_system_prompt = system_prompt.strip()
     if not normalized_system_prompt:
@@ -360,10 +367,17 @@ def build_jobfit_react_messages(
                 "<岗位JD>\n"
                 f"{escape_boundary_marker(normalized_job, '岗位JD')}\n"
                 "</岗位JD>\n\n"
-                "<简历原文>\n"
-                f"{escape_boundary_marker(normalized_resume, '简历原文')}\n"
-                "</简历原文>"
-                f"{context_section}"
+                + (
+                    "<简历原文>\n"
+                    f"{escape_boundary_marker(normalized_resume, '简历原文')}\n"
+                    "</简历原文>"
+                    if normalized_resume is not None
+                    else "<简历数据>\n"
+                    "简历全文已入库，运行时只通过检索工具返回证据片段；"
+                    "不要在回复中假设未提供的简历内容。\n"
+                    "</简历数据>"
+                )
+                + f"{context_section}"
             ),
         },
     ]

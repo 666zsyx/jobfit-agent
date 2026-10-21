@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": "1.1",
   "cases": [
     {
       "case_id": "python_fastapi_happy",
@@ -700,6 +700,706 @@
         "steps": 4,
         "usage_total": 1600,
         "latency_ms": 6100,
+        "error_code": null
+      }
+    },
+    {
+      "case_id": "docker_deploy_happy",
+      "category": "happy_path",
+      "job_description": "需要 Docker 和 docker-compose 部署经验。",
+      "resume_text": "使用 Dockerfile 和 docker-compose 部署 FastAPI、PostgreSQL 与 Redis 服务。",
+      "expected": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          1301
+        ],
+        "should_abstain": false,
+        "requires_confirmation": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          1301
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 4,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 3,
+        "usage_total": 1200,
+        "latency_ms": 4200,
+        "error_code": null
+      }
+    },
+    {
+      "case_id": "langgraph_checkpoint_happy",
+      "category": "happy_path",
+      "job_description": "需要 LangGraph 和 Checkpoint 中断恢复经验。",
+      "resume_text": "使用 LangGraph StateGraph 与 PostgreSQL Checkpoint 实现中断恢复和人工确认。",
+      "expected": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          1302
+        ],
+        "should_abstain": false,
+        "requires_confirmation": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          1302
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 4,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 3,
+        "usage_total": 1200,
+        "latency_ms": 4200,
+        "error_code": null
+      }
+    },
+    {
+      "case_id": "redis_limiter_happy",
+      "category": "happy_path",
+      "job_description": "需要 Redis 限流和配额控制经验。",
+      "resume_text": "使用 Redis 实现按用户限流和每日 Token 配额。",
+      "expected": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          1303
+        ],
+        "should_abstain": false,
+        "requires_confirmation": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          1303
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 4,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 3,
+        "usage_total": 1200,
+        "latency_ms": 4200,
+        "error_code": null
+      }
+    },
+    {
+      "case_id": "no_golang_abstain",
+      "category": "abstention",
+      "job_description": "需要 Go 语言开发经验。",
+      "resume_text": "主要使用 Python 和 TypeScript，没有 Go 项目经验。",
+      "expected": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match"
+        ],
+        "match_statuses": [
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "should_abstain": true,
+        "requires_confirmation": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match"
+        ],
+        "match_statuses": [
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "abstained": true,
+        "confirmation_recovered": true,
+        "tool_call_count": 3,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 3,
+        "usage_total": 1200,
+        "latency_ms": 4200,
+        "error_code": null
+      }
+    },
+    {
+      "case_id": "no_kafka_abstain",
+      "category": "abstention",
+      "job_description": "熟悉 Kafka 消息队列。",
+      "resume_text": "使用 Redis 和 PostgreSQL，但没有 Kafka 使用经验。",
+      "expected": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match"
+        ],
+        "match_statuses": [
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "should_abstain": true,
+        "requires_confirmation": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match"
+        ],
+        "match_statuses": [
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "abstained": true,
+        "confirmation_recovered": true,
+        "tool_call_count": 3,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 3,
+        "usage_total": 1200,
+        "latency_ms": 4200,
+        "error_code": null
+      }
+    },
+    {
+      "case_id": "no_kubernetes_abstain",
+      "category": "abstention",
+      "job_description": "需要有 Kubernetes 生产运维经验。",
+      "resume_text": "简历中没有 Kubernetes 生产运维经验。",
+      "expected": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match"
+        ],
+        "match_statuses": [
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "should_abstain": true,
+        "requires_confirmation": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match"
+        ],
+        "match_statuses": [
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "abstained": true,
+        "confirmation_recovered": true,
+        "tool_call_count": 3,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 3,
+        "usage_total": 1200,
+        "latency_ms": 4200,
+        "error_code": null
+      }
+    },
+    {
+      "case_id": "mysql_partial",
+      "category": "partial_match",
+      "job_description": "需要 MySQL 分库分表经验。",
+      "resume_text": "做过 MySQL 查询和索引优化，未做过分库分表。",
+      "expected": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match"
+        ],
+        "citation_ids": [
+          1307
+        ],
+        "should_abstain": false,
+        "requires_confirmation": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match"
+        ],
+        "citation_ids": [
+          1307
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 4,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 3,
+        "usage_total": 1200,
+        "latency_ms": 4200,
+        "error_code": null
+      }
+    },
+    {
+      "case_id": "k8s_partial",
+      "category": "partial_match",
+      "job_description": "需要 Kubernetes 集群运维和故障排查经验。",
+      "resume_text": "在本地搭建过 Kubernetes 测试集群，未处理过生产故障。",
+      "expected": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match"
+        ],
+        "citation_ids": [
+          1308
+        ],
+        "should_abstain": false,
+        "requires_confirmation": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match"
+        ],
+        "citation_ids": [
+          1308
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 4,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 3,
+        "usage_total": 1200,
+        "latency_ms": 4200,
+        "error_code": null
+      }
+    },
+    {
+      "case_id": "typescript_partial",
+      "category": "partial_match",
+      "job_description": "需要 TypeScript 前端开发经验。",
+      "resume_text": "使用 TypeScript 写过内部工具页面，未主导大型前端项目。",
+      "expected": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match"
+        ],
+        "citation_ids": [
+          1309
+        ],
+        "should_abstain": false,
+        "requires_confirmation": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match"
+        ],
+        "citation_ids": [
+          1309
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 4,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 3,
+        "usage_total": 1200,
+        "latency_ms": 4200,
+        "error_code": null
+      }
+    },
+    {
+      "case_id": "python_kafka_mixed",
+      "category": "mixed",
+      "job_description": "需要 Python 后端经验，了解 Kafka 加分。",
+      "resume_text": "有 Python 后端项目经验，但没有 Kafka 使用经验。",
+      "expected": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match",
+          "insufficient_evidence"
+        ],
+        "citation_ids": [
+          1310
+        ],
+        "should_abstain": false,
+        "requires_confirmation": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match",
+          "insufficient_evidence"
+        ],
+        "citation_ids": [
+          1310
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 4,
+        "tool_error_count": 0,
+        "suggestion_count": 2,
+        "unsupported_suggestion_count": 0,
+        "steps": 4,
+        "usage_total": 1200,
+        "latency_ms": 4200,
+        "error_code": null
+      }
+    },
+    {
+      "case_id": "fastapi_redis_mixed",
+      "category": "mixed",
+      "job_description": "需要 FastAPI 服务开发经验，了解 Redis 分布式锁加分。",
+      "resume_text": "使用 FastAPI 开发服务，但没有 Redis 分布式锁经验。",
+      "expected": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match",
+          "insufficient_evidence"
+        ],
+        "citation_ids": [
+          1311
+        ],
+        "should_abstain": false,
+        "requires_confirmation": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match",
+          "insufficient_evidence"
+        ],
+        "citation_ids": [
+          1311
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 4,
+        "tool_error_count": 0,
+        "suggestion_count": 2,
+        "unsupported_suggestion_count": 0,
+        "steps": 4,
+        "usage_total": 1200,
+        "latency_ms": 4200,
+        "error_code": null
+      }
+    },
+    {
+      "case_id": "postgres_transaction_recovered",
+      "category": "recovery",
+      "job_description": "需要 PostgreSQL 事务经验。",
+      "resume_text": "做过 PostgreSQL 查询和简单事务，未做复杂事务优化。",
+      "expected": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match"
+        ],
+        "citation_ids": [
+          1312
+        ],
+        "should_abstain": false,
+        "requires_confirmation": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match"
+        ],
+        "citation_ids": [
+          1312
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 4,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 3,
+        "usage_total": 1200,
+        "latency_ms": 4200,
+        "error_code": null
+      }
+    },
+    {
+      "case_id": "citation_redis_limiter",
+      "category": "citation",
+      "job_description": "需要 Redis 缓存和限流经验。",
+      "resume_text": "使用 Redis 实现缓存、限流和运行锁。",
+      "expected": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          1313
+        ],
+        "should_abstain": false,
+        "requires_confirmation": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          1313
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 4,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 3,
+        "usage_total": 1200,
+        "latency_ms": 4200,
+        "error_code": null
+      }
+    },
+    {
+      "case_id": "hallucination_no_fastapi",
+      "category": "hallucination",
+      "job_description": "需要 FastAPI 服务开发经验。",
+      "resume_text": "使用 Python 开发 CLI 工具，没有 FastAPI 经验。",
+      "expected": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match"
+        ],
+        "match_statuses": [
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "should_abstain": true,
+        "requires_confirmation": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match"
+        ],
+        "match_statuses": [
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "abstained": true,
+        "confirmation_recovered": true,
+        "tool_call_count": 3,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 3,
+        "usage_total": 1200,
+        "latency_ms": 4200,
+        "error_code": null
+      }
+    },
+    {
+      "case_id": "tooling_python_strong",
+      "category": "tooling",
+      "job_description": "需要 Python 后端开发经验。",
+      "resume_text": "使用 Python 开发后端服务和自动化脚本。",
+      "expected": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          1315
+        ],
+        "should_abstain": false,
+        "requires_confirmation": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          1315
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 4,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 3,
+        "usage_total": 1200,
+        "latency_ms": 4200,
         "error_code": null
       }
     }

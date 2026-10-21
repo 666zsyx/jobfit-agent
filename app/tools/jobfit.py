@@ -263,13 +263,33 @@ async def assess_requirement_match_handler(
     return result.model_dump(mode="json")
 
 
+def _public_resume_profile(snapshot: dict) -> dict:
+    """返回可进入模型上下文的最小简历元信息，不含原文和分段正文。"""
+
+    extracted_sections = snapshot.get("extracted_sections")
+    section_count = 0
+    if isinstance(extracted_sections, dict):
+        sections = extracted_sections.get("sections")
+        if isinstance(sections, list):
+            section_count = len(sections)
+
+    return {
+        "found": bool(snapshot.get("found", False)),
+        "task_id": snapshot.get("task_id"),
+        "resume_id": snapshot.get("resume_id"),
+        "resume_version_id": snapshot.get("resume_version_id"),
+        "version_no": snapshot.get("version_no"),
+        "resume_title": snapshot.get("resume_title"),
+        "section_count": section_count,
+    }
+
 # 根据当前任务上下文读取当前用户持久化的简历版本。
 async def get_resume_profile_handler(
     args: GetResumeProfileArgs,
     context: ToolContext,
 ) -> dict:
     if context.resume_profile_snapshot is not None:
-        return context.resume_profile_snapshot
+        return _public_resume_profile(context.resume_profile_snapshot)
 
     if context.session is None or context.task_id is None:
         return {"found": False}
@@ -300,16 +320,17 @@ async def get_resume_profile_handler(
     if resume is None:
         return {"found": False}
 
-    return {
-        "found": True,
-        "task_id": task.task_id,
-        "resume_id": resume.resume_id,
-        "resume_version_id": resume_version.resume_version_id,
-        "version_no": resume_version.version_no,
-        "resume_title": resume.title,
-        "raw_text": resume_version.raw_text,
-        "extracted_sections": resume_version.extracted_sections,
-    }
+    return _public_resume_profile(
+        {
+            "found": True,
+            "task_id": task.task_id,
+            "resume_id": resume.resume_id,
+            "resume_version_id": resume_version.resume_version_id,
+            "version_no": resume_version.version_no,
+            "resume_title": resume.title,
+            "extracted_sections": resume_version.extracted_sections,
+        }
+    )
 
 
 def _validate_report_citations(

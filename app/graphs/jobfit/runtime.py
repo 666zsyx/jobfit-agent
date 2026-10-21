@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import Any, NotRequired, TypedDict
+from typing import Any, Literal, NotRequired, TypedDict
 
 from app.graphs.jobfit.state import JobFitGraphState
 from app.schemas.agent_events import AgentEventSink
@@ -15,6 +15,7 @@ from app.tools.registry import ToolRegistry
 ChatWithTools = Callable[..., Awaitable[LLMWithToolsResult]]
 ToolContextFactory = Callable[[JobFitGraphState, int], ToolContext]
 ReportPersist = Callable[[JobFitGraphState], Awaitable[dict[str, Any]]]
+ConfirmationPolicy = Literal["always", "risk_based"]
 
 
 class JobFitGraphContext(TypedDict):
@@ -29,10 +30,12 @@ class JobFitGraphContext(TypedDict):
     tool_context_factory: ToolContextFactory
     event_sink: AgentEventSink | None
     persist_report: NotRequired[ReportPersist]
+    confirmation_policy: NotRequired[ConfirmationPolicy]
 
 
 __all__ = [
     "ChatWithTools",
+    "ConfirmationPolicy",
     "JobFitGraphContext",
     "ReportPersist",
     "ToolContextFactory",

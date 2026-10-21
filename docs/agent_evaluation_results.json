@@ -1,24 +1,24 @@
 {
   "version": 1,
-  "case_count": 15,
+  "case_count": 30,
   "summary": {
-    "case_count": 15,
+    "case_count": 30,
     "task_completion_rate": 1.0,
-    "tool_sequence_accuracy": 0.9333333333333333,
-    "tool_precision": 0.9866666666666667,
+    "tool_sequence_accuracy": 0.9666666666666667,
+    "tool_precision": 0.9933333333333334,
     "tool_recall": 1.0,
-    "tool_f1": 0.9925925925925926,
-    "tool_success_rate": 0.9777777777777777,
+    "tool_f1": 0.9962962962962963,
+    "tool_success_rate": 0.9888888888888889,
     "match_status_f1": 1.0,
-    "citation_f1": 0.9777777777777777,
-    "citation_validity_rate": 0.9333333333333333,
+    "citation_f1": 0.9888888888888889,
+    "citation_validity_rate": 0.9666666666666667,
     "abstention_accuracy": 1.0,
     "confirmation_recovery_rate": 1.0,
-    "unsupported_suggestion_rate": 0.06666666666666667,
-    "average_steps": 2.7333333333333334,
-    "average_usage_total": 1171.3333333333333,
-    "p50_latency_ms": 4400.0,
-    "p95_latency_ms": 7000.0
+    "unsupported_suggestion_rate": 0.03333333333333333,
+    "average_steps": 2.933333333333333,
+    "average_usage_total": 1185.6666666666667,
+    "p50_latency_ms": 4200.0,
+    "p95_latency_ms": 6100.0
   },
   "thresholds": {
     "task_completion_rate": {
@@ -28,19 +28,19 @@
       "passed": true
     },
     "tool_sequence_accuracy": {
-      "value": 0.9333333333333333,
+      "value": 0.9666666666666667,
       "threshold": 0.6,
       "operator": ">=",
       "passed": true
     },
     "tool_f1": {
-      "value": 0.9925925925925926,
+      "value": 0.9962962962962963,
       "threshold": 0.85,
       "operator": ">=",
       "passed": true
     },
     "tool_success_rate": {
-      "value": 0.9777777777777777,
+      "value": 0.9888888888888889,
       "threshold": 0.95,
       "operator": ">=",
       "passed": true
@@ -52,13 +52,13 @@
       "passed": true
     },
     "citation_f1": {
-      "value": 0.9777777777777777,
+      "value": 0.9888888888888889,
       "threshold": 0.8,
       "operator": ">=",
       "passed": true
     },
     "citation_validity_rate": {
-      "value": 0.9333333333333333,
+      "value": 0.9666666666666667,
       "threshold": 0.8,
       "operator": ">=",
       "passed": true
@@ -76,7 +76,7 @@
       "passed": true
     },
     "unsupported_suggestion_rate": {
-      "value": 0.06666666666666667,
+      "value": 0.03333333333333333,
       "threshold": 0.15,
       "operator": "<=",
       "passed": true
@@ -387,6 +387,321 @@
         "tool_precision": 0.8,
         "tool_recall": 1.0,
         "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "docker_deploy_happy",
+      "category": "happy_path",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "langgraph_checkpoint_happy",
+      "category": "happy_path",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "redis_limiter_happy",
+      "category": "happy_path",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "no_golang_abstain",
+      "category": "abstention",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "no_kafka_abstain",
+      "category": "abstention",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "no_kubernetes_abstain",
+      "category": "abstention",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "mysql_partial",
+      "category": "partial_match",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "k8s_partial",
+      "category": "partial_match",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "typescript_partial",
+      "category": "partial_match",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "python_kafka_mixed",
+      "category": "mixed",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "fastapi_redis_mixed",
+      "category": "mixed",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "postgres_transaction_recovered",
+      "category": "recovery",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "citation_redis_limiter",
+      "category": "citation",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "hallucination_no_fastapi",
+      "category": "hallucination",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "tooling_python_strong",
+      "category": "tooling",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
         "tool_success_rate": 1.0,
         "match_status_f1": 1.0,
         "citation_precision": 1.0,

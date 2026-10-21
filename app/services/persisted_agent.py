@@ -474,7 +474,7 @@ async def _run_persisted_task_core(
         react_result = await run_react_loop(
             messages=build_jobfit_react_messages(
                 job_description=snapshot.job_description,
-                resume_text=snapshot.resume_profile["raw_text"],
+                resume_text=None,
                 system_prompt=JOBFIT_PERSISTED_SYSTEM_PROMPT,
                 conversation_context=snapshot.conversation_context,
             ),

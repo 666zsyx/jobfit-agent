@@ -22,6 +22,7 @@ from app.schemas.agent_events import AgentEvent, AgentEventSink
 from app.schemas.chat import LLMWithToolsResult, TokenUsage, ToolCall
 from app.schemas.knowledge import EvidencePack
 from app.schemas.react_agent import ReactToolExecution
+from app.services.citation_validation import validate_report_citations
 from app.services.react_agent import (
     JOBFIT_PERSISTED_SYSTEM_PROMPT,
     build_jobfit_react_messages,
@@ -175,7 +176,7 @@ def load_context(state: JobFitGraphState) -> dict:
 
     messages = build_jobfit_react_messages(
         job_description=state.get("job_description", ""),
-        resume_text=state.get("resume_text", ""),
+        resume_text=state.get("resume_text"),
         system_prompt=state.get(
             "system_prompt",
             JOBFIT_PERSISTED_SYSTEM_PROMPT,
@@ -432,8 +433,51 @@ def assess_evidence(state: JobFitGraphState) -> dict:
     }
 
 
-def human_confirmation(state: JobFitGraphState) -> dict:
-    """节点：暂停工作流并等待人工确认。"""
+def is_low_risk_report(state: JobFitGraphState) -> bool:
+    """低风险：正常跑完、有报告、且引用全部来自本次证据包。"""
+
+    if state.get("react_status") != "completed":
+        return False
+
+    pending_report = state.get("pending_report")
+    if not isinstance(pending_report, dict):
+        return False
+
+    result_json = pending_report.get("result_json")
+    if not isinstance(result_json, dict) or not result_json:
+        return False
+
+    try:
+        evidence_packs = [
+            EvidencePack.model_validate(item)
+            for item in (state.get("retrieved_evidence_packs") or [])
+        ]
+    except Exception:
+        return False
+
+    if not evidence_packs:
+        return False
+
+    return validate_report_citations(
+        result_json=result_json,
+        evidence_packs=evidence_packs,
+        require_at_least_one=True,
+    ).valid
+
+async def human_confirmation(
+    state: JobFitGraphState,
+    runtime: Runtime[JobFitGraphContext],
+) -> dict:
+    """节点：低风险自动放行，其余暂停等待人工确认。"""
+
+    policy = runtime.context.get("confirmation_policy", "always")
+    if policy == "risk_based" and is_low_risk_report(state):
+        return {
+            **_node_update("auto_approve"),
+            "confirmation_decision": "approve",
+            "reviewed_report": state.get("pending_report"),
+            "resume_revision_text": None,
+        }
 
     payload = interrupt(
         {
@@ -550,6 +594,7 @@ def route_after_confirmation(
 
 __all__ = [
     "agent_decide",
+    "is_low_risk_report",
     "assess_evidence",
     "cancel",
     "execute_tools",

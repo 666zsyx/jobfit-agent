@@ -733,3 +733,73 @@ def test_save_report_uses_persist_callback() -> None:
 
     assert result["report_id"] == 123
     assert result["status"] == "report_saved"
+
+def _evidence_pack_dict(chunk_id: int = 101) -> dict:
+    return {
+        "requirement": "Python",
+        "items": [
+            {
+                "chunk_id": chunk_id,
+                "user_id": 7,
+                "resume_version_id": 3,
+                "section_type": "skills",
+                "title": "技能",
+                "content": "Python 开发",
+                "content_hash": "0" * 64,
+                "position": 1,
+                "start_offset": 0,
+                "end_offset": 8,
+                "chunker_version": "v1",
+                "relevance_score": 0.9,
+                "rank": 1,
+            }
+        ],
+        "rerank_applied": True,
+    }
+
+
+def _low_risk_state(**overrides) -> dict:
+    state = {
+        "react_status": "completed",
+        "pending_report": {
+            "summary": "匹配完成",
+            "result_json": {"assessments": [{"chunk_id": 101}]},
+        },
+        "retrieved_evidence_packs": [_evidence_pack_dict()],
+    }
+    state.update(overrides)
+    return state
+
+
+def test_low_risk_report_requires_completed_run_and_valid_citations() -> None:
+    from app.graphs.jobfit.nodes import is_low_risk_report
+
+    assert is_low_risk_report(_low_risk_state()) is True
+    assert (
+        is_low_risk_report(
+            _low_risk_state(react_status="max_steps_reached")
+        )
+        is False
+    )
+    assert is_low_risk_report(_low_risk_state(pending_report=None)) is False
+
+    unknown = _low_risk_state()
+    unknown["pending_report"]["result_json"] = {"chunk_id": 999}
+    assert is_low_risk_report(unknown) is False
+
+    no_evidence = _low_risk_state(retrieved_evidence_packs=[])
+    assert is_low_risk_report(no_evidence) is False
+
+
+def test_human_confirmation_auto_approves_low_risk_report() -> None:
+    from app.graphs.jobfit.nodes import human_confirmation
+
+    state = _low_risk_state()
+    runtime = SimpleNamespace(context={"confirmation_policy": "risk_based"})
+
+    update = asyncio.run(human_confirmation(state, runtime))
+
+    assert update["confirmation_decision"] == "approve"
+    assert update["reviewed_report"] == state["pending_report"]
+    assert update["current_node"] == "auto_approve"
+    assert update["trace"] == ["auto_approve"]

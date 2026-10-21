@@ -90,7 +90,7 @@ def build_markdown_report(summary: dict, case_count: int) -> str:
             "- Negative cases evaluate whether the strategy returns no accepted evidence.",
             "- Rerank raw reports unthresholded ranking quality.",
             "- Rerank prod applies a calibrated minimum score of -2.9.",
-            "- The threshold was calibrated on this 30-case set, so an independent holdout is still recommended.",
+            "- The threshold -2.9 was calibrated on the original 30-case subset; the current set has 100 cases, and an independent holdout is still recommended.",
         ]
     )
 

@@ -27,6 +27,7 @@ class Settings(BaseModel):
     vector_index_path: str
     vector_collection_name: str
     reranker_model_name: str
+    jobfit_confirmation_policy: str
     rate_limit_enabled: bool
     rate_limit_requests_per_minute: int
     daily_request_quota: int
@@ -90,6 +91,14 @@ def get_settings() -> Settings:
         "RERANKER_MODEL_NAME",
         "BAAI/bge-reranker-base",
     )
+    confirmation_policy = os.getenv(
+        "JOBFIT_CONFIRMATION_POLICY",
+        "risk_based",
+    ).strip().lower()
+    if confirmation_policy not in {"always", "risk_based"}:
+        raise RuntimeError(
+            "JOBFIT_CONFIRMATION_POLICY 必须是 always 或 risk_based"
+        )
     rate_limit_enabled = _env_bool("RATE_LIMIT_ENABLED", True)
     rate_limit_requests_per_minute = _env_int(
         "RATE_LIMIT_REQUESTS_PER_MINUTE",
@@ -149,6 +158,7 @@ def get_settings() -> Settings:
         vector_index_path=vector_index_path,
         vector_collection_name=vector_collection_name,
         reranker_model_name=reranker_model_name,
+        jobfit_confirmation_policy=confirmation_policy,
         rate_limit_enabled=rate_limit_enabled,
         rate_limit_requests_per_minute=rate_limit_requests_per_minute,
         daily_request_quota=daily_request_quota,
