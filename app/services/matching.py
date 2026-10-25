@@ -9,7 +9,7 @@ from app.schemas.matching import (
     MatchSummary,
     RequirementAssessment,
 )
-
+from app.services.text_similarity import requirements_are_similar
 
 STRONG_MATCH_SCORE = 0.6
 
@@ -55,7 +55,9 @@ def assess_requirement_match(
     search_result: EvidenceSearchResult,
 ) -> MatchAssessmentResult:
     if not isinstance(search_result, EvidenceSearchResult):
-        raise ValueError("search_result 必须是 EvidenceSearchResult")
+        raise ValueError(  # noqa: TRY004
+            "search_result 必须是 EvidenceSearchResult"
+        )
 
     if not search_result.matches:
         raise ValueError("matches 不能为空")
@@ -80,6 +82,71 @@ def assess_requirement_match(
 
     return MatchAssessmentResult(
         assessments=assessments,
+        summary=MatchSummary(
+            strong_match_count=strong_match_count,
+            partial_match_count=partial_match_count,
+            insufficient_evidence_count=insufficient_evidence_count,
+        ),
+    )
+
+_STATUS_RANK = {
+    "insufficient_evidence": 0,
+    "partial_match": 1,
+    "strong_match": 2,
+}
+
+
+def _best_assessment(
+    assessments: list[RequirementAssessment],
+) -> RequirementAssessment:
+    return max(
+        assessments,
+        key=lambda assessment: (
+            _STATUS_RANK[assessment.status],
+            max(
+                (item.score for item in assessment.evidence),
+                default=-1.0,
+            ),
+            len(assessment.evidence),
+        ),
+    )
+
+
+def merge_similar_assessments(
+    result: MatchAssessmentResult,
+) -> MatchAssessmentResult:
+    merged: list[RequirementAssessment] = []
+    for assessment in result.assessments:
+        duplicate_index = None
+        for index, existing in enumerate(merged):
+            if requirements_are_similar(
+                assessment.requirement,
+                existing.requirement,
+            ):
+                duplicate_index = index
+                break
+        if duplicate_index is None:
+            merged.append(assessment)
+        else:
+            merged[duplicate_index] = _best_assessment(
+                [merged[duplicate_index], assessment]
+            )
+
+    strong_match_count = sum(
+        assessment.status == "strong_match"
+        for assessment in merged
+    )
+    partial_match_count = sum(
+        assessment.status == "partial_match"
+        for assessment in merged
+    )
+    insufficient_evidence_count = sum(
+        assessment.status == "insufficient_evidence"
+        for assessment in merged
+    )
+
+    return MatchAssessmentResult(
+        assessments=merged,
         summary=MatchSummary(
             strong_match_count=strong_match_count,
             partial_match_count=partial_match_count,

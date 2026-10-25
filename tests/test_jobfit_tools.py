@@ -19,10 +19,8 @@ from app.schemas.matching import (
 )
 from app.schemas.resume import ResumeExtraction, ResumeSection
 from app.services.resume_extraction import MAX_RESUME_TEXT_LENGTH
-from app.tools import ToolContext
+from app.tools import ToolContext, jobfit
 from app.tools.executor import execute_tool
-from app.tools import jobfit
-
 
 VALID_JOB_DESCRIPTION = "负责 FastAPI 后端开发，要求熟悉 Python。"
 VALID_RESUME_TEXT = "教育经历\n某大学 计算机科学"
@@ -215,13 +213,11 @@ def test_save_match_report_can_defer_persistence():
         )
     )
 
-    assert result == {
-        "ok": True,
-        "result": {
-            "saved": True,
-            "queued": True,
-        },
-    }
+    assert result["ok"] is True
+    assert result["result"]["saved"] is True
+    assert result["result"]["queued"] is True
+    assert result["result"]["duplicate"] is False
+    assert "禁止再次调用" in result["result"]["message"]
     assert context.pending_report == {
         "summary": "Deferred report",
         "result_json": {"matches": []},

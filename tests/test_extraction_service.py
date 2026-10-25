@@ -10,7 +10,6 @@ from app.schemas.chat import ChatResult, TokenUsage
 from app.schemas.extraction import JobExtraction
 from app.services import extraction
 
-
 VALID_JOB_JSON = (
     '{"responsibilities":["负责 FastAPI 后端服务开发"],'
     '"required_skills":["熟悉 Python 和 FastAPI"],'
@@ -191,3 +190,31 @@ def test_extract_job_raises_after_two_empty_responses(monkeypatch):
     assert len(calls) == 2
     assert isinstance(exc_info.value.__cause__, RuntimeError)
     assert str(exc_info.value.__cause__) == "大模型返回内容为空"
+
+def test_merge_similar_skills_collapses_overlapping_deployment_requirements() -> None:
+    result = extraction._merge_similar_skills(
+        JobExtraction(
+            responsibilities=["负责服务部署"],
+            required_skills=[
+                "具备 Docker 和 docker-compose 部署经验",
+                "使用 Docker 和 docker-compose 进行部署",
+            ],
+        )
+    )
+
+    assert len(result.required_skills) == 1
+    assert "Docker" in result.required_skills[0]
+
+
+def test_merge_similar_skills_keeps_python_and_fastapi_separate() -> None:
+    result = extraction._merge_similar_skills(
+        JobExtraction(
+            responsibilities=["负责后端开发"],
+            required_skills=[
+                "具备 Python 后端开发经验",
+                "具备 FastAPI 后端开发经验",
+            ],
+        )
+    )
+
+    assert len(result.required_skills) == 2

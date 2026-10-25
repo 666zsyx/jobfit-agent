@@ -71,6 +71,10 @@ JOBFIT_PERSISTED_SYSTEM_PROMPT = (
     "assess_requirement_match 返回的 evidence 中包含 chunk_id，"
     "最终报告必须保留真实 chunk_id，不得编造引用。"
     "最后调用 save_match_report 保存报告。"
+    "assess_requirement_match 只调用一次，拿到结果后直接保存报告。"
+    "save_match_report 只调用一次；调用成功后立即输出最终总结，"
+    "不得再次调用任何工具。"
+    "search_resume_evidence 只调用一次，除非工具明确返回错误。"
     "user_id 和 task_id 只能由后端提供，禁止在工具参数中提供。"
 )
 

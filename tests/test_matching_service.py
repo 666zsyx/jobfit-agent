@@ -11,6 +11,7 @@ from app.schemas.evidence import (
 from app.services.matching import (
     STRONG_MATCH_SCORE,
     assess_requirement_match,
+    merge_similar_assessments,
 )
 
 
@@ -242,3 +243,27 @@ def test_non_evidence_search_result_is_rejected():
         match="search_result 必须是 EvidenceSearchResult",
     ):
         assess_requirement_match({"matches": []})
+
+def test_merge_similar_assessments_keeps_best_status():
+    search_result = make_search_result(
+        [
+            (
+                "具备 Docker 和 docker-compose 部署经验",
+                [make_evidence(0.4)],
+            ),
+            (
+                "使用 Docker 和 docker-compose 进行部署",
+                [make_evidence(0.9)],
+            ),
+        ]
+    )
+
+    result = assess_requirement_match(search_result)
+    assert len(result.assessments) == 2
+
+    merged = merge_similar_assessments(result)
+
+    assert len(merged.assessments) == 1
+    assert merged.assessments[0].status == "strong_match"
+    assert merged.summary.strong_match_count == 1
+    assert merged.summary.partial_match_count == 0

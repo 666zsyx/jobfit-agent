@@ -11,10 +11,11 @@ from app.schemas.evidence import (
 )
 from app.schemas.knowledge import (
     EvidenceItem as KnowledgeEvidenceItem,
+)
+from app.schemas.knowledge import (
     EvidencePack,
 )
-from app.tools import ToolContext
-from app.tools import jobfit
+from app.tools import ToolContext, jobfit
 
 
 class FakeSessionContext:
@@ -195,7 +196,31 @@ def test_report_citations_accept_known_chunk_id():
         )
     )
 
-    assert result == {"saved": True, "queued": True}
+    assert result["saved"] is True
+    assert result["queued"] is True
+    assert result["duplicate"] is False
+    assert "禁止再次调用" in result["message"]
+
+
+def test_duplicate_deferred_report_is_marked_duplicate():
+    context = make_context()
+    context.retrieved_evidence_packs.append(make_evidence_pack())
+    context.defer_report_save = True
+    args = jobfit.SaveMatchReportArgs(
+        summary="总结",
+        result_json={"evidence": [{"chunk_id": 101}]},
+    )
+
+    first = asyncio.run(
+        jobfit.save_match_report_handler(args, context)
+    )
+    second = asyncio.run(
+        jobfit.save_match_report_handler(args, context)
+    )
+
+    assert first["duplicate"] is False
+    assert second["duplicate"] is True
+    assert "禁止再次调用" in second["message"]
 
 
 def test_report_citations_reject_missing_or_unknown_chunk_id():

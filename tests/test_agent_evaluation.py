@@ -89,6 +89,17 @@ def test_unknown_citation_is_invalid() -> None:
     assert result.metrics.citation_valid is False
 
 
+def test_duplicate_citation_is_invalid() -> None:
+    result = evaluate_agent_case(
+        make_case(
+            expected={"citation_ids": [1]},
+            observed={"citation_ids": [1, 1]},
+        )
+    )
+
+    assert result.metrics.citation_valid is False
+
+
 def test_abstention_case_requires_empty_citations() -> None:
     result = evaluate_agent_case(
         make_case(
@@ -122,6 +133,20 @@ def test_unsupported_suggestion_rate_is_detected() -> None:
     assert result.metrics.unsupported_suggestion_rate == 0.5
 
 
+def test_expected_tool_error_count_does_not_reduce_success_rate() -> None:
+    result = evaluate_agent_case(
+        make_case(
+            expected={"expected_tool_error_count": 1},
+            observed={
+                "tool_call_count": 3,
+                "tool_error_count": 1,
+            },
+        )
+    )
+
+    assert result.metrics.tool_success_rate == 1.0
+
+
 def test_tool_sequence_accuracy_is_strict() -> None:
     result = evaluate_agent_case(
         make_case(
@@ -141,7 +166,7 @@ def test_fixed_dataset_is_valid_and_summarizable() -> None:
         for item in payload["cases"]
     ]
 
-    assert len(cases) == 30
+    assert len(cases) == 50
     assert len({case.case_id for case in cases}) == len(cases)
 
     results = [evaluate_agent_case(case) for case in cases]
@@ -150,7 +175,7 @@ def test_fixed_dataset_is_valid_and_summarizable() -> None:
         observed_outcomes=[case.observed for case in cases],
     )
 
-    assert summary.case_count == 30
+    assert summary.case_count == 50
     assert 0 <= summary.task_completion_rate <= 1
     assert 0 <= summary.tool_f1 <= 1
     assert 0 <= summary.citation_f1 <= 1

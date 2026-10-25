@@ -217,6 +217,7 @@ def derive_observed_outcome(
         "assessment_count": len(assessments),
         "evidence_item_count": evidence_item_count,
         "evidence_backed": evidence_backed(assessments),
+        "assessments": assessments,
         "tool_calls": [
             {
                 "tool_name": execution.tool_name,
@@ -310,6 +311,44 @@ def load_observations(path: Path) -> dict:
 
 
 # 用真实观测值替换数据集里的回放观测值，复用同一套评分逻辑。
+def summarize_by_category(case_details: list[dict]) -> dict:
+    grouped: dict[str, list[dict]] = {}
+    for case in case_details:
+        grouped.setdefault(case["category"], []).append(case)
+
+    result: dict[str, dict] = {}
+    for category, cases in sorted(grouped.items()):
+        metrics = [case["metrics"] for case in cases]
+        count = len(metrics)
+        result[category] = {
+            "case_count": count,
+            "task_completion_rate": sum(
+                1 for item in metrics if item["task_completed"]
+            ) / count,
+            "tool_f1": sum(item["tool_f1"] for item in metrics) / count,
+            "tool_success_rate": sum(
+                item["tool_success_rate"] for item in metrics
+            ) / count,
+            "match_status_f1": sum(
+                item["match_status_f1"] for item in metrics
+            ) / count,
+            "citation_validity_rate": sum(
+                1 for item in metrics if item["citation_valid"]
+            ) / count,
+            "abstention_accuracy": sum(
+                1 for item in metrics if item["abstention_correct"]
+            ) / count,
+            "unsupported_suggestion_rate": sum(
+                item["unsupported_suggestion_rate"] for item in metrics
+            ) / count,
+            "evidence_backed_rate": sum(
+                1 for case in cases
+                if case["extras"].get("evidence_backed")
+            ) / count,
+        }
+    return result
+
+
 def score_live_observations(
     cases: list[AgentEvaluationCase],
     observations: dict,
@@ -354,6 +393,8 @@ def score_live_observations(
         )
         live_cases.append(live_case)
 
+    by_category = summarize_by_category(case_details)
+
     if not live_cases:
         raise ValueError("没有可评分的真实观测值")
 
@@ -385,14 +426,22 @@ def score_live_observations(
         "git_revision": observations.get("git_revision"),
         "model": observations.get("model"),
         "max_steps": observations.get("max_steps"),
+        "dataset_case_count": len(cases),
         "executed_case_count": len(case_details),
         "skipped_case_count": len(observations.get("skipped_cases", [])),
+        "pending_case_count": max(
+            0,
+            len(cases)
+            - len(case_details)
+            - len(observations.get("skipped_cases", [])),
+        ),
         "summary": summary_payload,
         "thresholds": thresholds,
         "strict_passed": all(
             item["passed"] for item in thresholds.values()
         ),
         "cases": case_details,
+        "by_category": by_category,
         "skipped_cases": observations.get("skipped_cases", []),
     }
     return report, summary, live_cases
@@ -411,19 +460,29 @@ def load_replay_summary() -> dict | None:
 
 def build_markdown_report(report: dict) -> str:
     summary = report["summary"]
-    total = report["executed_case_count"] + report["skipped_case_count"]
+    total = report.get(
+        "dataset_case_count",
+        report["executed_case_count"] + report["skipped_case_count"],
+    )
+    pending = report.get("pending_case_count", 0)
     lines = [
         "# Agent 评估（真实执行）",
         "",
         "本报告由 scripts/evaluate_agent_live.py 真实调用 LLM 和工具生成，",
-        "不是回放固定观测值。入口函数为 run_jobfit_agent，",
-        "与 POST /api/agent/match 使用同一条非持久化关键词 ReAct 路径。",
+        "不是回放固定观测值。",
         "",
         f"- 生成时间: {report.get('generated_at')}",
         f"- 模型: {report.get('model')}",
         f"- commit: {report.get('git_revision')}",
         f"- max_steps: {report.get('max_steps')}",
-        f"- 实际执行: {report['executed_case_count']} / {total} 个 case",
+        (
+            f"- 实际执行: {report['executed_case_count']} / {total} 个 case"
+            + (
+                f"（{pending} 条新增 case 尚无观测值）"
+                if pending
+                else ""
+            )
+        ),
         f"- 门槛结论: {'PASS' if report['strict_passed'] else 'REVIEW'}",
         "",
         "## 实测指标",
@@ -501,6 +560,23 @@ def build_markdown_report(report: dict) -> str:
             ]
         )
 
+    lines.extend(["", "## 按类别", ""])
+    lines.extend(
+        [
+            "| 类别 | case 数 | 任务完成 | 工具F1 | 匹配F1 | 弃答 | 证据支撑 |",
+            "|---|---:|---:|---:|---:|---:|---:|",
+        ]
+    )
+    for category, item in report.get("by_category", {}).items():
+        lines.append(
+            f"| {category} | {item['case_count']} | "
+            f"{item['task_completion_rate']:.4f} | "
+            f"{item['tool_f1']:.4f} | "
+            f"{item['match_status_f1']:.4f} | "
+            f"{item['abstention_accuracy']:.4f} | "
+            f"{item['evidence_backed_rate']:.4f} |"
+        )
+
     lines.extend(
         [
             "",
@@ -533,6 +609,11 @@ def build_markdown_report(report: dict) -> str:
                 f"- {item['case_id']}（{item['category']}）: "
                 f"{item['skip_reason']}"
             )
+    if pending:
+        lines.append(
+            f"- 另有 {pending} 条 case 尚无观测值（新增 live/mock case），"
+            "需要下一次真实执行生成。"
+        )
 
     lines.extend(
         [
@@ -540,14 +621,14 @@ def build_markdown_report(report: dict) -> str:
             "## 说明",
             "",
             (
-                "- tool_precision 会低于 1.0：关键词路径必须多调一次"
+                "- tool_precision 会低于 1.0：当前 live 路径必须多调一次"
                 " extract_resume_sections，而评估集的 expected.tools"
                 " 只列了 4 个工具，这是 fixture 与路径的差异，不是多余调用。"
             ),
-            "- 关键词路径不产生持久化 chunk_id，因此不计算引用 ID 维度的",
+            "- 当前 live 路径不产生持久化 chunk_id，因此不计算引用 ID 维度的",
             "  citation_f1 / citation_validity_rate；引用质量由",
             "  evidence_backed_rate 和 unsupported_suggestion_rate 约束。",
-            "- 人工确认恢复率在关键词路径不适用，未纳入本次门槛。",
+            "- 人工确认恢复率在当前 live 路径不适用，未纳入本次门槛。",
             (
                 "- tool_sequence_accuracy 是严格全等"
                 "（工具名/顺序/数量完全一致），仅作参考；"

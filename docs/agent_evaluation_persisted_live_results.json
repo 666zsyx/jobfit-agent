@@ -1,0 +1,415 @@
+{
+  "version": 1,
+  "source": "live_react_keyword",
+  "generated_at": "2026-10-25T10:08:49+00:00",
+  "git_revision": "7a7c879",
+  "model": null,
+  "max_steps": 8,
+  "dataset_case_count": 3,
+  "executed_case_count": 3,
+  "skipped_case_count": 0,
+  "pending_case_count": 0,
+  "summary": {
+    "case_count": 3,
+    "task_completion_rate": 1.0,
+    "tool_sequence_accuracy": 0.0,
+    "tool_precision": 0.7555555555555555,
+    "tool_recall": 1.0,
+    "tool_f1": 0.8592592592592593,
+    "tool_success_rate": 1.0,
+    "match_status_f1": 1.0,
+    "citation_f1": 0.0,
+    "citation_validity_rate": 0.0,
+    "abstention_accuracy": 1.0,
+    "confirmation_recovery_rate": 1.0,
+    "unsupported_suggestion_rate": 0.0,
+    "average_steps": 5.333333333333333,
+    "average_usage_total": 18579.666666666668,
+    "p50_latency_ms": 13106.0,
+    "p95_latency_ms": 15667.0,
+    "evidence_backed_rate": 1.0
+  },
+  "thresholds": {
+    "task_completion_rate": {
+      "value": 1.0,
+      "threshold": 0.85,
+      "operator": ">=",
+      "passed": true
+    },
+    "tool_recall": {
+      "value": 1.0,
+      "threshold": 0.9,
+      "operator": ">=",
+      "passed": true
+    },
+    "tool_f1": {
+      "value": 0.8592592592592593,
+      "threshold": 0.85,
+      "operator": ">=",
+      "passed": true
+    },
+    "tool_success_rate": {
+      "value": 1.0,
+      "threshold": 0.95,
+      "operator": ">=",
+      "passed": true
+    },
+    "match_status_f1": {
+      "value": 1.0,
+      "threshold": 0.85,
+      "operator": ">=",
+      "passed": true
+    },
+    "abstention_accuracy": {
+      "value": 1.0,
+      "threshold": 0.9,
+      "operator": ">=",
+      "passed": true
+    },
+    "unsupported_suggestion_rate": {
+      "value": 0.0,
+      "threshold": 0.15,
+      "operator": "<=",
+      "passed": true
+    },
+    "evidence_backed_rate": {
+      "value": 1.0,
+      "threshold": 0.85,
+      "operator": ">=",
+      "passed": true
+    }
+  },
+  "strict_passed": true,
+  "cases": [
+    {
+      "case_id": "python_fastapi_happy",
+      "category": "happy_path",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "get_resume_profile",
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          244
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 5,
+        "usage_total": 16505,
+        "latency_ms": 13106,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 1,
+        "evidence_item_count": 1,
+        "evidence_backed": true,
+        "assessments": [
+          {
+            "requirement": "具备 Python 和 FastAPI 后端开发经验",
+            "status": "strong_match",
+            "reason": "存在最高分为 0.983 的原文证据，达到强匹配阈值 0.6。",
+            "evidence": [
+              {
+                "section_type": "project_experience",
+                "title": "简历原文",
+                "content": "在课程项目中用 Python 和 FastAPI 开发了三个 REST API 服务，负责接口设计、参数校验、JWT 鉴权和 Docker 部署，服务日均请求约 1 万次。",
+                "score": 0.983182,
+                "chunk_id": 244,
+                "source_version_id": 175,
+                "position": 1,
+                "rerank_score": 4.06836605
+              }
+            ]
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool_name": "get_resume_profile",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "redis_strong",
+      "category": "happy_path",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.6666666666666666,
+        "tool_recall": 1.0,
+        "tool_f1": 0.8,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "get_resume_profile",
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          245
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 6,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 23190,
+        "latency_ms": 15667,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 1,
+        "evidence_item_count": 1,
+        "evidence_backed": true,
+        "assessments": [
+          {
+            "requirement": "熟悉 Redis 缓存和分布式锁",
+            "status": "strong_match",
+            "reason": "存在最高分为 0.923 的原文证据，达到强匹配阈值 0.6。",
+            "evidence": [
+              {
+                "section_type": "project_experience",
+                "title": "简历原文",
+                "content": "使用 Redis 实现缓存、运行锁和限流。",
+                "score": 0.922717,
+                "chunk_id": 245,
+                "source_version_id": 176,
+                "position": 1,
+                "rerank_score": 2.47984552
+              }
+            ]
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool_name": "get_resume_profile",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "docker_deploy_happy",
+      "category": "happy_path",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "get_resume_profile",
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          246
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 5,
+        "usage_total": 16044,
+        "latency_ms": 9996,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 1,
+        "evidence_item_count": 1,
+        "evidence_backed": true,
+        "assessments": [
+          {
+            "requirement": "具备 Docker 与 docker-compose 部署经验",
+            "status": "strong_match",
+            "reason": "存在最高分为 0.986 的原文证据，达到强匹配阈值 0.6。",
+            "evidence": [
+              {
+                "section_type": "project_experience",
+                "title": "简历原文",
+                "content": "使用 Dockerfile 和 docker-compose 部署 FastAPI、PostgreSQL 与 Redis 服务。",
+                "score": 0.986366,
+                "chunk_id": 246,
+                "source_version_id": 177,
+                "position": 1,
+                "rerank_score": 4.28145266
+              }
+            ]
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool_name": "get_resume_profile",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    }
+  ],
+  "by_category": {
+    "happy_path": {
+      "case_count": 3,
+      "task_completion_rate": 1.0,
+      "tool_f1": 0.8592592592592593,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 1.0,
+      "citation_validity_rate": 0.0,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.0,
+      "evidence_backed_rate": 1.0
+    }
+  },
+  "skipped_cases": []
+}

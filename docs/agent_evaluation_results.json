@@ -1,24 +1,24 @@
 {
   "version": 1,
-  "case_count": 30,
+  "case_count": 50,
   "summary": {
-    "case_count": 30,
+    "case_count": 50,
     "task_completion_rate": 1.0,
-    "tool_sequence_accuracy": 0.9666666666666667,
-    "tool_precision": 0.9933333333333334,
+    "tool_sequence_accuracy": 0.98,
+    "tool_precision": 0.996,
     "tool_recall": 1.0,
-    "tool_f1": 0.9962962962962963,
-    "tool_success_rate": 0.9888888888888889,
+    "tool_f1": 0.9977777777777778,
+    "tool_success_rate": 1.0,
     "match_status_f1": 1.0,
-    "citation_f1": 0.9888888888888889,
-    "citation_validity_rate": 0.9666666666666667,
+    "citation_f1": 0.9466666666666668,
+    "citation_validity_rate": 0.92,
     "abstention_accuracy": 1.0,
     "confirmation_recovery_rate": 1.0,
-    "unsupported_suggestion_rate": 0.03333333333333333,
-    "average_steps": 2.933333333333333,
-    "average_usage_total": 1185.6666666666667,
+    "unsupported_suggestion_rate": 0.02,
+    "average_steps": 3.12,
+    "average_usage_total": 1294.2,
     "p50_latency_ms": 4200.0,
-    "p95_latency_ms": 6100.0
+    "p95_latency_ms": 7000.0
   },
   "thresholds": {
     "task_completion_rate": {
@@ -28,19 +28,19 @@
       "passed": true
     },
     "tool_sequence_accuracy": {
-      "value": 0.9666666666666667,
+      "value": 0.98,
       "threshold": 0.6,
       "operator": ">=",
       "passed": true
     },
     "tool_f1": {
-      "value": 0.9962962962962963,
+      "value": 0.9977777777777778,
       "threshold": 0.85,
       "operator": ">=",
       "passed": true
     },
     "tool_success_rate": {
-      "value": 0.9888888888888889,
+      "value": 1.0,
       "threshold": 0.95,
       "operator": ">=",
       "passed": true
@@ -52,13 +52,13 @@
       "passed": true
     },
     "citation_f1": {
-      "value": 0.9888888888888889,
+      "value": 0.9466666666666668,
       "threshold": 0.8,
       "operator": ">=",
       "passed": true
     },
     "citation_validity_rate": {
-      "value": 0.9666666666666667,
+      "value": 0.92,
       "threshold": 0.8,
       "operator": ">=",
       "passed": true
@@ -76,7 +76,7 @@
       "passed": true
     },
     "unsupported_suggestion_rate": {
-      "value": 0.03333333333333333,
+      "value": 0.02,
       "threshold": 0.15,
       "operator": "<=",
       "passed": true
@@ -261,7 +261,7 @@
         "tool_precision": 1.0,
         "tool_recall": 1.0,
         "tool_f1": 1.0,
-        "tool_success_rate": 0.6666666666666667,
+        "tool_success_rate": 1.0,
         "match_status_f1": 1.0,
         "citation_precision": 1.0,
         "citation_recall": 1.0,
@@ -713,6 +713,528 @@
         "unsupported_suggestion_rate": 0.0
       },
       "observed_error_code": null
+    },
+    {
+      "case_id": "mock_unknown_tool_recovered",
+      "category": "tooling",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "mock_invalid_arguments_recovered",
+      "category": "tooling",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "mock_tool_timeout_recovered",
+      "category": "recovery",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "mock_tool_handler_error_recovered",
+      "category": "recovery",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "mock_max_steps_loop",
+      "category": "failure",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": "max_steps_reached"
+    },
+    {
+      "case_id": "mock_repeated_tool_loop",
+      "category": "failure",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": "max_steps_reached"
+    },
+    {
+      "case_id": "mock_citation_missing",
+      "category": "citation",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "mock_citation_unknown_id",
+      "category": "citation",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "mock_citation_duplicate_id",
+      "category": "citation",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 0.5,
+        "citation_recall": 1.0,
+        "citation_f1": 0.6666666666666666,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "mock_empty_evidence_abstain",
+      "category": "abstention",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "live_strong_match_exact",
+      "category": "happy_path",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "live_partial_match_weak",
+      "category": "partial_match",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "live_insufficient_no_evidence",
+      "category": "abstention",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "live_partial_vs_insufficient",
+      "category": "partial_match",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "live_mixed_three_states",
+      "category": "mixed",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "live_multi_requirement_partial",
+      "category": "mixed",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "live_long_resume_partial",
+      "category": "partial_match",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "live_short_resume_insufficient",
+      "category": "abstention",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "live_cross_section_match",
+      "category": "happy_path",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
+    },
+    {
+      "case_id": "live_weak_evidence_partial",
+      "category": "partial_match",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
+        "tool_recall": 1.0,
+        "tool_f1": 1.0,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0
+      },
+      "observed_error_code": null
     }
-  ]
+  ],
+  "by_category": {
+    "abstention": {
+      "case_count": 8,
+      "task_completion_rate": 1.0,
+      "tool_f1": 1.0,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 1.0,
+      "citation_validity_rate": 1.0,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.0
+    },
+    "citation": {
+      "case_count": 5,
+      "task_completion_rate": 1.0,
+      "tool_f1": 1.0,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 1.0,
+      "citation_validity_rate": 0.2,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.0
+    },
+    "failure": {
+      "case_count": 3,
+      "task_completion_rate": 1.0,
+      "tool_f1": 1.0,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 1.0,
+      "citation_validity_rate": 1.0,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.0
+    },
+    "hallucination": {
+      "case_count": 2,
+      "task_completion_rate": 1.0,
+      "tool_f1": 1.0,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 1.0,
+      "citation_validity_rate": 1.0,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.5
+    },
+    "happy_path": {
+      "case_count": 9,
+      "task_completion_rate": 1.0,
+      "tool_f1": 1.0,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 1.0,
+      "citation_validity_rate": 1.0,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.0
+    },
+    "human_confirmation": {
+      "case_count": 2,
+      "task_completion_rate": 1.0,
+      "tool_f1": 1.0,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 1.0,
+      "citation_validity_rate": 1.0,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.0
+    },
+    "mixed": {
+      "case_count": 5,
+      "task_completion_rate": 1.0,
+      "tool_f1": 1.0,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 1.0,
+      "citation_validity_rate": 1.0,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.0
+    },
+    "partial_match": {
+      "case_count": 8,
+      "task_completion_rate": 1.0,
+      "tool_f1": 1.0,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 1.0,
+      "citation_validity_rate": 1.0,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.0
+    },
+    "recovery": {
+      "case_count": 4,
+      "task_completion_rate": 1.0,
+      "tool_f1": 1.0,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 1.0,
+      "citation_validity_rate": 1.0,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.0
+    },
+    "tooling": {
+      "case_count": 4,
+      "task_completion_rate": 1.0,
+      "tool_f1": 0.9722222222222222,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 1.0,
+      "citation_validity_rate": 1.0,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.0
+    }
+  }
 }

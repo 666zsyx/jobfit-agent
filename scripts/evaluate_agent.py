@@ -18,7 +18,6 @@ from app.services.agent_evaluation import (
     summarize_agent_results,
 )
 
-
 DATASET_PATH = PROJECT_ROOT / "data/evaluation/agent_cases.json"
 REPORT_JSON_PATH = PROJECT_ROOT / "docs/agent_evaluation_results.json"
 REPORT_MARKDOWN_PATH = PROJECT_ROOT / "docs/AGENT_EVALUATION.md"
@@ -61,11 +60,46 @@ def threshold_results(summary: AgentEvaluationSummary) -> dict[str, dict]:
     return results
 
 
+def summarize_by_category(case_details: list[dict]) -> dict:
+    grouped: dict[str, list[dict]] = {}
+    for case in case_details:
+        grouped.setdefault(case["category"], []).append(case)
+
+    result: dict[str, dict] = {}
+    for category, cases in sorted(grouped.items()):
+        metrics = [case["metrics"] for case in cases]
+        count = len(metrics)
+        result[category] = {
+            "case_count": count,
+            "task_completion_rate": sum(
+                1 for item in metrics if item["task_completed"]
+            ) / count,
+            "tool_f1": sum(item["tool_f1"] for item in metrics) / count,
+            "tool_success_rate": sum(
+                item["tool_success_rate"] for item in metrics
+            ) / count,
+            "match_status_f1": sum(
+                item["match_status_f1"] for item in metrics
+            ) / count,
+            "citation_validity_rate": sum(
+                1 for item in metrics if item["citation_valid"]
+            ) / count,
+            "abstention_accuracy": sum(
+                1 for item in metrics if item["abstention_correct"]
+            ) / count,
+            "unsupported_suggestion_rate": sum(
+                item["unsupported_suggestion_rate"] for item in metrics
+            ) / count,
+        }
+    return result
+
+
 def build_markdown_report(
     summary: AgentEvaluationSummary,
     threshold_report: dict[str, dict],
     case_details: list[dict],
     strict_passed: bool,
+    by_category: dict,
 ) -> str:
     lines = [
         "# STEP 12 Agent Evaluation",
@@ -104,6 +138,23 @@ def build_markdown_report(
             f"{item['value']:.4f} | "
             f"{item['operator']} {item['threshold']:.4f} | "
             f"{'PASS' if item['passed'] else 'FAIL'} |"
+        )
+
+    lines.extend(["", "## By Category", ""])
+    lines.extend(
+        [
+            "| Category | Cases | Task Completion | Tool F1 | Match F1 | Citation Validity | Abstention |",
+            "|---|---:|---:|---:|---:|---:|---:|",
+        ]
+    )
+    for category, item in by_category.items():
+        lines.append(
+            f"| {category} | {item['case_count']} | "
+            f"{item['task_completion_rate']:.4f} | "
+            f"{item['tool_f1']:.4f} | "
+            f"{item['match_status_f1']:.4f} | "
+            f"{item['citation_validity_rate']:.4f} | "
+            f"{item['abstention_accuracy']:.4f} |"
         )
 
     lines.extend(
@@ -175,6 +226,7 @@ def evaluate_agent_dataset(*, limit: int = 0) -> tuple[dict, str, bool]:
         result.model_dump(mode="json")
         for result in results
     ]
+    by_category = summarize_by_category(case_details)
     report = {
         "version": 1,
         "case_count": len(cases),
@@ -182,12 +234,14 @@ def evaluate_agent_dataset(*, limit: int = 0) -> tuple[dict, str, bool]:
         "thresholds": thresholds,
         "strict_passed": strict_passed,
         "cases": case_details,
+        "by_category": by_category,
     }
     markdown = build_markdown_report(
         summary,
         thresholds,
         case_details,
         strict_passed,
+        by_category,
     )
     return report, markdown, strict_passed
 

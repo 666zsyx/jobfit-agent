@@ -4,6 +4,12 @@ import logging
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.repositories import (
+    AnalysisTaskRepository,
+    ReportRepository,
+    ResumeRepository,
+    ResumeVersionRepository,
+)
 from app.schemas.agent_events import AgentEvent
 from app.schemas.evidence import (
     EvidenceSearchRequest,
@@ -12,16 +18,13 @@ from app.schemas.evidence import (
 from app.schemas.extraction import JobExtraction
 from app.schemas.matching import MatchAssessmentResult
 from app.schemas.resume import ResumeExtraction
-from app.repositories import (
-    AnalysisTaskRepository,
-    ReportRepository,
-    ResumeRepository,
-    ResumeVersionRepository,
-)
 from app.services.citation_validation import validate_report_citations
 from app.services.evidence_search import search_resume_evidence
 from app.services.extraction import extract_job
-from app.services.matching import assess_requirement_match
+from app.services.matching import (
+    assess_requirement_match,
+    merge_similar_assessments,
+)
 from app.services.rag_evidence import search_requirements_with_rag
 from app.services.resume_extraction import (
     MAX_RESUME_TEXT_LENGTH,
@@ -29,7 +32,6 @@ from app.services.resume_extraction import (
 )
 from app.tools.base import ToolContext, ToolSpec
 from app.tools.registry import ToolRegistry
-
 
 logger = logging.getLogger(__name__)
 # 定义岗位 JD 提取工具的输入契约。
@@ -137,7 +139,7 @@ def _sections_from_context(
         return ResumeExtraction.model_validate(
             extracted_sections
         ).sections
-    except Exception:
+    except Exception:  # noqa: BLE001
         return []
 
 
@@ -260,6 +262,7 @@ async def assess_requirement_match_handler(
     context: ToolContext,
 ) -> dict:
     result: MatchAssessmentResult = assess_requirement_match(args)
+    result = merge_similar_assessments(result)
     return result.model_dump(mode="json")
 
 
@@ -372,13 +375,21 @@ async def save_match_report_handler(
         }
 
     if context.defer_report_save:
-        context.pending_report = {
+        queued_report = {
             "summary": args.summary,
             "result_json": args.result_json,
         }
+        duplicate = context.pending_report == queued_report
+        context.pending_report = queued_report
         return {
             "saved": True,
             "queued": True,
+            "duplicate": duplicate,
+            "message": (
+                "报告已进入待确认队列，禁止再次调用 save_match_report。"
+                if not duplicate
+                else "报告已在队列中，禁止再次调用 save_match_report。"
+            ),
         }
 
     if context.session is None or context.task_id is None:

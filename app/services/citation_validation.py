@@ -116,14 +116,19 @@ def validate_report_citations(
             missing_citation=require_at_least_one,
         )
 
+    combined_items = []
+    seen_chunk_ids: set[int] = set()
+    for pack in evidence_packs:
+        for item in pack.items:
+            if item.chunk_id in seen_chunk_ids:
+                continue
+            seen_chunk_ids.add(item.chunk_id)
+            combined_items.append(item)
+
     return validate_evidence_citations(
         evidence_pack=EvidencePack(
             requirement="combined",
-            items=[
-                item
-                for pack in evidence_packs
-                for item in pack.items
-            ],
+            items=combined_items,
             rerank_applied=True,
         ),
         cited_chunk_ids=cited_chunk_ids,

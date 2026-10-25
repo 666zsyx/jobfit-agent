@@ -1,0 +1,278 @@
+{
+  "version": 1,
+  "source": "live_persisted_rag",
+  "entrypoint": "app.services.react_agent.run_react_loop",
+  "generated_at": "2026-10-25T10:08:49+00:00",
+  "git_revision": "7a7c879",
+  "model": null,
+  "max_steps": 8,
+  "dataset": "data\\evaluation\\agent_cases.json",
+  "executed_cases": [
+    {
+      "case_id": "python_fastapi_happy",
+      "category": "happy_path",
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "get_resume_profile",
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          244
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 5,
+        "usage_total": 16505,
+        "latency_ms": 13106,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 1,
+        "evidence_item_count": 1,
+        "evidence_backed": true,
+        "assessments": [
+          {
+            "requirement": "具备 Python 和 FastAPI 后端开发经验",
+            "status": "strong_match",
+            "reason": "存在最高分为 0.983 的原文证据，达到强匹配阈值 0.6。",
+            "evidence": [
+              {
+                "section_type": "project_experience",
+                "title": "简历原文",
+                "content": "在课程项目中用 Python 和 FastAPI 开发了三个 REST API 服务，负责接口设计、参数校验、JWT 鉴权和 Docker 部署，服务日均请求约 1 万次。",
+                "score": 0.983182,
+                "chunk_id": 244,
+                "source_version_id": 175,
+                "position": 1,
+                "rerank_score": 4.06836605
+              }
+            ]
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool_name": "get_resume_profile",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "redis_strong",
+      "category": "happy_path",
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "get_resume_profile",
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          245
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 6,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 23190,
+        "latency_ms": 15667,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 1,
+        "evidence_item_count": 1,
+        "evidence_backed": true,
+        "assessments": [
+          {
+            "requirement": "熟悉 Redis 缓存和分布式锁",
+            "status": "strong_match",
+            "reason": "存在最高分为 0.923 的原文证据，达到强匹配阈值 0.6。",
+            "evidence": [
+              {
+                "section_type": "project_experience",
+                "title": "简历原文",
+                "content": "使用 Redis 实现缓存、运行锁和限流。",
+                "score": 0.922717,
+                "chunk_id": 245,
+                "source_version_id": 176,
+                "position": 1,
+                "rerank_score": 2.47984552
+              }
+            ]
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool_name": "get_resume_profile",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "docker_deploy_happy",
+      "category": "happy_path",
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "get_resume_profile",
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [
+          246
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 5,
+        "usage_total": 16044,
+        "latency_ms": 9996,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 1,
+        "evidence_item_count": 1,
+        "evidence_backed": true,
+        "assessments": [
+          {
+            "requirement": "具备 Docker 与 docker-compose 部署经验",
+            "status": "strong_match",
+            "reason": "存在最高分为 0.986 的原文证据，达到强匹配阈值 0.6。",
+            "evidence": [
+              {
+                "section_type": "project_experience",
+                "title": "简历原文",
+                "content": "使用 Dockerfile 和 docker-compose 部署 FastAPI、PostgreSQL 与 Redis 服务。",
+                "score": 0.986366,
+                "chunk_id": 246,
+                "source_version_id": 177,
+                "position": 1,
+                "rerank_score": 4.28145266
+              }
+            ]
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool_name": "get_resume_profile",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    }
+  ],
+  "skipped_cases": []
+}

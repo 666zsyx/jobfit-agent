@@ -24,6 +24,8 @@ class ExpectedAgentOutcome(BaseModel):
     citation_ids: list[int] = Field(default_factory=list)
     should_abstain: bool = False
     requires_confirmation: bool = False
+    # Expected tool errors (fault injection / recovery cases).
+    expected_tool_error_count: int = Field(default=0, ge=0)
 
 
 class ObservedAgentOutcome(BaseModel):
@@ -180,12 +182,18 @@ def evaluate_agent_case(case: AgentEvaluationCase) -> AgentCaseResult:
         citation_valid = (
             bool(observed_citations)
             and observed_citations == expected_citations
+            and len(observed.citation_ids) == len(expected.citation_ids)
         )
 
+    unexpected_tool_error_count = max(
+        0,
+        observed.tool_error_count - expected.expected_tool_error_count,
+    )
     tool_success_rate = (
         1.0
         if observed.tool_call_count == 0
-        else 1.0 - (observed.tool_error_count / observed.tool_call_count)
+        else 1.0
+        - (unexpected_tool_error_count / observed.tool_call_count)
     )
     unsupported_suggestion_rate = (
         0.0

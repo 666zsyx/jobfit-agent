@@ -7,7 +7,10 @@ from app.schemas.knowledge import (
     HybridSearchHit,
     RerankedSearchHit,
 )
-from app.services.citation_validation import validate_evidence_citations
+from app.services.citation_validation import (
+    validate_evidence_citations,
+    validate_report_citations,
+)
 from app.services.evidence_pipeline import (
     build_evidence_pack_from_hybrid,
     build_evidence_pack_from_reranked,
@@ -163,6 +166,28 @@ def test_citation_validation_rejects_unknown_and_duplicate_ids():
     assert result.valid is False
     assert result.unknown_chunk_ids == [999]
     assert result.duplicate_chunk_ids == [1]
+
+
+def test_report_citation_validation_deduplicates_shared_chunks():
+    first_pack = build_evidence_pack_from_hybrid(
+        requirement="Python 后端开发",
+        hybrid_hits=[make_hybrid_hit(1, rank=1, fusion_score=0.03)],
+        top_n=1,
+        fallback_reason="test",
+    )
+    second_pack = EvidencePack(
+        requirement="Redis 缓存",
+        items=first_pack.items,
+        rerank_applied=False,
+    )
+
+    result = validate_report_citations(
+        result_json={"matches": [{"chunk_id": 1}]},
+        evidence_packs=[first_pack, second_pack],
+    )
+
+    assert result.valid is True
+    assert result.cited_chunk_ids == [1]
 
 
 def test_citation_validation_rejects_missing_citation():

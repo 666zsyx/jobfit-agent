@@ -6,13 +6,13 @@ from pydantic import ValidationError
 
 from app.core.exceptions import StructuredOutputError
 from app.schemas.extraction import JobExtraction
+from app.services.llm import chat_json
 from app.services.prompt_injection import (
     build_security_notice,
     ensure_safe_untrusted_text,
     escape_boundary_marker,
 )
-from app.services.llm import chat_json
-
+from app.services.text_similarity import requirements_are_similar
 
 JOB_SCHEMA_TEXT = json.dumps(
     JobExtraction.model_json_schema(),
@@ -55,6 +55,10 @@ def build_job_extraction_messages(
         "4. 不得虚构 JD 中不存在的信息。\n"
         "5. responsibilities 和 required_skills 不能为空列表。\n"
         "6. 提取应尽可能完整，不得无理由遗漏原文中的关键要求。\n"
+        "7. 同一句话里的并列技能，如果语义重叠或属于同一技术组合，"
+        "合并成一条完整要求，不要拆成多条近义要求。\n"
+        "8. required_skills 一般控制在 1~5 条，优先保留完整、"
+        "可验证的要求。\n"
     )
 
     return [
@@ -83,6 +87,28 @@ def _build_validation_feedback(
         "请根据原始岗位 JD 重新输出完整的 JSON 对象，"
         "不要只返回修复片段，并严格遵守 JSON Schema。"
     )
+
+
+def merge_similar_requirements(requirements: list[str]) -> list[str]:
+    merged: list[str] = []
+    for requirement in requirements:
+        duplicate_index = None
+        for index, existing in enumerate(merged):
+            if requirements_are_similar(requirement, existing):
+                duplicate_index = index
+                break
+        if duplicate_index is None:
+            merged.append(requirement)
+        elif len(requirement) > len(merged[duplicate_index]):
+            merged[duplicate_index] = requirement
+    return merged
+
+
+def _merge_similar_skills(result: JobExtraction) -> JobExtraction:
+    merged = merge_similar_requirements(result.required_skills)
+    if merged == result.required_skills:
+        return result
+    return result.model_copy(update={"required_skills": merged})
 
 
 # 调用模型提取岗位 JD，并对空响应和结构错误执行有限重试。
@@ -124,7 +150,8 @@ async def extract_job(
             break
 
         try:
-            return JobExtraction.model_validate_json(raw_json)
+            result = JobExtraction.model_validate_json(raw_json)
+            return _merge_similar_skills(result)
         except ValidationError as exc:
             last_error = exc
 

@@ -1,30 +1,32 @@
 {
   "version": 1,
   "source": "live_react_keyword",
-  "generated_at": "2026-10-21T10:28:13+00:00",
-  "git_revision": "af4b6d6",
+  "generated_at": "2026-10-25T09:18:51+00:00",
+  "git_revision": "7a7c879",
   "model": "deepseek-flash",
   "max_steps": 8,
-  "executed_case_count": 27,
-  "skipped_case_count": 3,
+  "dataset_case_count": 50,
+  "executed_case_count": 45,
+  "skipped_case_count": 5,
+  "pending_case_count": 0,
   "summary": {
-    "case_count": 27,
+    "case_count": 45,
     "task_completion_rate": 1.0,
     "tool_sequence_accuracy": 0.0,
-    "tool_precision": 0.7506172839506172,
-    "tool_recall": 1.0,
-    "tool_f1": 0.8547325102880658,
+    "tool_precision": 0.7511111111111112,
+    "tool_recall": 0.9822222222222223,
+    "tool_f1": 0.847283950617284,
     "tool_success_rate": 1.0,
-    "match_status_f1": 0.5765432098765432,
-    "citation_f1": 0.2222222222222222,
-    "citation_validity_rate": 0.2222222222222222,
-    "abstention_accuracy": 0.9629629629629629,
+    "match_status_f1": 0.43407407407407406,
+    "citation_f1": 0.2,
+    "citation_validity_rate": 0.2,
+    "abstention_accuracy": 0.8444444444444444,
     "confirmation_recovery_rate": 1.0,
     "unsupported_suggestion_rate": 0.0,
-    "average_steps": 5.851851851851852,
-    "average_usage_total": 19043.444444444445,
-    "p50_latency_ms": 11309.0,
-    "p95_latency_ms": 13965.0,
+    "average_steps": 5.688888888888889,
+    "average_usage_total": 18616.155555555557,
+    "p50_latency_ms": 11625.0,
+    "p95_latency_ms": 14584.0,
     "evidence_backed_rate": 1.0
   },
   "thresholds": {
@@ -35,16 +37,16 @@
       "passed": true
     },
     "tool_recall": {
-      "value": 1.0,
+      "value": 0.9822222222222223,
       "threshold": 0.9,
       "operator": ">=",
       "passed": true
     },
     "tool_f1": {
-      "value": 0.8547325102880658,
+      "value": 0.847283950617284,
       "threshold": 0.85,
       "operator": ">=",
-      "passed": true
+      "passed": false
     },
     "tool_success_rate": {
       "value": 1.0,
@@ -53,16 +55,16 @@
       "passed": true
     },
     "match_status_f1": {
-      "value": 0.5765432098765432,
+      "value": 0.43407407407407406,
       "threshold": 0.85,
       "operator": ">=",
       "passed": false
     },
     "abstention_accuracy": {
-      "value": 0.9629629629629629,
+      "value": 0.8444444444444444,
       "threshold": 0.9,
       "operator": ">=",
-      "passed": true
+      "passed": false
     },
     "unsupported_suggestion_rate": {
       "value": 0.0,
@@ -110,6 +112,7 @@
         ],
         "match_statuses": [
           "partial_match",
+          "partial_match",
           "partial_match"
         ],
         "citation_ids": [],
@@ -117,16 +120,16 @@
         "confirmation_recovered": true,
         "tool_call_count": 5,
         "tool_error_count": 0,
-        "suggestion_count": 2,
+        "suggestion_count": 3,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 20376,
-        "latency_ms": 12948,
+        "steps": 5,
+        "usage_total": 18700,
+        "latency_ms": 12972,
         "error_code": null
       },
       "extras": {
-        "assessment_count": 2,
-        "evidence_item_count": 2,
+        "assessment_count": 3,
+        "evidence_item_count": 3,
         "evidence_backed": true,
         "tool_calls": [
           {
@@ -137,25 +140,25 @@
           },
           {
             "tool_name": "extract_resume_sections",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
-            "step": 4,
+            "step": 3,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "save_match_report",
-            "step": 5,
+            "step": 4,
             "ok": true,
             "error": null
           }
@@ -168,9 +171,9 @@
       "metrics": {
         "task_completed": true,
         "tool_sequence_accuracy": 0.0,
-        "tool_precision": 0.8,
+        "tool_precision": 0.6666666666666666,
         "tool_recall": 1.0,
-        "tool_f1": 0.888888888888889,
+        "tool_f1": 0.8,
         "tool_success_rate": 1.0,
         "match_status_f1": 0.6666666666666666,
         "citation_precision": 0.0,
@@ -189,6 +192,7 @@
           "extract_resume_sections",
           "search_resume_evidence",
           "assess_requirement_match",
+          "save_match_report",
           "save_match_report"
         ],
         "match_statuses": [
@@ -198,13 +202,13 @@
         "citation_ids": [],
         "abstained": false,
         "confirmation_recovered": true,
-        "tool_call_count": 5,
+        "tool_call_count": 6,
         "tool_error_count": 0,
         "suggestion_count": 2,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 19162,
-        "latency_ms": 11058,
+        "usage_total": 21855,
+        "latency_ms": 15825,
         "error_code": null
       },
       "extras": {
@@ -220,18 +224,24 @@
           },
           {
             "tool_name": "extract_resume_sections",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
             "step": 4,
             "ok": true,
             "error": null
@@ -251,9 +261,9 @@
       "metrics": {
         "task_completed": true,
         "tool_sequence_accuracy": 0.0,
-        "tool_precision": 0.8,
+        "tool_precision": 0.6666666666666666,
         "tool_recall": 1.0,
-        "tool_f1": 0.888888888888889,
+        "tool_f1": 0.8,
         "tool_success_rate": 1.0,
         "match_status_f1": 0.6666666666666666,
         "citation_precision": 0.0,
@@ -272,6 +282,7 @@
           "extract_resume_sections",
           "search_resume_evidence",
           "assess_requirement_match",
+          "save_match_report",
           "save_match_report"
         ],
         "match_statuses": [
@@ -281,13 +292,13 @@
         "citation_ids": [],
         "abstained": false,
         "confirmation_recovered": true,
-        "tool_call_count": 5,
+        "tool_call_count": 6,
         "tool_error_count": 0,
         "suggestion_count": 2,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 20593,
-        "latency_ms": 13965,
+        "steps": 7,
+        "usage_total": 23520,
+        "latency_ms": 14748,
         "error_code": null
       },
       "extras": {
@@ -322,6 +333,12 @@
           {
             "tool_name": "save_match_report",
             "step": 5,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 6,
             "ok": true,
             "error": null
           }
@@ -358,7 +375,6 @@
           "save_match_report"
         ],
         "match_statuses": [
-          "partial_match",
           "partial_match"
         ],
         "citation_ids": [],
@@ -366,16 +382,16 @@
         "confirmation_recovered": true,
         "tool_call_count": 5,
         "tool_error_count": 0,
-        "suggestion_count": 2,
+        "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 21310,
-        "latency_ms": 14032,
+        "usage_total": 20031,
+        "latency_ms": 14246,
         "error_code": null
       },
       "extras": {
-        "assessment_count": 2,
-        "evidence_item_count": 2,
+        "assessment_count": 1,
+        "evidence_item_count": 1,
         "evidence_backed": true,
         "tool_calls": [
           {
@@ -451,8 +467,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 18532,
-        "latency_ms": 11090,
+        "usage_total": 20190,
+        "latency_ms": 14584,
         "error_code": null
       },
       "extras": {
@@ -533,8 +549,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 18455,
-        "latency_ms": 10946,
+        "usage_total": 18658,
+        "latency_ms": 12191,
         "error_code": null
       },
       "extras": {
@@ -615,8 +631,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 17748,
-        "latency_ms": 9142,
+        "usage_total": 17843,
+        "latency_ms": 10389,
         "error_code": null
       },
       "extras": {
@@ -698,8 +714,8 @@
         "suggestion_count": 2,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 19918,
-        "latency_ms": 11997,
+        "usage_total": 18675,
+        "latency_ms": 11129,
         "error_code": null
       },
       "extras": {
@@ -750,7 +766,7 @@
         "tool_recall": 1.0,
         "tool_f1": 0.888888888888889,
         "tool_success_rate": 1.0,
-        "match_status_f1": 0.6666666666666666,
+        "match_status_f1": 0.0,
         "citation_precision": 0.0,
         "citation_recall": 0.0,
         "citation_f1": 0.0,
@@ -770,7 +786,6 @@
           "save_match_report"
         ],
         "match_statuses": [
-          "strong_match",
           "partial_match"
         ],
         "citation_ids": [],
@@ -778,16 +793,16 @@
         "confirmation_recovered": true,
         "tool_call_count": 5,
         "tool_error_count": 0,
-        "suggestion_count": 2,
+        "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 20473,
-        "latency_ms": 12871,
+        "usage_total": 18284,
+        "latency_ms": 10009,
         "error_code": null
       },
       "extras": {
-        "assessment_count": 2,
-        "evidence_item_count": 2,
+        "assessment_count": 1,
+        "evidence_item_count": 1,
         "evidence_backed": true,
         "tool_calls": [
           {
@@ -863,8 +878,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 18535,
-        "latency_ms": 11086,
+        "usage_total": 18318,
+        "latency_ms": 9875,
         "error_code": null
       },
       "extras": {
@@ -911,88 +926,6 @@
       "metrics": {
         "task_completed": true,
         "tool_sequence_accuracy": 0.0,
-        "tool_precision": 0.8,
-        "tool_recall": 1.0,
-        "tool_f1": 0.888888888888889,
-        "tool_success_rate": 1.0,
-        "match_status_f1": 1.0,
-        "citation_precision": 0.0,
-        "citation_recall": 0.0,
-        "citation_f1": 0.0,
-        "citation_valid": false,
-        "abstention_correct": true,
-        "confirmation_recovered": true,
-        "unsupported_suggestion_rate": 0.0,
-        "evidence_backed": true
-      },
-      "observed": {
-        "task_status": "completed",
-        "tools": [
-          "extract_job_requirements",
-          "extract_resume_sections",
-          "search_resume_evidence",
-          "assess_requirement_match",
-          "save_match_report"
-        ],
-        "match_statuses": [
-          "strong_match"
-        ],
-        "citation_ids": [],
-        "abstained": false,
-        "confirmation_recovered": true,
-        "tool_call_count": 5,
-        "tool_error_count": 0,
-        "suggestion_count": 1,
-        "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 18162,
-        "latency_ms": 9934,
-        "error_code": null
-      },
-      "extras": {
-        "assessment_count": 1,
-        "evidence_item_count": 1,
-        "evidence_backed": true,
-        "tool_calls": [
-          {
-            "tool_name": "extract_job_requirements",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "extract_resume_sections",
-            "step": 2,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "search_resume_evidence",
-            "step": 3,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "assess_requirement_match",
-            "step": 4,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "save_match_report",
-            "step": 5,
-            "ok": true,
-            "error": null
-          }
-        ]
-      }
-    },
-    {
-      "case_id": "extra_tool_call_failure",
-      "category": "tooling",
-      "metrics": {
-        "task_completed": true,
-        "tool_sequence_accuracy": 0.0,
         "tool_precision": 0.6666666666666666,
         "tool_recall": 1.0,
         "tool_f1": 0.8,
@@ -1027,9 +960,97 @@
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 7,
-        "usage_total": 23333,
-        "latency_ms": 12030,
+        "steps": 6,
+        "usage_total": 19745,
+        "latency_ms": 10621,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 1,
+        "evidence_item_count": 1,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "extra_tool_call_failure",
+      "category": "tooling",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match"
+        ],
+        "citation_ids": [],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 18368,
+        "latency_ms": 12196,
         "error_code": null
       },
       "extras": {
@@ -1066,10 +1087,87 @@
             "step": 5,
             "ok": true,
             "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "docker_deploy_happy",
+      "category": "happy_path",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "insufficient_evidence",
+          "partial_match"
+        ],
+        "citation_ids": [],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 2,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 19836,
+        "latency_ms": 13198,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 2,
+        "evidence_item_count": 1,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 4,
+            "ok": true,
+            "error": null
           },
           {
             "tool_name": "save_match_report",
-            "step": 6,
+            "step": 5,
             "ok": true,
             "error": null
           }
@@ -1077,7 +1175,7 @@
       }
     },
     {
-      "case_id": "docker_deploy_happy",
+      "case_id": "langgraph_checkpoint_happy",
       "category": "happy_path",
       "metrics": {
         "task_completed": true,
@@ -1117,8 +1215,8 @@
         "suggestion_count": 2,
         "unsupported_suggestion_count": 0,
         "steps": 5,
-        "usage_total": 17791,
-        "latency_ms": 11284,
+        "usage_total": 18641,
+        "latency_ms": 13846,
         "error_code": null
       },
       "extras": {
@@ -1160,89 +1258,6 @@
       }
     },
     {
-      "case_id": "langgraph_checkpoint_happy",
-      "category": "happy_path",
-      "metrics": {
-        "task_completed": true,
-        "tool_sequence_accuracy": 0.0,
-        "tool_precision": 0.8,
-        "tool_recall": 1.0,
-        "tool_f1": 0.888888888888889,
-        "tool_success_rate": 1.0,
-        "match_status_f1": 0.0,
-        "citation_precision": 0.0,
-        "citation_recall": 0.0,
-        "citation_f1": 0.0,
-        "citation_valid": false,
-        "abstention_correct": true,
-        "confirmation_recovered": true,
-        "unsupported_suggestion_rate": 0.0,
-        "evidence_backed": true
-      },
-      "observed": {
-        "task_status": "completed",
-        "tools": [
-          "extract_job_requirements",
-          "extract_resume_sections",
-          "search_resume_evidence",
-          "assess_requirement_match",
-          "save_match_report"
-        ],
-        "match_statuses": [
-          "insufficient_evidence",
-          "partial_match"
-        ],
-        "citation_ids": [],
-        "abstained": false,
-        "confirmation_recovered": true,
-        "tool_call_count": 5,
-        "tool_error_count": 0,
-        "suggestion_count": 2,
-        "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 19747,
-        "latency_ms": 11539,
-        "error_code": null
-      },
-      "extras": {
-        "assessment_count": 2,
-        "evidence_item_count": 1,
-        "evidence_backed": true,
-        "tool_calls": [
-          {
-            "tool_name": "extract_job_requirements",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "extract_resume_sections",
-            "step": 2,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "search_resume_evidence",
-            "step": 3,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "assess_requirement_match",
-            "step": 4,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "save_match_report",
-            "step": 5,
-            "ok": true,
-            "error": null
-          }
-        ]
-      }
-    },
-    {
       "case_id": "redis_limiter_happy",
       "category": "happy_path",
       "metrics": {
@@ -1273,7 +1288,7 @@
         ],
         "match_statuses": [
           "partial_match",
-          "insufficient_evidence"
+          "partial_match"
         ],
         "citation_ids": [],
         "abstained": false,
@@ -1282,14 +1297,14 @@
         "tool_error_count": 0,
         "suggestion_count": 2,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 20622,
-        "latency_ms": 12066,
+        "steps": 5,
+        "usage_total": 17474,
+        "latency_ms": 10790,
         "error_code": null
       },
       "extras": {
         "assessment_count": 2,
-        "evidence_item_count": 1,
+        "evidence_item_count": 2,
         "evidence_backed": true,
         "tool_calls": [
           {
@@ -1300,25 +1315,25 @@
           },
           {
             "tool_name": "extract_resume_sections",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
-            "step": 4,
+            "step": 3,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "save_match_report",
-            "step": 5,
+            "step": 4,
             "ok": true,
             "error": null
           }
@@ -1365,8 +1380,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 5,
-        "usage_total": 15504,
-        "latency_ms": 8939,
+        "usage_total": 15357,
+        "latency_ms": 9419,
         "error_code": null
       },
       "extras": {
@@ -1446,9 +1461,9 @@
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 18487,
-        "latency_ms": 10748,
+        "steps": 5,
+        "usage_total": 15374,
+        "latency_ms": 10083,
         "error_code": null
       },
       "extras": {
@@ -1464,25 +1479,25 @@
           },
           {
             "tool_name": "extract_resume_sections",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
-            "step": 4,
+            "step": 3,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "save_match_report",
-            "step": 5,
+            "step": 4,
             "ok": true,
             "error": null
           }
@@ -1529,8 +1544,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 18324,
-        "latency_ms": 11266,
+        "usage_total": 19134,
+        "latency_ms": 12394,
         "error_code": null
       },
       "extras": {
@@ -1610,9 +1625,9 @@
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 5,
-        "usage_total": 16841,
-        "latency_ms": 11476,
+        "steps": 6,
+        "usage_total": 19926,
+        "latency_ms": 12984,
         "error_code": null
       },
       "extras": {
@@ -1628,25 +1643,25 @@
           },
           {
             "tool_name": "extract_resume_sections",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "search_resume_evidence",
             "step": 2,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "assess_requirement_match",
+            "tool_name": "search_resume_evidence",
             "step": 3,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "save_match_report",
+            "tool_name": "assess_requirement_match",
             "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
             "ok": true,
             "error": null
           }
@@ -1693,9 +1708,9 @@
         "tool_error_count": 0,
         "suggestion_count": 2,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 20601,
-        "latency_ms": 11635,
+        "steps": 5,
+        "usage_total": 17317,
+        "latency_ms": 11463,
         "error_code": null
       },
       "extras": {
@@ -1711,25 +1726,25 @@
           },
           {
             "tool_name": "extract_resume_sections",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
-            "step": 4,
+            "step": 3,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "save_match_report",
-            "step": 5,
+            "step": 4,
             "ok": true,
             "error": null
           }
@@ -1776,8 +1791,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 19283,
-        "latency_ms": 11309,
+        "usage_total": 18763,
+        "latency_ms": 10906,
         "error_code": null
       },
       "extras": {
@@ -1828,7 +1843,7 @@
         "tool_recall": 1.0,
         "tool_f1": 0.888888888888889,
         "tool_success_rate": 1.0,
-        "match_status_f1": 0.5,
+        "match_status_f1": 0.8,
         "citation_precision": 0.0,
         "citation_recall": 0.0,
         "citation_f1": 0.0,
@@ -1848,6 +1863,7 @@
           "save_match_report"
         ],
         "match_statuses": [
+          "strong_match",
           "partial_match",
           "insufficient_evidence"
         ],
@@ -1856,16 +1872,16 @@
         "confirmation_recovered": true,
         "tool_call_count": 5,
         "tool_error_count": 0,
-        "suggestion_count": 2,
+        "suggestion_count": 3,
         "unsupported_suggestion_count": 0,
-        "steps": 5,
-        "usage_total": 16872,
-        "latency_ms": 10938,
+        "steps": 6,
+        "usage_total": 19900,
+        "latency_ms": 11408,
         "error_code": null
       },
       "extras": {
-        "assessment_count": 2,
-        "evidence_item_count": 1,
+        "assessment_count": 3,
+        "evidence_item_count": 2,
         "evidence_backed": true,
         "tool_calls": [
           {
@@ -1876,25 +1892,25 @@
           },
           {
             "tool_name": "extract_resume_sections",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "search_resume_evidence",
             "step": 2,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "assess_requirement_match",
+            "tool_name": "search_resume_evidence",
             "step": 3,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "save_match_report",
+            "tool_name": "assess_requirement_match",
             "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
             "ok": true,
             "error": null
           }
@@ -1942,9 +1958,9 @@
         "tool_error_count": 0,
         "suggestion_count": 3,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 20272,
-        "latency_ms": 12050,
+        "steps": 5,
+        "usage_total": 17935,
+        "latency_ms": 11275,
         "error_code": null
       },
       "extras": {
@@ -1960,25 +1976,25 @@
           },
           {
             "tool_name": "extract_resume_sections",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
-            "step": 4,
+            "step": 3,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "save_match_report",
-            "step": 5,
+            "step": 4,
             "ok": true,
             "error": null
           }
@@ -2025,8 +2041,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 5,
-        "usage_total": 16233,
-        "latency_ms": 11531,
+        "usage_total": 16342,
+        "latency_ms": 11556,
         "error_code": null
       },
       "extras": {
@@ -2108,8 +2124,8 @@
         "suggestion_count": 2,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 19834,
-        "latency_ms": 10501,
+        "usage_total": 19669,
+        "latency_ms": 13374,
         "error_code": null
       },
       "extras": {
@@ -2189,9 +2205,9 @@
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 18568,
-        "latency_ms": 11716,
+        "steps": 5,
+        "usage_total": 15296,
+        "latency_ms": 9605,
         "error_code": null
       },
       "extras": {
@@ -2207,25 +2223,25 @@
           },
           {
             "tool_name": "extract_resume_sections",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
-            "step": 4,
+            "step": 3,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "save_match_report",
-            "step": 5,
+            "step": 4,
             "ok": true,
             "error": null
           }
@@ -2272,8 +2288,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 18597,
-        "latency_ms": 10619,
+        "usage_total": 19216,
+        "latency_ms": 12755,
         "error_code": null
       },
       "extras": {
@@ -2313,8 +2329,1588 @@
           }
         ]
       }
+    },
+    {
+      "case_id": "mock_unknown_tool_recovered",
+      "category": "tooling",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 0.8,
+        "tool_f1": 0.8000000000000002,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match",
+          "partial_match"
+        ],
+        "citation_ids": [],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 2,
+        "unsupported_suggestion_count": 0,
+        "steps": 5,
+        "usage_total": 17496,
+        "latency_ms": 13560,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 2,
+        "evidence_item_count": 2,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "mock_invalid_arguments_recovered",
+      "category": "tooling",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 0.8,
+        "tool_f1": 0.8000000000000002,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.6666666666666666,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "insufficient_evidence",
+          "partial_match"
+        ],
+        "citation_ids": [],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 2,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 18909,
+        "latency_ms": 10497,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 2,
+        "evidence_item_count": 1,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "mock_tool_timeout_recovered",
+      "category": "recovery",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 0.8,
+        "tool_f1": 0.8000000000000002,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match",
+          "partial_match"
+        ],
+        "citation_ids": [],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 2,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 20076,
+        "latency_ms": 11559,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 2,
+        "evidence_item_count": 2,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "mock_tool_handler_error_recovered",
+      "category": "recovery",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 0.8,
+        "tool_f1": 0.8000000000000002,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.6666666666666666,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match",
+          "partial_match"
+        ],
+        "citation_ids": [],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 2,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 20583,
+        "latency_ms": 12104,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 2,
+        "evidence_item_count": 2,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "mock_citation_missing",
+      "category": "citation",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match"
+        ],
+        "citation_ids": [],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 18965,
+        "latency_ms": 11625,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 1,
+        "evidence_item_count": 1,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "mock_citation_unknown_id",
+      "category": "citation",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match"
+        ],
+        "citation_ids": [],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 18414,
+        "latency_ms": 11560,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 1,
+        "evidence_item_count": 1,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "mock_citation_duplicate_id",
+      "category": "citation",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match"
+        ],
+        "citation_ids": [],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 5,
+        "usage_total": 15986,
+        "latency_ms": 10628,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 1,
+        "evidence_item_count": 1,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "mock_empty_evidence_abstain",
+      "category": "abstention",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.6,
+        "tool_recall": 1.0,
+        "tool_f1": 0.7499999999999999,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": false,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match"
+        ],
+        "citation_ids": [],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 18994,
+        "latency_ms": 11688,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 1,
+        "evidence_item_count": 1,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "live_strong_match_exact",
+      "category": "happy_path",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match",
+          "partial_match"
+        ],
+        "citation_ids": [],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 2,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 20562,
+        "latency_ms": 14092,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 2,
+        "evidence_item_count": 2,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "live_partial_match_weak",
+      "category": "partial_match",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": false,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "insufficient_evidence",
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "abstained": true,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 2,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 18695,
+        "latency_ms": 12196,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 2,
+        "evidence_item_count": 0,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "live_insufficient_no_evidence",
+      "category": "abstention",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.6,
+        "tool_recall": 1.0,
+        "tool_f1": 0.7499999999999999,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.6666666666666666,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "insufficient_evidence",
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "abstained": true,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 2,
+        "unsupported_suggestion_count": 0,
+        "steps": 5,
+        "usage_total": 16638,
+        "latency_ms": 10738,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 2,
+        "evidence_item_count": 0,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "live_partial_vs_insufficient",
+      "category": "partial_match",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": false,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "insufficient_evidence",
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "abstained": true,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 2,
+        "unsupported_suggestion_count": 0,
+        "steps": 5,
+        "usage_total": 16281,
+        "latency_ms": 12589,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 2,
+        "evidence_item_count": 0,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "live_mixed_three_states",
+      "category": "mixed",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.6666666666666666,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "partial_match",
+          "partial_match",
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 3,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 21000,
+        "latency_ms": 12458,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 3,
+        "evidence_item_count": 2,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "live_multi_requirement_partial",
+      "category": "mixed",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.6666666666666666,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match",
+          "strong_match",
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 3,
+        "unsupported_suggestion_count": 0,
+        "steps": 5,
+        "usage_total": 17427,
+        "latency_ms": 11186,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 3,
+        "evidence_item_count": 2,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "live_long_resume_partial",
+      "category": "partial_match",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": false,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "abstained": true,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 19281,
+        "latency_ms": 12799,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 1,
+        "evidence_item_count": 0,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "live_short_resume_insufficient",
+      "category": "abstention",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.6,
+        "tool_recall": 1.0,
+        "tool_f1": 0.7499999999999999,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "abstained": true,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 18402,
+        "latency_ms": 11244,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 1,
+        "evidence_item_count": 0,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "live_cross_section_match",
+      "category": "happy_path",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": false,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "insufficient_evidence",
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "abstained": true,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 2,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 18790,
+        "latency_ms": 11499,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 2,
+        "evidence_item_count": 0,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "live_weak_evidence_partial",
+      "category": "partial_match",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.0,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": false,
+        "abstention_correct": false,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "extract_job_requirements",
+          "extract_resume_sections",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "insufficient_evidence",
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "abstained": true,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 2,
+        "unsupported_suggestion_count": 0,
+        "steps": 5,
+        "usage_total": 16861,
+        "latency_ms": 12001,
+        "error_code": null
+      },
+      "extras": {
+        "assessment_count": 2,
+        "evidence_item_count": 0,
+        "evidence_backed": true,
+        "tool_calls": [
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_resume_sections",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
     }
   ],
+  "by_category": {
+    "abstention": {
+      "case_count": 8,
+      "task_completion_rate": 1.0,
+      "tool_f1": 0.7499999999999999,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 0.8333333333333334,
+      "citation_validity_rate": 1.0,
+      "abstention_accuracy": 0.875,
+      "unsupported_suggestion_rate": 0.0,
+      "evidence_backed_rate": 1.0
+    },
+    "citation": {
+      "case_count": 5,
+      "task_completion_rate": 1.0,
+      "tool_f1": 0.888888888888889,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 0.0,
+      "citation_validity_rate": 0.0,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.0,
+      "evidence_backed_rate": 1.0
+    },
+    "hallucination": {
+      "case_count": 2,
+      "task_completion_rate": 1.0,
+      "tool_f1": 0.7749999999999999,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 1.0,
+      "citation_validity_rate": 0.5,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.0,
+      "evidence_backed_rate": 1.0
+    },
+    "happy_path": {
+      "case_count": 9,
+      "task_completion_rate": 1.0,
+      "tool_f1": 0.8790123456790124,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 0.07407407407407407,
+      "citation_validity_rate": 0.0,
+      "abstention_accuracy": 0.7777777777777778,
+      "unsupported_suggestion_rate": 0.0,
+      "evidence_backed_rate": 1.0
+    },
+    "mixed": {
+      "case_count": 5,
+      "task_completion_rate": 1.0,
+      "tool_f1": 0.888888888888889,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 0.7066666666666667,
+      "citation_validity_rate": 0.0,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.0,
+      "evidence_backed_rate": 1.0
+    },
+    "partial_match": {
+      "case_count": 8,
+      "task_completion_rate": 1.0,
+      "tool_f1": 0.8777777777777779,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 0.41666666666666663,
+      "citation_validity_rate": 0.0,
+      "abstention_accuracy": 0.5,
+      "unsupported_suggestion_rate": 0.0,
+      "evidence_backed_rate": 1.0
+    },
+    "recovery": {
+      "case_count": 4,
+      "task_completion_rate": 1.0,
+      "tool_f1": 0.8444444444444446,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 0.41666666666666663,
+      "citation_validity_rate": 0.0,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.0,
+      "evidence_backed_rate": 1.0
+    },
+    "tooling": {
+      "case_count": 4,
+      "task_completion_rate": 1.0,
+      "tool_f1": 0.8444444444444446,
+      "tool_success_rate": 1.0,
+      "match_status_f1": 0.41666666666666663,
+      "citation_validity_rate": 0.0,
+      "abstention_accuracy": 1.0,
+      "unsupported_suggestion_rate": 0.0,
+      "evidence_backed_rate": 1.0
+    }
+  },
   "skipped_cases": [
     {
       "case_id": "confirmation_revise_recovered",
@@ -2328,6 +3924,16 @@
     },
     {
       "case_id": "max_steps_interrupted",
+      "category": "failure",
+      "skip_reason": "需要持久化任务状态或强制步数上限"
+    },
+    {
+      "case_id": "mock_max_steps_loop",
+      "category": "failure",
+      "skip_reason": "需要持久化任务状态或强制步数上限"
+    },
+    {
+      "case_id": "mock_repeated_tool_loop",
       "category": "failure",
       "skip_reason": "需要持久化任务状态或强制步数上限"
     }
