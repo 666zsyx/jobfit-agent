@@ -91,25 +91,25 @@
 ### 4.1 持久化 RAG 全量结果（45 条）
 
 - task_completion_rate：**1.0000**
-- tool_recall：**0.9822**
-- tool_f1：**0.8284**（低于 0.85，FAIL）
+- tool_recall：**1.0000**
+- tool_f1：**0.9557**
 - tool_success_rate：**1.0000**
-- match_status_f1：**0.5259**（低于 0.85，FAIL）
-- abstention_accuracy：**0.8222**（低于 0.90，FAIL）
+- match_status_f1：**0.8704**
+- abstention_accuracy：**0.9556**
 - unsupported_suggestion_rate：**0.0000**
 - evidence_backed_rate：**1.0000**
 - citation_validity_rate：**0.9556**（证据白名单口径）
-- citation_f1：**0.0667**（占位 ID 口径，不具可比性）
-- average_steps：**5.84**
-- average_usage_total：**19538.20**
-- p95 latency：**17866 ms**
-- 门槛结论：**REVIEW**
+- citation_f1：**0.2000**（占位 ID 口径，不具可比性）
+- average_steps：**5.73**
+- average_usage_total：**18930.56**
+- p95 latency：**17658 ms**
+- 门槛结论：**PASS**
 
 注意：
 
 - `citation_f1` 仍是占位 ID 比对，不具可比性；
 - `citation_validity_rate` 已改为证据白名单校验，**0.9556** 才是有效口径；
-- 3 条 smoke 的 `match_status_f1 = 1.0` 没有泛化到全量 45 条。
+- 规则修复后的复算为 match_status_f1 **0.8519**，全新 live 为 **0.8704**，两次一致。
 
 ## 5. 已知限制
 

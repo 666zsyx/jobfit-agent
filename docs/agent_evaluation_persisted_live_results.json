@@ -1,8 +1,8 @@
 {
   "version": 1,
   "source": "live_react_keyword",
-  "generated_at": "2026-10-25T10:23:08+00:00",
-  "git_revision": "7bc39cb",
+  "generated_at": "2026-10-25T13:25:48+00:00",
+  "git_revision": "626e949",
   "model": null,
   "max_steps": 8,
   "dataset_case_count": 50,
@@ -13,20 +13,20 @@
     "case_count": 45,
     "task_completion_rate": 1.0,
     "tool_sequence_accuracy": 0.6222222222222222,
-    "tool_precision": 0.915873015873016,
+    "tool_precision": 0.9214814814814816,
     "tool_recall": 1.0,
-    "tool_f1": 0.9520314253647587,
+    "tool_f1": 0.9556902356902357,
     "tool_success_rate": 1.0,
-    "match_status_f1": 0.8518518518518519,
+    "match_status_f1": 0.8703703703703703,
     "citation_f1": 0.2,
     "citation_validity_rate": 0.9555555555555556,
     "abstention_accuracy": 0.9555555555555556,
     "confirmation_recovery_rate": 1.0,
     "unsupported_suggestion_rate": 0.0,
-    "average_steps": 5.844444444444444,
-    "average_usage_total": 19538.2,
-    "p50_latency_ms": 11406.0,
-    "p95_latency_ms": 17866.0,
+    "average_steps": 5.733333333333333,
+    "average_usage_total": 18930.555555555555,
+    "p50_latency_ms": 10949.0,
+    "p95_latency_ms": 17658.0,
     "evidence_backed_rate": 1.0
   },
   "thresholds": {
@@ -43,7 +43,7 @@
       "passed": true
     },
     "tool_f1": {
-      "value": 0.9520314253647587,
+      "value": 0.9556902356902357,
       "threshold": 0.85,
       "operator": ">=",
       "passed": true
@@ -55,7 +55,7 @@
       "passed": true
     },
     "match_status_f1": {
-      "value": 0.8518518518518519,
+      "value": 0.8703703703703703,
       "threshold": 0.85,
       "operator": ">=",
       "passed": true
@@ -114,7 +114,7 @@
           "strong_match"
         ],
         "citation_ids": [
-          247
+          292
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -123,8 +123,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 5,
-        "usage_total": 16347,
-        "latency_ms": 12518,
+        "usage_total": 16529,
+        "latency_ms": 13372,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -143,8 +143,8 @@
                 "title": "简历原文",
                 "content": "在课程项目中用 Python 和 FastAPI 开发了三个 REST API 服务，负责接口设计、参数校验、JWT 鉴权和 Docker 部署，服务日均请求约 1 万次。",
                 "score": 0.983182,
-                "chunk_id": 247,
-                "source_version_id": 178,
+                "chunk_id": 292,
+                "source_version_id": 223,
                 "position": 1,
                 "rerank_score": 4.06836605
               }
@@ -218,7 +218,7 @@
           "partial_match"
         ],
         "citation_ids": [
-          248
+          293
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -226,9 +226,9 @@
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 18990,
-        "latency_ms": 10376,
+        "steps": 5,
+        "usage_total": 16345,
+        "latency_ms": 11168,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -247,8 +247,8 @@
                 "title": "简历原文",
                 "content": "做过 PostgreSQL 查询和简单表设计，未负责复杂事务优化。",
                 "score": 0.305109,
-                "chunk_id": 248,
-                "source_version_id": 179,
+                "chunk_id": 293,
+                "source_version_id": 224,
                 "position": 1,
                 "rerank_score": -0.82308447
               }
@@ -264,25 +264,25 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
-            "step": 4,
+            "step": 3,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "save_match_report",
-            "step": 5,
+            "step": 4,
             "ok": true,
             "error": null
           }
@@ -322,7 +322,7 @@
           "strong_match"
         ],
         "citation_ids": [
-          249
+          294
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -330,9 +330,9 @@
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 5,
-        "usage_total": 16141,
-        "latency_ms": 9524,
+        "steps": 6,
+        "usage_total": 18548,
+        "latency_ms": 10604,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -351,8 +351,8 @@
                 "title": "简历原文",
                 "content": "使用 Redis 实现缓存、运行锁和限流。",
                 "score": 0.922717,
-                "chunk_id": 249,
-                "source_version_id": 180,
+                "chunk_id": 294,
+                "source_version_id": 225,
                 "position": 1,
                 "rerank_score": 2.47984552
               }
@@ -368,25 +368,25 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "search_resume_evidence",
             "step": 2,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "assess_requirement_match",
+            "tool_name": "search_resume_evidence",
             "step": 3,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "save_match_report",
+            "tool_name": "assess_requirement_match",
             "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
             "ok": true,
             "error": null
           }
@@ -403,7 +403,7 @@
         "tool_recall": 1.0,
         "tool_f1": 1.0,
         "tool_success_rate": 1.0,
-        "match_status_f1": 0.0,
+        "match_status_f1": 0.6666666666666666,
         "citation_precision": 0.0,
         "citation_recall": 0.0,
         "citation_f1": 0.0,
@@ -423,10 +423,10 @@
           "save_match_report"
         ],
         "match_statuses": [
-          "partial_match"
+          "strong_match"
         ],
         "citation_ids": [
-          250
+          295
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -435,8 +435,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 19011,
-        "latency_ms": 10157,
+        "usage_total": 19395,
+        "latency_ms": 10263,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -446,19 +446,19 @@
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "实现过 RAG 混合检索和 Rerank",
-            "status": "partial_match",
-            "reason": "存在最高分为 0.400 的原文证据，但未达到强匹配阈值 0.6。",
+            "requirement": "实现 RAG 混合检索和 Rerank 相关工作",
+            "status": "strong_match",
+            "reason": "存在最高分为 0.728 的原文证据，达到强匹配阈值 0.6。",
             "evidence": [
               {
                 "section_type": "project_experience",
                 "title": "简历原文",
                 "content": "实现 BM25、向量检索、RRF、Cross-Encoder Rerank 和引用校验。",
-                "score": 0.400115,
-                "chunk_id": 250,
-                "source_version_id": 181,
+                "score": 0.728474,
+                "chunk_id": 295,
+                "source_version_id": 226,
                 "position": 1,
-                "rerank_score": -0.40498471
+                "rerank_score": 0.98689198
               }
             ]
           }
@@ -502,10 +502,10 @@
       "category": "happy_path",
       "metrics": {
         "task_completed": true,
-        "tool_sequence_accuracy": 1.0,
-        "tool_precision": 1.0,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8333333333333334,
         "tool_recall": 1.0,
-        "tool_f1": 1.0,
+        "tool_f1": 0.9090909090909091,
         "tool_success_rate": 1.0,
         "match_status_f1": 0.0,
         "citation_precision": 0.0,
@@ -513,188 +513,6 @@
         "citation_f1": 0.0,
         "citation_valid": false,
         "abstention_correct": false,
-        "confirmation_recovered": true,
-        "unsupported_suggestion_rate": 0.0,
-        "evidence_backed": true
-      },
-      "observed": {
-        "task_status": "completed",
-        "tools": [
-          "get_resume_profile",
-          "extract_job_requirements",
-          "search_resume_evidence",
-          "assess_requirement_match",
-          "save_match_report"
-        ],
-        "match_statuses": [
-          "insufficient_evidence"
-        ],
-        "citation_ids": [],
-        "abstained": true,
-        "confirmation_recovered": true,
-        "tool_call_count": 5,
-        "tool_error_count": 0,
-        "suggestion_count": 1,
-        "unsupported_suggestion_count": 0,
-        "steps": 5,
-        "usage_total": 15961,
-        "latency_ms": 11406,
-        "error_code": null,
-        "citation_ids_valid": null
-      },
-      "extras": {
-        "assessment_count": 1,
-        "evidence_item_count": 0,
-        "evidence_backed": true,
-        "assessments": [
-          {
-            "requirement": "具备手写或基于框架实现 Agent 循环的经验",
-            "status": "insufficient_evidence",
-            "reason": "未检索到相关的简历原文证据。",
-            "evidence": []
-          }
-        ],
-        "tool_calls": [
-          {
-            "tool_name": "get_resume_profile",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "extract_job_requirements",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "search_resume_evidence",
-            "step": 2,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "assess_requirement_match",
-            "step": 3,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "save_match_report",
-            "step": 4,
-            "ok": true,
-            "error": null
-          }
-        ]
-      }
-    },
-    {
-      "case_id": "no_mongodb_abstain",
-      "category": "abstention",
-      "metrics": {
-        "task_completed": true,
-        "tool_sequence_accuracy": 0.0,
-        "tool_precision": 0.8,
-        "tool_recall": 1.0,
-        "tool_f1": 0.888888888888889,
-        "tool_success_rate": 1.0,
-        "match_status_f1": 1.0,
-        "citation_precision": 1.0,
-        "citation_recall": 1.0,
-        "citation_f1": 1.0,
-        "citation_valid": true,
-        "abstention_correct": true,
-        "confirmation_recovered": true,
-        "unsupported_suggestion_rate": 0.0,
-        "evidence_backed": true
-      },
-      "observed": {
-        "task_status": "completed",
-        "tools": [
-          "get_resume_profile",
-          "extract_job_requirements",
-          "search_resume_evidence",
-          "assess_requirement_match",
-          "save_match_report"
-        ],
-        "match_statuses": [
-          "insufficient_evidence"
-        ],
-        "citation_ids": [],
-        "abstained": true,
-        "confirmation_recovered": true,
-        "tool_call_count": 5,
-        "tool_error_count": 0,
-        "suggestion_count": 1,
-        "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 18348,
-        "latency_ms": 9693,
-        "error_code": null,
-        "citation_ids_valid": null
-      },
-      "extras": {
-        "assessment_count": 1,
-        "evidence_item_count": 1,
-        "evidence_backed": true,
-        "assessments": [
-          {
-            "requirement": "熟悉 MongoDB",
-            "status": "insufficient_evidence",
-            "reason": "检索到的证据是否定表述，不能作为匹配依据。",
-            "evidence": []
-          }
-        ],
-        "tool_calls": [
-          {
-            "tool_name": "get_resume_profile",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "extract_job_requirements",
-            "step": 2,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "search_resume_evidence",
-            "step": 3,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "assess_requirement_match",
-            "step": 4,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "save_match_report",
-            "step": 5,
-            "ok": true,
-            "error": null
-          }
-        ]
-      }
-    },
-    {
-      "case_id": "no_rust_abstain",
-      "category": "abstention",
-      "metrics": {
-        "task_completed": true,
-        "tool_sequence_accuracy": 0.0,
-        "tool_precision": 0.6666666666666666,
-        "tool_recall": 1.0,
-        "tool_f1": 0.8,
-        "tool_success_rate": 1.0,
-        "match_status_f1": 1.0,
-        "citation_precision": 1.0,
-        "citation_recall": 1.0,
-        "citation_f1": 1.0,
-        "citation_valid": true,
-        "abstention_correct": true,
         "confirmation_recovered": true,
         "unsupported_suggestion_rate": 0.0,
         "evidence_backed": true
@@ -720,8 +538,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 7,
-        "usage_total": 22465,
-        "latency_ms": 14291,
+        "usage_total": 23575,
+        "latency_ms": 18341,
         "error_code": null,
         "citation_ids_valid": null
       },
@@ -731,7 +549,7 @@
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "具备 Rust 开发经验",
+            "requirement": "具备手写 Agent 循环或基于框架实现 Agent 循环的经验",
             "status": "insufficient_evidence",
             "reason": "未检索到相关的简历原文证据。",
             "evidence": []
@@ -778,6 +596,195 @@
       }
     },
     {
+      "case_id": "no_mongodb_abstain",
+      "category": "abstention",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8,
+        "tool_recall": 1.0,
+        "tool_f1": 0.888888888888889,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "get_resume_profile",
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "abstained": true,
+        "confirmation_recovered": true,
+        "tool_call_count": 5,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 5,
+        "usage_total": 15461,
+        "latency_ms": 8180,
+        "error_code": null,
+        "citation_ids_valid": null
+      },
+      "extras": {
+        "assessment_count": 1,
+        "evidence_item_count": 0,
+        "evidence_backed": true,
+        "assessments": [
+          {
+            "requirement": "熟悉 MongoDB",
+            "status": "insufficient_evidence",
+            "reason": "检索到的证据是否定表述，不能作为匹配依据。",
+            "evidence": []
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool_name": "get_resume_profile",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "no_rust_abstain",
+      "category": "abstention",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.6666666666666666,
+        "tool_recall": 1.0,
+        "tool_f1": 0.8,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 1.0,
+        "citation_precision": 1.0,
+        "citation_recall": 1.0,
+        "citation_f1": 1.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "get_resume_profile",
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "insufficient_evidence"
+        ],
+        "citation_ids": [],
+        "abstained": true,
+        "confirmation_recovered": true,
+        "tool_call_count": 6,
+        "tool_error_count": 0,
+        "suggestion_count": 1,
+        "unsupported_suggestion_count": 0,
+        "steps": 6,
+        "usage_total": 19837,
+        "latency_ms": 14446,
+        "error_code": null,
+        "citation_ids_valid": null
+      },
+      "extras": {
+        "assessment_count": 1,
+        "evidence_item_count": 0,
+        "evidence_backed": true,
+        "assessments": [
+          {
+            "requirement": "具备 Rust 开发经验",
+            "status": "insufficient_evidence",
+            "reason": "未检索到相关的简历原文证据。",
+            "evidence": []
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool_name": "get_resume_profile",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
       "case_id": "mixed_requirement",
       "category": "mixed",
       "metrics": {
@@ -811,7 +818,7 @@
           "insufficient_evidence"
         ],
         "citation_ids": [
-          254
+          299
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -820,8 +827,8 @@
         "suggestion_count": 2,
         "unsupported_suggestion_count": 0,
         "steps": 5,
-        "usage_total": 16358,
-        "latency_ms": 8944,
+        "usage_total": 16456,
+        "latency_ms": 8577,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -831,7 +838,7 @@
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "需要 Python",
+            "requirement": "Python",
             "status": "partial_match",
             "reason": "存在最高分为 0.311 的原文证据，但未达到强匹配阈值 0.6。",
             "evidence": [
@@ -840,17 +847,17 @@
                 "title": "简历原文",
                 "content": "Python 项目经验丰富，但没有 Kubernetes 经验。",
                 "score": 0.310852,
-                "chunk_id": 254,
-                "source_version_id": 185,
+                "chunk_id": 299,
+                "source_version_id": 230,
                 "position": 1,
                 "rerank_score": -0.79614109
               }
             ]
           },
           {
-            "requirement": "了解 Kubernetes 加分",
+            "requirement": "了解 Kubernetes",
             "status": "insufficient_evidence",
-            "reason": "未检索到相关的简历原文证据。",
+            "reason": "检索到的证据是否定表述，不能作为匹配依据。",
             "evidence": []
           }
         ],
@@ -893,10 +900,10 @@
       "category": "recovery",
       "metrics": {
         "task_completed": true,
-        "tool_sequence_accuracy": 1.0,
-        "tool_precision": 1.0,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8333333333333334,
         "tool_recall": 1.0,
-        "tool_f1": 1.0,
+        "tool_f1": 0.9090909090909091,
         "tool_success_rate": 1.0,
         "match_status_f1": 1.0,
         "citation_precision": 0.0,
@@ -915,23 +922,24 @@
           "extract_job_requirements",
           "search_resume_evidence",
           "assess_requirement_match",
+          "save_match_report",
           "save_match_report"
         ],
         "match_statuses": [
           "strong_match"
         ],
         "citation_ids": [
-          255
+          300
         ],
         "abstained": false,
         "confirmation_recovered": true,
-        "tool_call_count": 5,
+        "tool_call_count": 6,
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 18334,
-        "latency_ms": 9664,
+        "usage_total": 21949,
+        "latency_ms": 13536,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -950,8 +958,8 @@
                 "title": "简历原文",
                 "content": "使用 FastAPI 开发多个服务。",
                 "score": 0.996529,
-                "chunk_id": 255,
-                "source_version_id": 186,
+                "chunk_id": 300,
+                "source_version_id": 231,
                 "position": 1,
                 "rerank_score": 5.65974951
               }
@@ -967,18 +975,24 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
             "step": 4,
             "ok": true,
             "error": null
@@ -1025,7 +1039,7 @@
           "strong_match"
         ],
         "citation_ids": [
-          256
+          301
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -1033,9 +1047,9 @@
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 5,
-        "usage_total": 15765,
-        "latency_ms": 7669,
+        "steps": 6,
+        "usage_total": 18398,
+        "latency_ms": 10418,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -1054,8 +1068,8 @@
                 "title": "简历原文",
                 "content": "做过 PostgreSQL 索引设计。",
                 "score": 0.682827,
-                "chunk_id": 256,
-                "source_version_id": 187,
+                "chunk_id": 301,
+                "source_version_id": 232,
                 "position": 1,
                 "rerank_score": 0.76679361
               }
@@ -1071,25 +1085,25 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "search_resume_evidence",
             "step": 2,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "assess_requirement_match",
+            "tool_name": "search_resume_evidence",
             "step": 3,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "save_match_report",
+            "tool_name": "assess_requirement_match",
             "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
             "ok": true,
             "error": null
           }
@@ -1129,7 +1143,7 @@
           "strong_match"
         ],
         "citation_ids": [
-          257
+          302
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -1138,8 +1152,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 18001,
-        "latency_ms": 7720,
+        "usage_total": 18148,
+        "latency_ms": 11867,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -1158,8 +1172,8 @@
                 "title": "简历原文",
                 "content": "有 Redis 使用经验。",
                 "score": 0.999045,
-                "chunk_id": 257,
-                "source_version_id": 188,
+                "chunk_id": 302,
+                "source_version_id": 233,
                 "position": 1,
                 "rerank_score": 6.95258236
               }
@@ -1233,7 +1247,7 @@
           "strong_match"
         ],
         "citation_ids": [
-          258
+          303
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -1242,8 +1256,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 5,
-        "usage_total": 15676,
-        "latency_ms": 8749,
+        "usage_total": 15895,
+        "latency_ms": 8834,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -1253,7 +1267,7 @@
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "Python 经验",
+            "requirement": "需要 Python 经验。",
             "status": "strong_match",
             "reason": "存在最高分为 0.994 的原文证据，达到强匹配阈值 0.6。",
             "evidence": [
@@ -1262,8 +1276,8 @@
                 "title": "简历原文",
                 "content": "Python 项目经验。",
                 "score": 0.993987,
-                "chunk_id": 258,
-                "source_version_id": 189,
+                "chunk_id": 303,
+                "source_version_id": 234,
                 "position": 1,
                 "rerank_score": 5.10784769
               }
@@ -1309,10 +1323,10 @@
       "category": "happy_path",
       "metrics": {
         "task_completed": true,
-        "tool_sequence_accuracy": 1.0,
-        "tool_precision": 1.0,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8333333333333334,
         "tool_recall": 1.0,
-        "tool_f1": 1.0,
+        "tool_f1": 0.9090909090909091,
         "tool_success_rate": 1.0,
         "match_status_f1": 1.0,
         "citation_precision": 0.0,
@@ -1331,23 +1345,24 @@
           "extract_job_requirements",
           "search_resume_evidence",
           "assess_requirement_match",
+          "save_match_report",
           "save_match_report"
         ],
         "match_statuses": [
           "strong_match"
         ],
         "citation_ids": [
-          259
+          304
         ],
         "abstained": false,
         "confirmation_recovered": true,
-        "tool_call_count": 5,
+        "tool_call_count": 6,
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 5,
-        "usage_total": 16318,
-        "latency_ms": 11059,
+        "steps": 7,
+        "usage_total": 25686,
+        "latency_ms": 14750,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -1357,19 +1372,19 @@
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "具备 Docker 和 docker-compose 部署经验",
+            "requirement": "使用 Docker 和 docker-compose 进行部署工作",
             "status": "strong_match",
-            "reason": "存在最高分为 0.989 的原文证据，达到强匹配阈值 0.6。",
+            "reason": "存在最高分为 0.998 的原文证据，达到强匹配阈值 0.6。",
             "evidence": [
               {
                 "section_type": "project_experience",
                 "title": "简历原文",
                 "content": "使用 Dockerfile 和 docker-compose 部署 FastAPI、PostgreSQL 与 Redis 服务。",
-                "score": 0.989352,
-                "chunk_id": 259,
-                "source_version_id": 190,
+                "score": 0.99809,
+                "chunk_id": 304,
+                "source_version_id": 235,
                 "position": 1,
-                "rerank_score": 4.53168631
+                "rerank_score": 6.25888157
               }
             ]
           }
@@ -1383,25 +1398,31 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "search_resume_evidence",
             "step": 2,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "assess_requirement_match",
+            "tool_name": "search_resume_evidence",
             "step": 3,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "save_match_report",
+            "tool_name": "assess_requirement_match",
             "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 6,
             "ok": true,
             "error": null
           }
@@ -1441,7 +1462,7 @@
           "strong_match"
         ],
         "citation_ids": [
-          260
+          305
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -1449,9 +1470,9 @@
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 5,
-        "usage_total": 16426,
-        "latency_ms": 10607,
+        "steps": 6,
+        "usage_total": 18840,
+        "latency_ms": 12101,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -1470,8 +1491,8 @@
                 "title": "简历原文",
                 "content": "使用 LangGraph StateGraph 与 PostgreSQL Checkpoint 实现中断恢复和人工确认。",
                 "score": 0.998102,
-                "chunk_id": 260,
-                "source_version_id": 191,
+                "chunk_id": 305,
+                "source_version_id": 236,
                 "position": 1,
                 "rerank_score": 6.26482677
               }
@@ -1487,25 +1508,25 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "search_resume_evidence",
             "step": 2,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "assess_requirement_match",
+            "tool_name": "search_resume_evidence",
             "step": 3,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "save_match_report",
+            "tool_name": "assess_requirement_match",
             "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
             "ok": true,
             "error": null
           }
@@ -1545,7 +1566,7 @@
           "strong_match"
         ],
         "citation_ids": [
-          261
+          306
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -1554,8 +1575,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 5,
-        "usage_total": 16188,
-        "latency_ms": 10772,
+        "usage_total": 16136,
+        "latency_ms": 10949,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -1574,8 +1595,8 @@
                 "title": "简历原文",
                 "content": "使用 Redis 实现按用户限流和每日 Token 配额。",
                 "score": 0.994359,
-                "chunk_id": 261,
-                "source_version_id": 192,
+                "chunk_id": 306,
+                "source_version_id": 237,
                 "position": 1,
                 "rerank_score": 5.17203331
               }
@@ -1655,15 +1676,15 @@
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 5,
-        "usage_total": 16870,
-        "latency_ms": 11800,
+        "steps": 6,
+        "usage_total": 18019,
+        "latency_ms": 8351,
         "error_code": null,
         "citation_ids_valid": null
       },
       "extras": {
         "assessment_count": 1,
-        "evidence_item_count": 1,
+        "evidence_item_count": 0,
         "evidence_backed": true,
         "assessments": [
           {
@@ -1682,25 +1703,25 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "search_resume_evidence",
             "step": 2,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "assess_requirement_match",
+            "tool_name": "search_resume_evidence",
             "step": 3,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "save_match_report",
+            "tool_name": "assess_requirement_match",
             "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
             "ok": true,
             "error": null
           }
@@ -1748,8 +1769,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 20074,
-        "latency_ms": 14268,
+        "usage_total": 20619,
+        "latency_ms": 16557,
         "error_code": null,
         "citation_ids_valid": null
       },
@@ -1845,18 +1866,18 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 19108,
-        "latency_ms": 11591,
+        "usage_total": 18977,
+        "latency_ms": 11779,
         "error_code": null,
         "citation_ids_valid": null
       },
       "extras": {
         "assessment_count": 1,
-        "evidence_item_count": 1,
+        "evidence_item_count": 0,
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "具备 Kubernetes 生产运维经验",
+            "requirement": "负责 Kubernetes 生产环境运维相关工作",
             "status": "insufficient_evidence",
             "reason": "检索到的证据是否定表述，不能作为匹配依据。",
             "evidence": []
@@ -1929,7 +1950,7 @@
           "partial_match"
         ],
         "citation_ids": [
-          265
+          310
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -1937,9 +1958,9 @@
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 18811,
-        "latency_ms": 10668,
+        "steps": 5,
+        "usage_total": 16112,
+        "latency_ms": 9900,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -1958,8 +1979,8 @@
                 "title": "简历原文",
                 "content": "做过 MySQL 查询和索引优化，未做过分库分表。",
                 "score": 0.969581,
-                "chunk_id": 265,
-                "source_version_id": 196,
+                "chunk_id": 310,
+                "source_version_id": 241,
                 "position": 1,
                 "rerank_score": 3.46181059
               }
@@ -1975,25 +1996,25 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
-            "step": 4,
+            "step": 3,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "save_match_report",
-            "step": 5,
+            "step": 4,
             "ok": true,
             "error": null
           }
@@ -2033,7 +2054,7 @@
           "partial_match"
         ],
         "citation_ids": [
-          266
+          311
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -2042,8 +2063,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 20639,
-        "latency_ms": 14073,
+        "usage_total": 18735,
+        "latency_ms": 11558,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -2062,8 +2083,8 @@
                 "title": "简历原文",
                 "content": "在本地搭建过 Kubernetes 测试集群，未处理过生产故障。",
                 "score": 0.683621,
-                "chunk_id": 266,
-                "source_version_id": 197,
+                "chunk_id": 311,
+                "source_version_id": 242,
                 "position": 1,
                 "rerank_score": 0.77046108
               }
@@ -2109,10 +2130,10 @@
       "category": "partial_match",
       "metrics": {
         "task_completed": true,
-        "tool_sequence_accuracy": 0.0,
-        "tool_precision": 0.8333333333333334,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
         "tool_recall": 1.0,
-        "tool_f1": 0.9090909090909091,
+        "tool_f1": 1.0,
         "tool_success_rate": 1.0,
         "match_status_f1": 1.0,
         "citation_precision": 0.0,
@@ -2131,24 +2152,23 @@
           "extract_job_requirements",
           "search_resume_evidence",
           "assess_requirement_match",
-          "save_match_report",
           "save_match_report"
         ],
         "match_statuses": [
           "partial_match"
         ],
         "citation_ids": [
-          267
+          312
         ],
         "abstained": false,
         "confirmation_recovered": true,
-        "tool_call_count": 6,
+        "tool_call_count": 5,
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 7,
-        "usage_total": 23348,
-        "latency_ms": 12386,
+        "steps": 6,
+        "usage_total": 18593,
+        "latency_ms": 10385,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -2167,8 +2187,8 @@
                 "title": "简历原文",
                 "content": "使用 TypeScript 写过内部工具页面，未主导大型前端项目。",
                 "score": 0.843135,
-                "chunk_id": 267,
-                "source_version_id": 198,
+                "chunk_id": 312,
+                "source_version_id": 243,
                 "position": 1,
                 "rerank_score": 1.68173957
               }
@@ -2205,12 +2225,6 @@
             "step": 5,
             "ok": true,
             "error": null
-          },
-          {
-            "tool_name": "save_match_report",
-            "step": 6,
-            "ok": true,
-            "error": null
           }
         ]
       }
@@ -2220,10 +2234,10 @@
       "category": "mixed",
       "metrics": {
         "task_completed": true,
-        "tool_sequence_accuracy": 0.0,
-        "tool_precision": 0.8333333333333334,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
         "tool_recall": 1.0,
-        "tool_f1": 0.9090909090909091,
+        "tool_f1": 1.0,
         "tool_success_rate": 1.0,
         "match_status_f1": 1.0,
         "citation_precision": 0.0,
@@ -2242,7 +2256,6 @@
           "extract_job_requirements",
           "search_resume_evidence",
           "assess_requirement_match",
-          "save_match_report",
           "save_match_report"
         ],
         "match_statuses": [
@@ -2250,39 +2263,39 @@
           "insufficient_evidence"
         ],
         "citation_ids": [
-          268
+          313
         ],
         "abstained": false,
         "confirmation_recovered": true,
-        "tool_call_count": 6,
+        "tool_call_count": 5,
         "tool_error_count": 0,
         "suggestion_count": 2,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 23291,
-        "latency_ms": 15194,
+        "usage_total": 19108,
+        "latency_ms": 9372,
         "error_code": null,
         "citation_ids_valid": true
       },
       "extras": {
         "assessment_count": 2,
-        "evidence_item_count": 2,
+        "evidence_item_count": 1,
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "Python 后端开发经验",
+            "requirement": "具备 Python 后端开发经验",
             "status": "strong_match",
-            "reason": "存在最高分为 0.995 的原文证据，达到强匹配阈值 0.6。",
+            "reason": "存在最高分为 0.997 的原文证据，达到强匹配阈值 0.6。",
             "evidence": [
               {
                 "section_type": "project_experience",
                 "title": "简历原文",
                 "content": "有 Python 后端项目经验，但没有 Kafka 使用经验。",
-                "score": 0.994743,
-                "chunk_id": 268,
-                "source_version_id": 199,
+                "score": 0.997086,
+                "chunk_id": 313,
+                "source_version_id": 244,
                 "position": 1,
-                "rerank_score": 5.24294949
+                "rerank_score": 5.83529568
               }
             ]
           },
@@ -2302,24 +2315,18 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "search_resume_evidence",
             "step": 2,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "assess_requirement_match",
+            "tool_name": "search_resume_evidence",
             "step": 3,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "save_match_report",
+            "tool_name": "assess_requirement_match",
             "step": 4,
             "ok": true,
             "error": null
@@ -2338,10 +2345,10 @@
       "category": "mixed",
       "metrics": {
         "task_completed": true,
-        "tool_sequence_accuracy": 0.0,
-        "tool_precision": 0.8333333333333334,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
         "tool_recall": 1.0,
-        "tool_f1": 0.9090909090909091,
+        "tool_f1": 1.0,
         "tool_success_rate": 1.0,
         "match_status_f1": 1.0,
         "citation_precision": 0.0,
@@ -2360,7 +2367,6 @@
           "extract_job_requirements",
           "search_resume_evidence",
           "assess_requirement_match",
-          "save_match_report",
           "save_match_report"
         ],
         "match_statuses": [
@@ -2368,23 +2374,23 @@
           "insufficient_evidence"
         ],
         "citation_ids": [
-          269
+          314
         ],
         "abstained": false,
         "confirmation_recovered": true,
-        "tool_call_count": 6,
+        "tool_call_count": 5,
         "tool_error_count": 0,
         "suggestion_count": 2,
         "unsupported_suggestion_count": 0,
-        "steps": 7,
-        "usage_total": 26600,
-        "latency_ms": 17866,
+        "steps": 5,
+        "usage_total": 17767,
+        "latency_ms": 11582,
         "error_code": null,
         "citation_ids_valid": true
       },
       "extras": {
         "assessment_count": 2,
-        "evidence_item_count": 2,
+        "evidence_item_count": 1,
         "evidence_backed": true,
         "assessments": [
           {
@@ -2397,8 +2403,8 @@
                 "title": "简历原文",
                 "content": "使用 FastAPI 开发服务，但没有 Redis 分布式锁经验。",
                 "score": 0.997407,
-                "chunk_id": 269,
-                "source_version_id": 200,
+                "chunk_id": 314,
+                "source_version_id": 245,
                 "position": 1,
                 "rerank_score": 5.95215797
               }
@@ -2420,31 +2426,25 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
             "step": 4,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "save_match_report",
-            "step": 5,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "save_match_report",
-            "step": 6,
             "ok": true,
             "error": null
           }
@@ -2484,7 +2484,7 @@
           "partial_match"
         ],
         "citation_ids": [
-          270
+          315
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -2493,8 +2493,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 5,
-        "usage_total": 16077,
-        "latency_ms": 9863,
+        "usage_total": 15719,
+        "latency_ms": 8605,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -2504,7 +2504,7 @@
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "具备 PostgreSQL 事务相关经验",
+            "requirement": "具备 PostgreSQL 事务经验",
             "status": "partial_match",
             "reason": "证据只覆盖基础场景，未达到要求的范围或深度。",
             "evidence": [
@@ -2512,11 +2512,11 @@
                 "section_type": "project_experience",
                 "title": "简历原文",
                 "content": "做过 PostgreSQL 查询和简单事务，未做复杂事务优化。",
-                "score": 0.913652,
-                "chunk_id": 270,
-                "source_version_id": 201,
+                "score": 0.989559,
+                "chunk_id": 315,
+                "source_version_id": 246,
                 "position": 1,
-                "rerank_score": 2.3590672
+                "rerank_score": 4.55151749
               }
             ]
           }
@@ -2560,12 +2560,12 @@
       "category": "citation",
       "metrics": {
         "task_completed": true,
-        "tool_sequence_accuracy": 1.0,
-        "tool_precision": 1.0,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8333333333333334,
         "tool_recall": 1.0,
-        "tool_f1": 1.0,
+        "tool_f1": 0.9090909090909091,
         "tool_success_rate": 1.0,
-        "match_status_f1": 1.0,
+        "match_status_f1": 0.6666666666666666,
         "citation_precision": 0.0,
         "citation_recall": 0.0,
         "citation_f1": 0.0,
@@ -2582,29 +2582,31 @@
           "extract_job_requirements",
           "search_resume_evidence",
           "assess_requirement_match",
+          "save_match_report",
           "save_match_report"
         ],
         "match_statuses": [
+          "strong_match",
           "strong_match"
         ],
         "citation_ids": [
-          271
+          316
         ],
         "abstained": false,
         "confirmation_recovered": true,
-        "tool_call_count": 5,
+        "tool_call_count": 6,
         "tool_error_count": 0,
-        "suggestion_count": 1,
+        "suggestion_count": 2,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 18818,
-        "latency_ms": 11776,
+        "usage_total": 23107,
+        "latency_ms": 15461,
         "error_code": null,
         "citation_ids_valid": true
       },
       "extras": {
-        "assessment_count": 1,
-        "evidence_item_count": 1,
+        "assessment_count": 2,
+        "evidence_item_count": 2,
         "evidence_backed": true,
         "assessments": [
           {
@@ -2617,10 +2619,27 @@
                 "title": "简历原文",
                 "content": "使用 Redis 实现缓存、限流和运行锁。",
                 "score": 0.99482,
-                "chunk_id": 271,
-                "source_version_id": 202,
+                "chunk_id": 316,
+                "source_version_id": 247,
                 "position": 1,
                 "rerank_score": 5.25784874
+              }
+            ]
+          },
+          {
+            "requirement": "承担与 Redis 缓存和限流相关的开发工作",
+            "status": "strong_match",
+            "reason": "存在最高分为 0.832 的原文证据，达到强匹配阈值 0.6。",
+            "evidence": [
+              {
+                "section_type": "project_experience",
+                "title": "简历原文",
+                "content": "使用 Redis 实现缓存、限流和运行锁。",
+                "score": 0.832124,
+                "chunk_id": 316,
+                "source_version_id": 247,
+                "position": 1,
+                "rerank_score": 1.60075784
               }
             ]
           }
@@ -2634,18 +2653,24 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
             "step": 4,
             "ok": true,
             "error": null
@@ -2665,9 +2690,9 @@
       "metrics": {
         "task_completed": true,
         "tool_sequence_accuracy": 0.0,
-        "tool_precision": 0.6666666666666666,
+        "tool_precision": 0.8,
         "tool_recall": 1.0,
-        "tool_f1": 0.8,
+        "tool_f1": 0.888888888888889,
         "tool_success_rate": 1.0,
         "match_status_f1": 1.0,
         "citation_precision": 1.0,
@@ -2686,7 +2711,6 @@
           "extract_job_requirements",
           "search_resume_evidence",
           "assess_requirement_match",
-          "save_match_report",
           "save_match_report"
         ],
         "match_statuses": [
@@ -2695,19 +2719,19 @@
         "citation_ids": [],
         "abstained": true,
         "confirmation_recovered": true,
-        "tool_call_count": 6,
+        "tool_call_count": 5,
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 22733,
-        "latency_ms": 15821,
+        "steps": 5,
+        "usage_total": 15763,
+        "latency_ms": 8625,
         "error_code": null,
         "citation_ids_valid": null
       },
       "extras": {
         "assessment_count": 1,
-        "evidence_item_count": 1,
+        "evidence_item_count": 0,
         "evidence_backed": true,
         "assessments": [
           {
@@ -2747,12 +2771,6 @@
             "step": 4,
             "ok": true,
             "error": null
-          },
-          {
-            "tool_name": "save_match_report",
-            "step": 5,
-            "ok": true,
-            "error": null
           }
         ]
       }
@@ -2790,7 +2808,7 @@
           "strong_match"
         ],
         "citation_ids": [
-          273
+          318
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -2798,9 +2816,9 @@
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 5,
-        "usage_total": 15929,
-        "latency_ms": 10194,
+        "steps": 6,
+        "usage_total": 18289,
+        "latency_ms": 9207,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -2819,8 +2837,8 @@
                 "title": "简历原文",
                 "content": "使用 Python 开发后端服务和自动化脚本。",
                 "score": 0.994788,
-                "chunk_id": 273,
-                "source_version_id": 204,
+                "chunk_id": 318,
+                "source_version_id": 249,
                 "position": 1,
                 "rerank_score": 5.25150013
               }
@@ -2836,25 +2854,25 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "search_resume_evidence",
             "step": 2,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "assess_requirement_match",
+            "tool_name": "search_resume_evidence",
             "step": 3,
             "ok": true,
             "error": null
           },
           {
-            "tool_name": "save_match_report",
+            "tool_name": "assess_requirement_match",
             "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
             "ok": true,
             "error": null
           }
@@ -2866,12 +2884,12 @@
       "category": "tooling",
       "metrics": {
         "task_completed": true,
-        "tool_sequence_accuracy": 1.0,
-        "tool_precision": 1.0,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8333333333333334,
         "tool_recall": 1.0,
-        "tool_f1": 1.0,
+        "tool_f1": 0.9090909090909091,
         "tool_success_rate": 1.0,
-        "match_status_f1": 1.0,
+        "match_status_f1": 0.5,
         "citation_precision": 0.0,
         "citation_recall": 0.0,
         "citation_f1": 0.0,
@@ -2888,45 +2906,82 @@
           "extract_job_requirements",
           "search_resume_evidence",
           "assess_requirement_match",
+          "save_match_report",
           "save_match_report"
         ],
         "match_statuses": [
-          "strong_match"
+          "strong_match",
+          "partial_match",
+          "partial_match"
         ],
         "citation_ids": [
-          274
+          319
         ],
         "abstained": false,
         "confirmation_recovered": true,
-        "tool_call_count": 5,
+        "tool_call_count": 6,
         "tool_error_count": 0,
-        "suggestion_count": 1,
+        "suggestion_count": 3,
         "unsupported_suggestion_count": 0,
-        "steps": 5,
-        "usage_total": 16445,
-        "latency_ms": 10391,
+        "steps": 6,
+        "usage_total": 25768,
+        "latency_ms": 17658,
         "error_code": null,
         "citation_ids_valid": true
       },
       "extras": {
-        "assessment_count": 1,
-        "evidence_item_count": 1,
+        "assessment_count": 3,
+        "evidence_item_count": 3,
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "具备 Python 和 FastAPI 后端开发经验",
+            "requirement": "使用 Python 和 FastAPI 进行后端开发",
             "status": "strong_match",
-            "reason": "存在最高分为 0.968 的原文证据，达到强匹配阈值 0.6。",
+            "reason": "存在最高分为 0.996 的原文证据，达到强匹配阈值 0.6。",
             "evidence": [
               {
                 "section_type": "project_experience",
                 "title": "简历原文",
                 "content": "使用 Python 和 FastAPI 开发过多个 REST API。",
-                "score": 0.968041,
-                "chunk_id": 274,
-                "source_version_id": 205,
+                "score": 0.995908,
+                "chunk_id": 319,
+                "source_version_id": 250,
                 "position": 1,
-                "rerank_score": 3.41080809
+                "rerank_score": 5.49469662
+              }
+            ]
+          },
+          {
+            "requirement": "具备 Python 后端开发经验",
+            "status": "partial_match",
+            "reason": "存在最高分为 0.148 的原文证据，但未达到强匹配阈值 0.6。",
+            "evidence": [
+              {
+                "section_type": "project_experience",
+                "title": "简历原文",
+                "content": "使用 Python 和 FastAPI 开发过多个 REST API。",
+                "score": 0.148312,
+                "chunk_id": 319,
+                "source_version_id": 250,
+                "position": 1,
+                "rerank_score": -1.74790013
+              }
+            ]
+          },
+          {
+            "requirement": "具备 FastAPI 后端开发经验",
+            "status": "partial_match",
+            "reason": "存在最高分为 0.573 的原文证据，但未达到强匹配阈值 0.6。",
+            "evidence": [
+              {
+                "section_type": "project_experience",
+                "title": "简历原文",
+                "content": "使用 Python 和 FastAPI 开发过多个 REST API。",
+                "score": 0.572515,
+                "chunk_id": 319,
+                "source_version_id": 250,
+                "position": 1,
+                "rerank_score": 0.29212031
               }
             ]
           }
@@ -2959,6 +3014,12 @@
           {
             "tool_name": "save_match_report",
             "step": 4,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 5,
             "ok": true,
             "error": null
           }
@@ -2975,7 +3036,7 @@
         "tool_recall": 1.0,
         "tool_f1": 1.0,
         "tool_success_rate": 1.0,
-        "match_status_f1": 0.0,
+        "match_status_f1": 1.0,
         "citation_precision": 0.0,
         "citation_recall": 0.0,
         "citation_f1": 0.0,
@@ -2995,10 +3056,10 @@
           "save_match_report"
         ],
         "match_statuses": [
-          "strong_match"
+          "partial_match"
         ],
         "citation_ids": [
-          275
+          320
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -3006,9 +3067,9 @@
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 18327,
-        "latency_ms": 8651,
+        "steps": 5,
+        "usage_total": 16105,
+        "latency_ms": 9780,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -3018,19 +3079,142 @@
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "具备 PostgreSQL 事务和索引经验",
-            "status": "strong_match",
-            "reason": "存在最高分为 0.814 的原文证据，达到强匹配阈值 0.6。",
+            "requirement": "具备 PostgreSQL 事务和索引相关经验",
+            "status": "partial_match",
+            "reason": "存在最高分为 0.539 的原文证据，但未达到强匹配阈值 0.6。",
             "evidence": [
               {
                 "section_type": "project_experience",
                 "title": "简历原文",
                 "content": "使用 PostgreSQL 设计过表和索引。",
-                "score": 0.814023,
-                "chunk_id": 275,
-                "source_version_id": 206,
+                "score": 0.538758,
+                "chunk_id": 320,
+                "source_version_id": 251,
                 "position": 1,
-                "rerank_score": 1.4763658
+                "rerank_score": 0.15534511
+              }
+            ]
+          }
+        ],
+        "tool_calls": [
+          {
+            "tool_name": "get_resume_profile",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "extract_job_requirements",
+            "step": 1,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "search_resume_evidence",
+            "step": 2,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 4,
+            "ok": true,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "mock_tool_timeout_recovered",
+      "category": "recovery",
+      "metrics": {
+        "task_completed": true,
+        "tool_sequence_accuracy": 0.0,
+        "tool_precision": 0.8333333333333334,
+        "tool_recall": 1.0,
+        "tool_f1": 0.9090909090909091,
+        "tool_success_rate": 1.0,
+        "match_status_f1": 0.6666666666666666,
+        "citation_precision": 0.0,
+        "citation_recall": 0.0,
+        "citation_f1": 0.0,
+        "citation_valid": true,
+        "abstention_correct": true,
+        "confirmation_recovered": true,
+        "unsupported_suggestion_rate": 0.0,
+        "evidence_backed": true
+      },
+      "observed": {
+        "task_status": "completed",
+        "tools": [
+          "get_resume_profile",
+          "extract_job_requirements",
+          "search_resume_evidence",
+          "assess_requirement_match",
+          "save_match_report",
+          "save_match_report"
+        ],
+        "match_statuses": [
+          "strong_match",
+          "strong_match"
+        ],
+        "citation_ids": [
+          321
+        ],
+        "abstained": false,
+        "confirmation_recovered": true,
+        "tool_call_count": 6,
+        "tool_error_count": 0,
+        "suggestion_count": 2,
+        "unsupported_suggestion_count": 0,
+        "steps": 7,
+        "usage_total": 24776,
+        "latency_ms": 13959,
+        "error_code": null,
+        "citation_ids_valid": true
+      },
+      "extras": {
+        "assessment_count": 2,
+        "evidence_item_count": 2,
+        "evidence_backed": true,
+        "assessments": [
+          {
+            "requirement": "具备 Redis 缓存经验",
+            "status": "strong_match",
+            "reason": "存在最高分为 0.983 的原文证据，达到强匹配阈值 0.6。",
+            "evidence": [
+              {
+                "section_type": "project_experience",
+                "title": "简历原文",
+                "content": "使用 Redis 做过缓存和限流。",
+                "score": 0.982658,
+                "chunk_id": 321,
+                "source_version_id": 252,
+                "position": 1,
+                "rerank_score": 4.03713369
+              }
+            ]
+          },
+          {
+            "requirement": "具备限流经验",
+            "status": "strong_match",
+            "reason": "存在最高分为 0.780 的原文证据，达到强匹配阈值 0.6。",
+            "evidence": [
+              {
+                "section_type": "project_experience",
+                "title": "简历原文",
+                "content": "使用 Redis 做过缓存和限流。",
+                "score": 0.780396,
+                "chunk_id": 321,
+                "source_version_id": 252,
+                "position": 1,
+                "rerank_score": 1.26797771
               }
             ]
           }
@@ -3065,108 +3249,10 @@
             "step": 5,
             "ok": true,
             "error": null
-          }
-        ]
-      }
-    },
-    {
-      "case_id": "mock_tool_timeout_recovered",
-      "category": "recovery",
-      "metrics": {
-        "task_completed": true,
-        "tool_sequence_accuracy": 1.0,
-        "tool_precision": 1.0,
-        "tool_recall": 1.0,
-        "tool_f1": 1.0,
-        "tool_success_rate": 1.0,
-        "match_status_f1": 1.0,
-        "citation_precision": 0.0,
-        "citation_recall": 0.0,
-        "citation_f1": 0.0,
-        "citation_valid": true,
-        "abstention_correct": true,
-        "confirmation_recovered": true,
-        "unsupported_suggestion_rate": 0.0,
-        "evidence_backed": true
-      },
-      "observed": {
-        "task_status": "completed",
-        "tools": [
-          "get_resume_profile",
-          "extract_job_requirements",
-          "search_resume_evidence",
-          "assess_requirement_match",
-          "save_match_report"
-        ],
-        "match_statuses": [
-          "strong_match"
-        ],
-        "citation_ids": [
-          276
-        ],
-        "abstained": false,
-        "confirmation_recovered": true,
-        "tool_call_count": 5,
-        "tool_error_count": 0,
-        "suggestion_count": 1,
-        "unsupported_suggestion_count": 0,
-        "steps": 5,
-        "usage_total": 15796,
-        "latency_ms": 7577,
-        "error_code": null,
-        "citation_ids_valid": true
-      },
-      "extras": {
-        "assessment_count": 1,
-        "evidence_item_count": 1,
-        "evidence_backed": true,
-        "assessments": [
-          {
-            "requirement": "具备 Redis 缓存和限流经验",
-            "status": "strong_match",
-            "reason": "存在最高分为 0.995 的原文证据，达到强匹配阈值 0.6。",
-            "evidence": [
-              {
-                "section_type": "project_experience",
-                "title": "简历原文",
-                "content": "使用 Redis 做过缓存和限流。",
-                "score": 0.994861,
-                "chunk_id": 276,
-                "source_version_id": 207,
-                "position": 1,
-                "rerank_score": 5.26567554
-              }
-            ]
-          }
-        ],
-        "tool_calls": [
-          {
-            "tool_name": "get_resume_profile",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "extract_job_requirements",
-            "step": 1,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "search_resume_evidence",
-            "step": 2,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "assess_requirement_match",
-            "step": 3,
-            "ok": true,
-            "error": null
           },
           {
             "tool_name": "save_match_report",
-            "step": 4,
+            "step": 6,
             "ok": true,
             "error": null
           }
@@ -3183,7 +3269,7 @@
         "tool_recall": 1.0,
         "tool_f1": 1.0,
         "tool_success_rate": 1.0,
-        "match_status_f1": 1.0,
+        "match_status_f1": 0.6666666666666666,
         "citation_precision": 0.0,
         "citation_recall": 0.0,
         "citation_f1": 0.0,
@@ -3203,44 +3289,51 @@
           "save_match_report"
         ],
         "match_statuses": [
-          "strong_match"
+          "strong_match",
+          "insufficient_evidence"
         ],
         "citation_ids": [
-          277
+          322
         ],
         "abstained": false,
         "confirmation_recovered": true,
         "tool_call_count": 5,
         "tool_error_count": 0,
-        "suggestion_count": 1,
+        "suggestion_count": 2,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 18571,
-        "latency_ms": 9636,
+        "steps": 5,
+        "usage_total": 16576,
+        "latency_ms": 10023,
         "error_code": null,
         "citation_ids_valid": true
       },
       "extras": {
-        "assessment_count": 1,
+        "assessment_count": 2,
         "evidence_item_count": 1,
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "具备 Docker 和部署经验",
+            "requirement": "具备 Docker 使用经验",
             "status": "strong_match",
-            "reason": "存在最高分为 0.791 的原文证据，达到强匹配阈值 0.6。",
+            "reason": "存在最高分为 0.702 的原文证据，达到强匹配阈值 0.6。",
             "evidence": [
               {
                 "section_type": "project_experience",
                 "title": "简历原文",
                 "content": "使用 Docker 部署过 FastAPI 服务。",
-                "score": 0.790936,
-                "chunk_id": 277,
-                "source_version_id": 208,
+                "score": 0.702078,
+                "chunk_id": 322,
+                "source_version_id": 253,
                 "position": 1,
-                "rerank_score": 1.33057666
+                "rerank_score": 0.85721201
               }
             ]
+          },
+          {
+            "requirement": "具备部署经验",
+            "status": "insufficient_evidence",
+            "reason": "未检索到相关的简历原文证据。",
+            "evidence": []
           }
         ],
         "tool_calls": [
@@ -3252,25 +3345,25 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
-            "step": 4,
+            "step": 3,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "save_match_report",
-            "step": 5,
+            "step": 4,
             "ok": true,
             "error": null
           }
@@ -3310,7 +3403,7 @@
           "strong_match"
         ],
         "citation_ids": [
-          278
+          323
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -3319,8 +3412,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 19415,
-        "latency_ms": 11358,
+        "usage_total": 18271,
+        "latency_ms": 11060,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -3339,8 +3432,8 @@
                 "title": "简历原文",
                 "content": "使用 FastAPI 开发过服务。",
                 "score": 0.982758,
-                "chunk_id": 278,
-                "source_version_id": 209,
+                "chunk_id": 323,
+                "source_version_id": 254,
                 "position": 1,
                 "rerank_score": 4.04304409
               }
@@ -3414,7 +3507,7 @@
           "strong_match"
         ],
         "citation_ids": [
-          279
+          324
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -3422,9 +3515,9 @@
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 18301,
-        "latency_ms": 9725,
+        "steps": 5,
+        "usage_total": 15732,
+        "latency_ms": 9012,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -3443,8 +3536,8 @@
                 "title": "简历原文",
                 "content": "使用 Redis 做过缓存。",
                 "score": 0.965895,
-                "chunk_id": 279,
-                "source_version_id": 210,
+                "chunk_id": 324,
+                "source_version_id": 255,
                 "position": 1,
                 "rerank_score": 3.34360504
               }
@@ -3460,25 +3553,25 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
-            "step": 4,
+            "step": 3,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "save_match_report",
-            "step": 5,
+            "step": 4,
             "ok": true,
             "error": null
           }
@@ -3518,7 +3611,7 @@
           "strong_match"
         ],
         "citation_ids": [
-          280
+          325
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -3527,8 +3620,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 5,
-        "usage_total": 15690,
-        "latency_ms": 9070,
+        "usage_total": 16334,
+        "latency_ms": 9959,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -3547,8 +3640,8 @@
                 "title": "简历原文",
                 "content": "使用 PostgreSQL 做过查询优化。",
                 "score": 0.998758,
-                "chunk_id": 280,
-                "source_version_id": 211,
+                "chunk_id": 325,
+                "source_version_id": 256,
                 "position": 1,
                 "rerank_score": 6.68959427
               }
@@ -3595,9 +3688,9 @@
       "metrics": {
         "task_completed": true,
         "tool_sequence_accuracy": 0.0,
-        "tool_precision": 0.6666666666666666,
+        "tool_precision": 0.8,
         "tool_recall": 1.0,
-        "tool_f1": 0.8,
+        "tool_f1": 0.888888888888889,
         "tool_success_rate": 1.0,
         "match_status_f1": 1.0,
         "citation_precision": 1.0,
@@ -3616,7 +3709,6 @@
           "extract_job_requirements",
           "search_resume_evidence",
           "assess_requirement_match",
-          "save_match_report",
           "save_match_report"
         ],
         "match_statuses": [
@@ -3625,23 +3717,23 @@
         "citation_ids": [],
         "abstained": true,
         "confirmation_recovered": true,
-        "tool_call_count": 6,
+        "tool_call_count": 5,
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 7,
-        "usage_total": 24067,
-        "latency_ms": 14691,
+        "steps": 6,
+        "usage_total": 18755,
+        "latency_ms": 9992,
         "error_code": null,
         "citation_ids_valid": null
       },
       "extras": {
         "assessment_count": 1,
-        "evidence_item_count": 1,
+        "evidence_item_count": 0,
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "Rust 开发经验",
+            "requirement": "具备 Rust 开发经验",
             "status": "insufficient_evidence",
             "reason": "检索到的证据是否定表述，不能作为匹配依据。",
             "evidence": []
@@ -3677,12 +3769,6 @@
             "step": 5,
             "ok": true,
             "error": null
-          },
-          {
-            "tool_name": "save_match_report",
-            "step": 6,
-            "ok": true,
-            "error": null
           }
         ]
       }
@@ -3692,12 +3778,12 @@
       "category": "happy_path",
       "metrics": {
         "task_completed": true,
-        "tool_sequence_accuracy": 0.0,
-        "tool_precision": 0.8333333333333334,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
         "tool_recall": 1.0,
-        "tool_f1": 0.9090909090909091,
+        "tool_f1": 1.0,
         "tool_success_rate": 1.0,
-        "match_status_f1": 0.5,
+        "match_status_f1": 1.0,
         "citation_precision": 0.0,
         "citation_recall": 0.0,
         "citation_f1": 0.0,
@@ -3714,82 +3800,45 @@
           "extract_job_requirements",
           "search_resume_evidence",
           "assess_requirement_match",
-          "save_match_report",
           "save_match_report"
         ],
         "match_statuses": [
-          "partial_match",
-          "strong_match",
           "strong_match"
         ],
         "citation_ids": [
-          282
+          327
         ],
         "abstained": false,
         "confirmation_recovered": true,
-        "tool_call_count": 6,
+        "tool_call_count": 5,
         "tool_error_count": 0,
-        "suggestion_count": 3,
+        "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 7,
-        "usage_total": 27579,
-        "latency_ms": 14929,
+        "steps": 6,
+        "usage_total": 19268,
+        "latency_ms": 14571,
         "error_code": null,
         "citation_ids_valid": true
       },
       "extras": {
-        "assessment_count": 3,
-        "evidence_item_count": 3,
+        "assessment_count": 1,
+        "evidence_item_count": 1,
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "具备 Python 后端开发经验",
-            "status": "partial_match",
-            "reason": "存在最高分为 0.207 的原文证据，但未达到强匹配阈值 0.6。",
-            "evidence": [
-              {
-                "section_type": "project_experience",
-                "title": "简历原文",
-                "content": "使用 Python 和 FastAPI 开发了三个生产 REST API，负责参数校验和部署。",
-                "score": 0.206988,
-                "chunk_id": 282,
-                "source_version_id": 213,
-                "position": 1,
-                "rerank_score": -1.34317732
-              }
-            ]
-          },
-          {
-            "requirement": "具备 FastAPI 后端开发经验",
+            "requirement": "具备 Python 和 FastAPI 后端开发经验",
             "status": "strong_match",
-            "reason": "存在最高分为 0.644 的原文证据，达到强匹配阈值 0.6。",
+            "reason": "存在最高分为 0.975 的原文证据，达到强匹配阈值 0.6。",
             "evidence": [
               {
                 "section_type": "project_experience",
                 "title": "简历原文",
                 "content": "使用 Python 和 FastAPI 开发了三个生产 REST API，负责参数校验和部署。",
-                "score": 0.644342,
-                "chunk_id": 282,
-                "source_version_id": 213,
+                "score": 0.975114,
+                "chunk_id": 327,
+                "source_version_id": 258,
                 "position": 1,
-                "rerank_score": 0.59426212
-              }
-            ]
-          },
-          {
-            "requirement": "使用 Python 和 FastAPI 进行后端开发",
-            "status": "strong_match",
-            "reason": "存在最高分为 0.991 的原文证据，达到强匹配阈值 0.6。",
-            "evidence": [
-              {
-                "section_type": "project_experience",
-                "title": "简历原文",
-                "content": "使用 Python 和 FastAPI 开发了三个生产 REST API，负责参数校验和部署。",
-                "score": 0.991214,
-                "chunk_id": 282,
-                "source_version_id": 213,
-                "position": 1,
-                "rerank_score": 4.72577953
+                "rerank_score": 3.66825628
               }
             ]
           }
@@ -3822,12 +3871,6 @@
           {
             "tool_name": "save_match_report",
             "step": 5,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "save_match_report",
-            "step": 6,
             "ok": true,
             "error": null
           }
@@ -3867,7 +3910,7 @@
           "partial_match"
         ],
         "citation_ids": [
-          283
+          328
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -3876,8 +3919,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 5,
-        "usage_total": 16667,
-        "latency_ms": 11553,
+        "usage_total": 16126,
+        "latency_ms": 10197,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -3896,8 +3939,8 @@
                 "title": "简历原文",
                 "content": "使用 PostgreSQL 做过简单查询和表设计，没有负责过复杂事务优化。",
                 "score": 0.995706,
-                "chunk_id": 283,
-                "source_version_id": 214,
+                "chunk_id": 328,
+                "source_version_id": 259,
                 "position": 1,
                 "rerank_score": 5.44613028
               }
@@ -3977,15 +4020,15 @@
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 18589,
-        "latency_ms": 12588,
+        "steps": 5,
+        "usage_total": 16318,
+        "latency_ms": 10775,
         "error_code": null,
         "citation_ids_valid": null
       },
       "extras": {
         "assessment_count": 1,
-        "evidence_item_count": 1,
+        "evidence_item_count": 0,
         "evidence_backed": true,
         "assessments": [
           {
@@ -4004,25 +4047,25 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
-            "step": 4,
+            "step": 3,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "save_match_report",
-            "step": 5,
+            "step": 4,
             "ok": true,
             "error": null
           }
@@ -4064,7 +4107,7 @@
           "partial_match"
         ],
         "citation_ids": [
-          285
+          330
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -4073,8 +4116,8 @@
         "suggestion_count": 2,
         "unsupported_suggestion_count": 0,
         "steps": 7,
-        "usage_total": 26827,
-        "latency_ms": 18607,
+        "usage_total": 25782,
+        "latency_ms": 17286,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -4084,7 +4127,7 @@
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "具备 Redis 分布式锁经验",
+            "requirement": "具备 Redis 分布式锁相关经验",
             "status": "partial_match",
             "reason": "证据只覆盖基础场景，未达到要求的范围或深度。",
             "evidence": [
@@ -4092,16 +4135,16 @@
                 "section_type": "project_experience",
                 "title": "简历原文",
                 "content": "用过 Redis 做简单缓存，没有做过分布式锁和高并发优化。",
-                "score": 0.988426,
-                "chunk_id": 285,
-                "source_version_id": 216,
+                "score": 0.990432,
+                "chunk_id": 330,
+                "source_version_id": 261,
                 "position": 1,
-                "rerank_score": 4.44736576
+                "rerank_score": 4.63975668
               }
             ]
           },
           {
-            "requirement": "具备高并发缓存经验",
+            "requirement": "具备高并发缓存相关经验",
             "status": "partial_match",
             "reason": "证据只覆盖基础场景，未达到要求的范围或深度。",
             "evidence": [
@@ -4109,11 +4152,11 @@
                 "section_type": "project_experience",
                 "title": "简历原文",
                 "content": "用过 Redis 做简单缓存，没有做过分布式锁和高并发优化。",
-                "score": 0.988279,
-                "chunk_id": 285,
-                "source_version_id": 216,
+                "score": 0.934241,
+                "chunk_id": 330,
+                "source_version_id": 261,
                 "position": 1,
-                "rerank_score": 4.43457794
+                "rerank_score": 2.65374517
               }
             ]
           }
@@ -4194,7 +4237,7 @@
           "insufficient_evidence"
         ],
         "citation_ids": [
-          286
+          331
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -4203,18 +4246,18 @@
         "suggestion_count": 3,
         "unsupported_suggestion_count": 0,
         "steps": 7,
-        "usage_total": 28313,
-        "latency_ms": 17458,
+        "usage_total": 27472,
+        "latency_ms": 21155,
         "error_code": null,
         "citation_ids_valid": true
       },
       "extras": {
         "assessment_count": 3,
-        "evidence_item_count": 3,
+        "evidence_item_count": 2,
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "具备 Python 开发经验",
+            "requirement": "具备 Python 经验",
             "status": "partial_match",
             "reason": "证据只覆盖基础场景，未达到要求的范围或深度。",
             "evidence": [
@@ -4222,16 +4265,16 @@
                 "section_type": "project_experience",
                 "title": "简历原文",
                 "content": "精通 Python 和 FastAPI；使用 PostgreSQL 做过简单查询；没有 Kubernetes 经验。",
-                "score": 0.378176,
-                "chunk_id": 286,
-                "source_version_id": 217,
+                "score": 0.334709,
+                "chunk_id": 331,
+                "source_version_id": 262,
                 "position": 1,
-                "rerank_score": -0.49729919
+                "rerank_score": -0.68696284
               }
             ]
           },
           {
-            "requirement": "具备 PostgreSQL 数据库经验",
+            "requirement": "具备 PostgreSQL 经验",
             "status": "partial_match",
             "reason": "证据只覆盖基础场景，未达到要求的范围或深度。",
             "evidence": [
@@ -4239,16 +4282,16 @@
                 "section_type": "project_experience",
                 "title": "简历原文",
                 "content": "精通 Python 和 FastAPI；使用 PostgreSQL 做过简单查询；没有 Kubernetes 经验。",
-                "score": 0.719937,
-                "chunk_id": 286,
-                "source_version_id": 217,
+                "score": 0.830502,
+                "chunk_id": 331,
+                "source_version_id": 262,
                 "position": 1,
-                "rerank_score": 0.94415033
+                "rerank_score": 1.58918834
               }
             ]
           },
           {
-            "requirement": "具备 Kubernetes 容器编排经验",
+            "requirement": "具备 Kubernetes 经验",
             "status": "insufficient_evidence",
             "reason": "检索到的证据是否定表述，不能作为匹配依据。",
             "evidence": []
@@ -4299,12 +4342,12 @@
       "category": "mixed",
       "metrics": {
         "task_completed": true,
-        "tool_sequence_accuracy": 0.0,
-        "tool_precision": 0.7142857142857143,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
         "tool_recall": 1.0,
-        "tool_f1": 0.8333333333333333,
+        "tool_f1": 1.0,
         "tool_success_rate": 1.0,
-        "match_status_f1": 0.3333333333333333,
+        "match_status_f1": 0.5,
         "citation_precision": 0.0,
         "citation_recall": 0.0,
         "citation_f1": 0.0,
@@ -4321,83 +4364,45 @@
           "extract_job_requirements",
           "search_resume_evidence",
           "assess_requirement_match",
-          "save_match_report",
-          "save_match_report",
           "save_match_report"
         ],
         "match_statuses": [
-          "strong_match",
-          "strong_match",
           "strong_match"
         ],
         "citation_ids": [
-          287
+          332
         ],
         "abstained": false,
         "confirmation_recovered": true,
-        "tool_call_count": 7,
+        "tool_call_count": 5,
         "tool_error_count": 0,
-        "suggestion_count": 3,
+        "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 8,
-        "usage_total": 35009,
-        "latency_ms": 20003,
+        "steps": 5,
+        "usage_total": 16418,
+        "latency_ms": 9649,
         "error_code": null,
         "citation_ids_valid": true
       },
       "extras": {
-        "assessment_count": 3,
-        "evidence_item_count": 3,
+        "assessment_count": 1,
+        "evidence_item_count": 1,
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "具备 FastAPI 使用经验",
+            "requirement": "具备 FastAPI、Redis 和消息队列经验",
             "status": "strong_match",
-            "reason": "存在最高分为 0.992 的原文证据，达到强匹配阈值 0.6。",
+            "reason": "存在最高分为 0.989 的原文证据，达到强匹配阈值 0.6。",
             "evidence": [
               {
                 "section_type": "project_experience",
                 "title": "简历原文",
                 "content": "使用 FastAPI 开发服务，使用 Redis 做缓存，没有消息队列经验。",
-                "score": 0.991996,
-                "chunk_id": 287,
-                "source_version_id": 218,
+                "score": 0.989223,
+                "chunk_id": 332,
+                "source_version_id": 263,
                 "position": 1,
-                "rerank_score": 4.81977224
-              }
-            ]
-          },
-          {
-            "requirement": "具备 Redis 使用经验",
-            "status": "strong_match",
-            "reason": "存在最高分为 0.987 的原文证据，达到强匹配阈值 0.6。",
-            "evidence": [
-              {
-                "section_type": "project_experience",
-                "title": "简历原文",
-                "content": "使用 FastAPI 开发服务，使用 Redis 做缓存，没有消息队列经验。",
-                "score": 0.986946,
-                "chunk_id": 287,
-                "source_version_id": 218,
-                "position": 1,
-                "rerank_score": 4.3255434
-              }
-            ]
-          },
-          {
-            "requirement": "具备消息队列相关经验",
-            "status": "strong_match",
-            "reason": "存在最高分为 0.921 的原文证据，达到强匹配阈值 0.6。",
-            "evidence": [
-              {
-                "section_type": "project_experience",
-                "title": "简历原文",
-                "content": "使用 FastAPI 开发服务，使用 Redis 做缓存，没有消息队列经验。",
-                "score": 0.920843,
-                "chunk_id": 287,
-                "source_version_id": 218,
-                "position": 1,
-                "rerank_score": 2.4538517
+                "rerank_score": 4.51950169
               }
             ]
           }
@@ -4411,37 +4416,25 @@
           },
           {
             "tool_name": "extract_job_requirements",
-            "step": 2,
+            "step": 1,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "search_resume_evidence",
-            "step": 3,
+            "step": 2,
             "ok": true,
             "error": null
           },
           {
             "tool_name": "assess_requirement_match",
+            "step": 3,
+            "ok": true,
+            "error": null
+          },
+          {
+            "tool_name": "save_match_report",
             "step": 4,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "save_match_report",
-            "step": 5,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "save_match_report",
-            "step": 6,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "save_match_report",
-            "step": 7,
             "ok": true,
             "error": null
           }
@@ -4481,7 +4474,7 @@
           "partial_match"
         ],
         "citation_ids": [
-          288
+          333
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -4490,8 +4483,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 19338,
-        "latency_ms": 13232,
+        "usage_total": 18706,
+        "latency_ms": 10768,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -4510,8 +4503,8 @@
                 "title": "简历原文",
                 "content": "有多年 Python 后端经验，做过单机服务和小规模集群，没有大型分布式系统设计经验。",
                 "score": 0.996867,
-                "chunk_id": 288,
-                "source_version_id": 219,
+                "chunk_id": 333,
+                "source_version_id": 264,
                 "position": 1,
                 "rerank_score": 5.76249504
               }
@@ -4558,9 +4551,9 @@
       "metrics": {
         "task_completed": true,
         "tool_sequence_accuracy": 0.0,
-        "tool_precision": 0.8,
+        "tool_precision": 0.6666666666666666,
         "tool_recall": 1.0,
-        "tool_f1": 0.888888888888889,
+        "tool_f1": 0.8,
         "tool_success_rate": 1.0,
         "match_status_f1": 1.0,
         "citation_precision": 1.0,
@@ -4579,6 +4572,7 @@
           "extract_job_requirements",
           "search_resume_evidence",
           "assess_requirement_match",
+          "save_match_report",
           "save_match_report"
         ],
         "match_statuses": [
@@ -4587,13 +4581,13 @@
         "citation_ids": [],
         "abstained": true,
         "confirmation_recovered": true,
-        "tool_call_count": 5,
+        "tool_call_count": 6,
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 18125,
-        "latency_ms": 11539,
+        "steps": 7,
+        "usage_total": 22530,
+        "latency_ms": 15245,
         "error_code": null,
         "citation_ids_valid": null
       },
@@ -4639,6 +4633,12 @@
             "step": 5,
             "ok": true,
             "error": null
+          },
+          {
+            "tool_name": "save_match_report",
+            "step": 6,
+            "ok": true,
+            "error": null
           }
         ]
       }
@@ -4648,10 +4648,10 @@
       "category": "happy_path",
       "metrics": {
         "task_completed": true,
-        "tool_sequence_accuracy": 0.0,
-        "tool_precision": 0.8333333333333334,
+        "tool_sequence_accuracy": 1.0,
+        "tool_precision": 1.0,
         "tool_recall": 1.0,
-        "tool_f1": 0.9090909090909091,
+        "tool_f1": 1.0,
         "tool_success_rate": 1.0,
         "match_status_f1": 0.0,
         "citation_precision": 0.0,
@@ -4670,7 +4670,6 @@
           "extract_job_requirements",
           "search_resume_evidence",
           "assess_requirement_match",
-          "save_match_report",
           "save_match_report"
         ],
         "match_statuses": [
@@ -4679,13 +4678,13 @@
         "citation_ids": [],
         "abstained": true,
         "confirmation_recovered": true,
-        "tool_call_count": 6,
+        "tool_call_count": 5,
         "tool_error_count": 0,
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
-        "steps": 6,
-        "usage_total": 20315,
-        "latency_ms": 14277,
+        "steps": 5,
+        "usage_total": 15731,
+        "latency_ms": 11210,
         "error_code": null,
         "citation_ids_valid": null
       },
@@ -4695,7 +4694,7 @@
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "具备 RAG 检索和引用校验经验",
+            "requirement": "具备 RAG 检索与引用校验经验。",
             "status": "insufficient_evidence",
             "reason": "未检索到相关的简历原文证据。",
             "evidence": []
@@ -4729,12 +4728,6 @@
           {
             "tool_name": "save_match_report",
             "step": 4,
-            "ok": true,
-            "error": null
-          },
-          {
-            "tool_name": "save_match_report",
-            "step": 5,
             "ok": true,
             "error": null
           }
@@ -4774,7 +4767,7 @@
           "partial_match"
         ],
         "citation_ids": [
-          291
+          336
         ],
         "abstained": false,
         "confirmation_recovered": true,
@@ -4783,8 +4776,8 @@
         "suggestion_count": 1,
         "unsupported_suggestion_count": 0,
         "steps": 6,
-        "usage_total": 19218,
-        "latency_ms": 11490,
+        "usage_total": 19201,
+        "latency_ms": 12833,
         "error_code": null,
         "citation_ids_valid": true
       },
@@ -4794,7 +4787,7 @@
         "evidence_backed": true,
         "assessments": [
           {
-            "requirement": "具备 LangGraph 人工确认和断点恢复经验",
+            "requirement": "具备 LangGraph 人工确认与断点恢复经验",
             "status": "partial_match",
             "reason": "证据只覆盖基础场景，未达到要求的范围或深度。",
             "evidence": [
@@ -4802,11 +4795,11 @@
                 "section_type": "project_experience",
                 "title": "简历原文",
                 "content": "了解 LangGraph 的基本概念，做过简单 StateGraph demo，但没有实现人工确认和断点恢复。",
-                "score": 0.995708,
-                "chunk_id": 291,
-                "source_version_id": 222,
+                "score": 0.996414,
+                "chunk_id": 336,
+                "source_version_id": 267,
                 "position": 1,
-                "rerank_score": 5.44679022
+                "rerank_score": 5.62713146
               }
             ]
           }
@@ -4861,9 +4854,9 @@
     "citation": {
       "case_count": 5,
       "task_completion_rate": 1.0,
-      "tool_f1": 1.0,
+      "tool_f1": 0.9818181818181818,
       "tool_success_rate": 1.0,
-      "match_status_f1": 0.9333333333333333,
+      "match_status_f1": 0.8666666666666666,
       "citation_validity_rate": 1.0,
       "abstention_accuracy": 1.0,
       "unsupported_suggestion_rate": 0.0,
@@ -4872,7 +4865,7 @@
     "hallucination": {
       "case_count": 2,
       "task_completion_rate": 1.0,
-      "tool_f1": 0.9,
+      "tool_f1": 0.9444444444444444,
       "tool_success_rate": 1.0,
       "match_status_f1": 1.0,
       "citation_validity_rate": 1.0,
@@ -4885,7 +4878,7 @@
       "task_completion_rate": 1.0,
       "tool_f1": 0.9797979797979798,
       "tool_success_rate": 1.0,
-      "match_status_f1": 0.6111111111111112,
+      "match_status_f1": 0.7407407407407408,
       "citation_validity_rate": 0.7777777777777778,
       "abstention_accuracy": 0.7777777777777778,
       "unsupported_suggestion_rate": 0.0,
@@ -4894,9 +4887,9 @@
     "mixed": {
       "case_count": 5,
       "task_completion_rate": 1.0,
-      "tool_f1": 0.9121212121212121,
+      "tool_f1": 0.9818181818181818,
       "tool_success_rate": 1.0,
-      "match_status_f1": 0.7,
+      "match_status_f1": 0.7333333333333333,
       "citation_validity_rate": 1.0,
       "abstention_accuracy": 1.0,
       "unsupported_suggestion_rate": 0.0,
@@ -4905,7 +4898,7 @@
     "partial_match": {
       "case_count": 8,
       "task_completion_rate": 1.0,
-      "tool_f1": 0.9772727272727273,
+      "tool_f1": 0.9886363636363636,
       "tool_success_rate": 1.0,
       "match_status_f1": 0.9583333333333334,
       "citation_validity_rate": 1.0,
@@ -4916,9 +4909,9 @@
     "recovery": {
       "case_count": 4,
       "task_completion_rate": 1.0,
-      "tool_f1": 1.0,
+      "tool_f1": 0.9545454545454546,
       "tool_success_rate": 1.0,
-      "match_status_f1": 1.0,
+      "match_status_f1": 0.8333333333333333,
       "citation_validity_rate": 1.0,
       "abstention_accuracy": 1.0,
       "unsupported_suggestion_rate": 0.0,
@@ -4927,9 +4920,9 @@
     "tooling": {
       "case_count": 4,
       "task_completion_rate": 1.0,
-      "tool_f1": 1.0,
+      "tool_f1": 0.9772727272727273,
       "tool_success_rate": 1.0,
-      "match_status_f1": 0.75,
+      "match_status_f1": 0.875,
       "citation_validity_rate": 1.0,
       "abstention_accuracy": 1.0,
       "unsupported_suggestion_rate": 0.0,
