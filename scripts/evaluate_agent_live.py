@@ -349,6 +349,26 @@ def summarize_by_category(case_details: list[dict]) -> dict:
     return result
 
 
+def citation_valid_from_extras(
+    observed: ObservedAgentOutcome,
+    extras: dict,
+) -> bool | None:
+    assessments = extras.get("assessments") or []
+    evidence_chunk_ids = {
+        item.get("chunk_id")
+        for assessment in assessments
+        for item in (assessment.get("evidence") or [])
+        if item.get("chunk_id") is not None
+    }
+    if not evidence_chunk_ids:
+        return None
+
+    cited = set(observed.citation_ids)
+    if observed.abstained:
+        return not cited
+    return bool(cited) and cited <= evidence_chunk_ids
+
+
 def score_live_observations(
     cases: list[AgentEvaluationCase],
     observations: dict,
@@ -369,13 +389,20 @@ def score_live_observations(
         if record is None:
             continue
 
+        observed = ObservedAgentOutcome.model_validate(record["observed"])
+        extras = extras_by_id.get(case.case_id, {})
+        citation_valid = citation_valid_from_extras(observed, extras)
+        if citation_valid is not None:
+            observed = observed.model_copy(
+                update={"citation_ids_valid": citation_valid}
+            )
         live_case = AgentEvaluationCase(
             case_id=case.case_id,
             category=case.category,
             job_description=case.job_description,
             resume_text=case.resume_text,
             expected=case.expected,
-            observed=ObservedAgentOutcome.model_validate(record["observed"]),
+            observed=observed,
         )
         result = evaluate_agent_case(live_case)
         metrics = result.metrics.model_dump()

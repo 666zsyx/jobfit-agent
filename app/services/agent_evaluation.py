@@ -45,6 +45,7 @@ class ObservedAgentOutcome(BaseModel):
     usage_total: int = Field(ge=0)
     latency_ms: int = Field(ge=0)
     error_code: str | None = None
+    citation_ids_valid: bool | None = None
 
     @model_validator(mode="after")
     def validate_counts(self):
@@ -174,7 +175,9 @@ def evaluate_agent_case(case: AgentEvaluationCase) -> AgentCaseResult:
     expected_citations = set(expected.citation_ids)
     observed_citations = set(observed.citation_ids)
 
-    if expected.task_status != "completed":
+    if observed.citation_ids_valid is not None:
+        citation_valid = observed.citation_ids_valid
+    elif expected.task_status != "completed":
         citation_valid = True
     elif expected.should_abstain:
         citation_valid = not observed_citations

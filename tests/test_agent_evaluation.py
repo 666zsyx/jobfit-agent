@@ -100,6 +100,20 @@ def test_duplicate_citation_is_invalid() -> None:
     assert result.metrics.citation_valid is False
 
 
+def test_citation_valid_override_is_used() -> None:
+    result = evaluate_agent_case(
+        make_case(
+            expected={"citation_ids": [1]},
+            observed={
+                "citation_ids": [999],
+                "citation_ids_valid": True,
+            },
+        )
+    )
+
+    assert result.metrics.citation_valid is True
+
+
 def test_abstention_case_requires_empty_citations() -> None:
     result = evaluate_agent_case(
         make_case(

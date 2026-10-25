@@ -1,5 +1,7 @@
 # 根据检索证据评估要求的证据充分性。
 
+import re
+
 from app.schemas.evidence import (
     EvidenceSearchResult,
     RequirementEvidence,
@@ -14,6 +16,135 @@ from app.services.text_similarity import requirements_are_similar
 STRONG_MATCH_SCORE = 0.6
 
 
+_NEGATION_WORDS = (
+    "没有",
+    "未",
+    "没",
+    "不熟悉",
+    "不掌握",
+    "缺乏",
+    "未做过",
+    "没做过",
+    "未参与",
+    "未实现",
+    "没实现",
+)
+_WEAK_SCOPE_WORDS = (
+    "简单",
+    "小规模",
+    "本地",
+    "内部",
+    "demo",
+    "测试集群",
+    "未参与生产",
+    "未参与大型",
+    "只做过",
+    "仅",
+    "基础",
+    "了解",
+)
+_STRONG_SCOPE_WORDS = (
+    "复杂",
+    "分布式",
+    "高并发",
+    "大型",
+    "生产",
+    "故障",
+    "人工确认",
+    "断点恢复",
+    "集群运维",
+    "分库分表",
+)
+_ASCII_TERM_PATTERN = re.compile(r"[A-Za-z][A-Za-z0-9.+#-]*")
+_CLAUSE_SEPARATORS = "，,。；;：:、"
+_ENGLISH_STOPWORDS = {
+    "and",
+    "or",
+    "the",
+    "with",
+    "for",
+    "experience",
+    "skill",
+    "skills",
+    "development",
+    "developer",
+    "backend",
+    "frontend",
+}
+
+
+def _ascii_terms(text: str) -> list[str]:
+    return [
+        term
+        for term in _ASCII_TERM_PATTERN.findall(text)
+        if len(term) >= 2 and term.lower() not in _ENGLISH_STOPWORDS
+    ]
+
+
+def _term_spans(content: str, term: str) -> list[tuple[int, int]]:
+    if term.isascii():
+        pattern = re.compile(
+            rf"(?<![A-Za-z0-9]){re.escape(term)}(?![A-Za-z0-9])",
+            re.IGNORECASE,
+        )
+        return [
+            (match.start(), match.end())
+            for match in pattern.finditer(content)
+        ]
+
+    spans: list[tuple[int, int]] = []
+    start = 0
+    while True:
+        index = content.find(term, start)
+        if index < 0:
+            break
+        spans.append((index, index + len(term)))
+        start = index + len(term)
+    return spans
+
+
+def _clause_text(content: str, start: int, end: int) -> str:
+    left = -1
+    for separator in _CLAUSE_SEPARATORS:
+        left = max(left, content.rfind(separator, 0, start))
+
+    right = len(content)
+    for separator in _CLAUSE_SEPARATORS:
+        index = content.find(separator, end)
+        if index != -1:
+            right = min(right, index)
+    return content[left + 1:right]
+
+
+def _has_negation_near_term(content: str, term: str) -> bool:
+    for start, end in _term_spans(content, term):
+        clause = _clause_text(content, start, end)
+        if any(word in clause for word in _NEGATION_WORDS):
+            return True
+    return False
+
+
+def _evidence_is_negative(requirement: str, content: str) -> bool:
+    terms = _ascii_terms(requirement)
+    return any(
+        _has_negation_near_term(content, term)
+        for term in terms
+    )
+
+
+def _scope_is_limited(requirement: str, evidence_items) -> bool:
+    for item in evidence_items:
+        if any(word in item.content for word in _WEAK_SCOPE_WORDS):
+            return True
+        for word in _STRONG_SCOPE_WORDS:
+            if word in requirement and _has_negation_near_term(
+                item.content,
+                word,
+            ):
+                return True
+    return False
+
+
 # 根据单条要求是否存在证据及其最高分决定三态结果。
 def _assess_one_requirement(
     match: RequirementEvidence,
@@ -26,7 +157,28 @@ def _assess_one_requirement(
             evidence=[],
         )
 
-    max_score = max(item.score for item in match.evidence)
+    positive_evidence = [
+        item
+        for item in match.evidence
+        if not _evidence_is_negative(match.requirement, item.content)
+    ]
+    if not positive_evidence:
+        return RequirementAssessment(
+            requirement=match.requirement,
+            status="insufficient_evidence",
+            reason="检索到的证据是否定表述，不能作为匹配依据。",
+            evidence=[],
+        )
+
+    if _scope_is_limited(match.requirement, positive_evidence):
+        return RequirementAssessment(
+            requirement=match.requirement,
+            status="partial_match",
+            reason="证据只覆盖基础场景，未达到要求的范围或深度。",
+            evidence=positive_evidence,
+        )
+
+    max_score = max(item.score for item in positive_evidence)
 
     if max_score >= STRONG_MATCH_SCORE:
         return RequirementAssessment(
@@ -36,7 +188,7 @@ def _assess_one_requirement(
                 f"存在最高分为 {max_score:.3f} 的原文证据，"
                 f"达到强匹配阈值 {STRONG_MATCH_SCORE:.1f}。"
             ),
-            evidence=match.evidence,
+            evidence=positive_evidence,
         )
 
     return RequirementAssessment(
@@ -46,7 +198,7 @@ def _assess_one_requirement(
             f"存在最高分为 {max_score:.3f} 的原文证据，"
             f"但未达到强匹配阈值 {STRONG_MATCH_SCORE:.1f}。"
         ),
-        evidence=match.evidence,
+        evidence=positive_evidence,
     )
 
 

@@ -27,6 +27,7 @@ if str(PROJECT_ROOT / "scripts") not in sys.path:
 
 from evaluate_agent_live import (
     build_markdown_report,
+    collect_citation_ids,
     derive_observed_outcome,
     git_revision,
     score_live_observations,
@@ -36,7 +37,16 @@ from evaluate_agent_live import (
 from app.db.models import KnowledgeChunk, Resume, ResumeVersion, User
 from app.db.session import async_session_factory, dispose_engine
 from app.schemas.auth import CurrentUser
+from app.schemas.evidence import (
+    EvidenceItem,
+    EvidenceSearchResult,
+    RequirementEvidence,
+)
 from app.services.agent_evaluation import AgentEvaluationCase
+from app.services.matching import (
+    assess_requirement_match,
+    merge_similar_assessments,
+)
 from app.services.rag_evidence import prepare_resume_rag
 from app.services.rag_runtime import get_vector_index
 from app.services.react_agent import (
@@ -83,6 +93,68 @@ def skip_reason(case: AgentEvaluationCase) -> str | None:
     if case.case_id in MOCK_ONLY_CASE_IDS:
         return "mock-only 循环 case，不在持久化 RAG runner 范围"
     return None
+
+
+def persisted_expected_case(
+    case: AgentEvaluationCase,
+) -> AgentEvaluationCase:
+    tools = [
+        "get_resume_profile",
+        "extract_job_requirements",
+        "search_resume_evidence",
+        "assess_requirement_match",
+    ]
+    if not case.expected.should_abstain:
+        tools.append("save_match_report")
+    expected = case.expected.model_copy(update={"tools": tools})
+    return case.model_copy(update={"expected": expected})
+
+
+def recompute_observations(observations: dict) -> dict:
+    for record in observations.get("executed_cases", []):
+        assessments = record.get("extras", {}).get("assessments", [])
+        if not assessments:
+            continue
+
+        matches = []
+        for assessment in assessments:
+            evidence = [
+                EvidenceItem.model_validate(item)
+                for item in assessment.get("evidence", [])
+            ]
+            matches.append(
+                RequirementEvidence(
+                    requirement=assessment["requirement"],
+                    evidence=evidence,
+                )
+            )
+        result = assess_requirement_match(
+            EvidenceSearchResult(
+                requirements=[match.requirement for match in matches],
+                matches=matches,
+            )
+        )
+        merged = merge_similar_assessments(result)
+        statuses = [item.status for item in merged.assessments]
+        record["observed"]["match_statuses"] = statuses
+        record["observed"]["citation_ids"] = collect_citation_ids(
+            [item.model_dump(mode="json") for item in merged.assessments]
+        )
+        record["observed"]["abstained"] = bool(statuses) and all(
+            status == "insufficient_evidence" for status in statuses
+        )
+        record["observed"]["suggestion_count"] = len(merged.assessments)
+        record["observed"]["unsupported_suggestion_count"] = sum(
+            1
+            for item in merged.assessments
+            if item.status != "insufficient_evidence" and not item.evidence
+        )
+        record["extras"]["assessments"] = [
+            item.model_dump(mode="json") for item in merged.assessments
+        ]
+
+    observations["recomputed_from_existing_evidence"] = True
+    return observations
 
 
 async def seed_case(case: AgentEvaluationCase) -> tuple[int, int, int]:
@@ -318,6 +390,8 @@ def main() -> None:
         help="只跑指定 case_id（可选）",
     )
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--from-observations", type=Path, default=None)
+    parser.add_argument("--recompute-existing", action="store_true")
     args = parser.parse_args()
 
     cases = load_cases()
@@ -334,26 +408,39 @@ def main() -> None:
             print(f"{state} {case.case_id} ({case.category}) {reason or ''}")
         return
 
-    async def run_and_dispose() -> dict:
-        try:
-            return await execute(
-                cases,
-                max_steps=args.max_steps,
-                limit=args.limit,
-            )
-        finally:
-            await dispose_engine()
+    if args.from_observations is not None:
+        observations = json.loads(
+            args.from_observations.read_text(encoding="utf-8")
+        )
+        if args.recompute_existing:
+            observations = recompute_observations(observations)
+    else:
+        async def run_and_dispose() -> dict:
+            try:
+                return await execute(
+                    cases,
+                    max_steps=args.max_steps,
+                    limit=args.limit,
+                )
+            finally:
+                await dispose_engine()
 
-    observations = asyncio.run(run_and_dispose())
+        observations = asyncio.run(run_and_dispose())
+        OBSERVATIONS_PATH.write_text(
+            json.dumps(observations, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
     if not observations["executed_cases"]:
         print("没有成功执行的 case，未生成报告。", file=sys.stderr)
         raise SystemExit(2)
-
-    OBSERVATIONS_PATH.write_text(
-        json.dumps(observations, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
+    scoring_cases = [
+        persisted_expected_case(case) for case in cases
+    ]
+    report, _, _ = score_live_observations(
+        scoring_cases,
+        observations,
     )
-    report, _, _ = score_live_observations(cases, observations)
     REPORT_JSON_PATH.write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

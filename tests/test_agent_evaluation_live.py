@@ -4,7 +4,9 @@ import json
 
 from app.schemas.chat import TokenUsage
 from app.schemas.react_agent import ReactAgentResult, ReactToolExecution
+from app.services.agent_evaluation import ObservedAgentOutcome
 from scripts.evaluate_agent_live import (
+    citation_valid_from_extras,
     derive_observed_outcome,
     load_dataset,
     score_live_observations,
@@ -259,3 +261,26 @@ def test_score_live_observations_rejects_empty_observations() -> None:
         assert "没有可评分" in str(exc)
     else:
         raise AssertionError("空观测值必须报错")
+
+def test_citation_valid_from_extras_uses_evidence_chunk_ids() -> None:
+    observed = ObservedAgentOutcome(
+        task_status="completed",
+        citation_ids=[101],
+        tool_call_count=1,
+        tool_error_count=0,
+        suggestion_count=1,
+        unsupported_suggestion_count=0,
+        steps=1,
+        usage_total=100,
+        latency_ms=10,
+    )
+    extras = {
+        "assessments": [
+            {"evidence": [{"chunk_id": 101}]},
+        ]
+    }
+
+    assert citation_valid_from_extras(observed, extras) is True
+
+    unknown = observed.model_copy(update={"citation_ids": [999]})
+    assert citation_valid_from_extras(unknown, extras) is False

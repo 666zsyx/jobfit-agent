@@ -67,7 +67,7 @@
 - p95 latency：**7000 ms**
 - 门槛结论：**PASS**
 
-## 4. 真实执行结果（45 条观测）
+## 4. 基线 live 路径真实执行结果（45 条）
 
 - task_completion_rate：**1.0000**
 - tool_recall：**0.9822**
@@ -87,6 +87,29 @@
 - 扩样到 45 条后，match_status_f1 从 0.5765 降到 **0.4341**，弃答准确率从 0.9630 降到 **0.8444**：三态边界和弃答行为是当前最弱的地方。
 - tool_f1 0.8473 低于 0.85，但 tool_recall 0.9822 通过；差异主要来自当前 live 路径多调一次 extract_resume_sections，不是漏调关键工具。
 - 评估集里的 expected 目前仍是回放口径，不是 45 条 live 观测的人工标注真值；下一步必须人工校准，不能靠改阈值让它变绿。
+
+### 4.1 持久化 RAG 全量结果（45 条）
+
+- task_completion_rate：**1.0000**
+- tool_recall：**0.9822**
+- tool_f1：**0.8284**（低于 0.85，FAIL）
+- tool_success_rate：**1.0000**
+- match_status_f1：**0.5259**（低于 0.85，FAIL）
+- abstention_accuracy：**0.8222**（低于 0.90，FAIL）
+- unsupported_suggestion_rate：**0.0000**
+- evidence_backed_rate：**1.0000**
+- citation_validity_rate：**0.9556**（证据白名单口径）
+- citation_f1：**0.0667**（占位 ID 口径，不具可比性）
+- average_steps：**5.84**
+- average_usage_total：**19538.20**
+- p95 latency：**17866 ms**
+- 门槛结论：**REVIEW**
+
+注意：
+
+- `citation_f1` 仍是占位 ID 比对，不具可比性；
+- `citation_validity_rate` 已改为证据白名单校验，**0.9556** 才是有效口径；
+- 3 条 smoke 的 `match_status_f1 = 1.0` 没有泛化到全量 45 条。
 
 ## 5. 已知限制
 

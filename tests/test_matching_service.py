@@ -267,3 +267,87 @@ def test_merge_similar_assessments_keeps_best_status():
     assert merged.assessments[0].status == "strong_match"
     assert merged.summary.strong_match_count == 1
     assert merged.summary.partial_match_count == 0
+
+def test_negated_ascii_skill_is_insufficient():
+    search_result = make_search_result(
+        [
+            (
+                "熟悉 MongoDB",
+                [make_evidence(0.9, "没有 MongoDB 项目经验")],
+            )
+        ]
+    )
+
+    result = assess_requirement_match(search_result)
+
+    assert result.assessments[0].status == "insufficient_evidence"
+
+
+def test_negated_kubernetes_is_insufficient():
+    search_result = make_search_result(
+        [
+            (
+                "具备 Kubernetes 生产运维经验",
+                [make_evidence(0.9, "没有 Kubernetes 生产运维经验")],
+            )
+        ]
+    )
+
+    result = assess_requirement_match(search_result)
+
+    assert result.assessments[0].status == "insufficient_evidence"
+
+
+def test_simple_scope_is_partial():
+    search_result = make_search_result(
+        [
+            (
+                "复杂事务优化经验",
+                [
+                    make_evidence(
+                        0.9,
+                        "使用 PostgreSQL 做简单查询，没有复杂事务优化",
+                    )
+                ],
+            )
+        ]
+    )
+
+    result = assess_requirement_match(search_result)
+
+    assert result.assessments[0].status == "partial_match"
+
+
+def test_internal_typescript_scope_is_partial():
+    search_result = make_search_result(
+        [
+            (
+                "TypeScript 前端开发经验",
+                [
+                    make_evidence(
+                        0.9,
+                        "使用 TypeScript 写过内部管理页面，未参与大型前端项目",
+                    )
+                ],
+            )
+        ]
+    )
+
+    result = assess_requirement_match(search_result)
+
+    assert result.assessments[0].status == "partial_match"
+
+
+def test_strong_positive_evidence_stays_strong():
+    search_result = make_search_result(
+        [
+            (
+                "熟悉 Redis 缓存",
+                [make_evidence(0.9, "使用 Redis 实现缓存和限流")],
+            )
+        ]
+    )
+
+    result = assess_requirement_match(search_result)
+
+    assert result.assessments[0].status == "strong_match"
